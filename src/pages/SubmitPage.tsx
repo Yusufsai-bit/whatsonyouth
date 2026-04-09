@@ -137,35 +137,42 @@ export default function SubmitPage() {
             <div className="flex flex-col gap-5">
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Listing title</label>
-                <input type="text" name="title" required value={form.title} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal" />
+                <input type="text" name="title" required maxLength={150} value={form.title} onChange={handleChange} className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal ${errors.title ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
+                {errors.title && <p className="font-body text-xs text-brand-coral mt-1">{errors.title}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Category</label>
-                <select name="category" required value={form.category} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal bg-white">
+                <select name="category" required value={form.category} onChange={handleChange} className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal bg-white ${errors.category ? 'border-brand-coral' : 'border-brand-seafoam'}`}>
                   <option value="">Select a category</option>
                   {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
+                {errors.category && <p className="font-body text-xs text-brand-coral mt-1">{errors.category}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Organisation or group name</label>
-                <input type="text" name="organisation" required value={form.organisation} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal" />
+                <input type="text" name="organisation" required maxLength={200} value={form.organisation} onChange={handleChange} className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal ${errors.organisation ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
+                {errors.organisation && <p className="font-body text-xs text-brand-coral mt-1">{errors.organisation}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Location</label>
-                <input type="text" name="location" required value={form.location} onChange={handleChange} placeholder="E.g. Richmond, Geelong, or Victoria-wide" className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal placeholder:text-brand-seafoam" />
+                <input type="text" name="location" required maxLength={200} value={form.location} onChange={handleChange} placeholder="E.g. Richmond, Geelong, or Victoria-wide" className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal placeholder:text-brand-seafoam ${errors.location ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
+                {errors.location && <p className="font-body text-xs text-brand-coral mt-1">{errors.location}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Website or application link</label>
-                <input type="url" name="link" required value={form.link} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal" />
+                <input type="url" name="link" required maxLength={2000} value={form.link} onChange={handleChange} placeholder="https://example.com" className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal placeholder:text-brand-seafoam ${errors.link ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
+                {errors.link && <p className="font-body text-xs text-brand-coral mt-1">{errors.link}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Short description</label>
-                <textarea name="description" required maxLength={300} value={form.description} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal min-h-[120px] resize-none" />
+                <textarea name="description" required maxLength={300} value={form.description} onChange={handleChange} className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal min-h-[120px] resize-none ${errors.description ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
                 <p className="font-body text-xs text-brand-mid-teal mt-1">{form.description.length} / 300</p>
+                {errors.description && <p className="font-body text-xs text-brand-coral mt-1">{errors.description}</p>}
               </div>
               <div>
                 <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Contact email</label>
-                <input type="email" name="contact_email" required value={contactEmail} onChange={handleChange} className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal" />
+                <input type="email" name="contact_email" required maxLength={255} value={contactEmail} onChange={handleChange} className={`w-full border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal ${errors.contact_email ? 'border-brand-coral' : 'border-brand-seafoam'}`} />
+                {errors.contact_email && <p className="font-body text-xs text-brand-coral mt-1">{errors.contact_email}</p>}
               </div>
 
               <label className="flex items-start gap-3 cursor-pointer">
