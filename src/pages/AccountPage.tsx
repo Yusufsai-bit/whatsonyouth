@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { OpportunityCard } from '@/components/FeaturedOpportunities';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
