@@ -1,20 +1,7 @@
-import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-const titles: Record<string, string> = {
-  events: 'Events',
-  jobs: 'Jobs',
-  grants: 'Grants',
-  programs: 'Programs',
-  wellbeing: 'Wellbeing',
-  about: 'About What\'s On Youth',
-};
-
-export default function StubPage() {
-  const { slug } = useParams();
-  const title = titles[slug || ''] || 'Page';
-
+export default function StubPage({ title }: { title: string }) {
   return (
     <>
       <Navbar />

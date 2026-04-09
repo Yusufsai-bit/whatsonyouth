@@ -27,12 +27,12 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/submit" element={<SubmitPage />} />
             <Route path="/account" element={<AccountPage />} />
-            <Route path="/events" element={<StubPage />} />
-            <Route path="/jobs" element={<StubPage />} />
-            <Route path="/grants" element={<StubPage />} />
-            <Route path="/programs" element={<StubPage />} />
-            <Route path="/wellbeing" element={<StubPage />} />
-            <Route path="/about" element={<StubPage />} />
+            <Route path="/events" element={<StubPage title="Events" />} />
+            <Route path="/jobs" element={<StubPage title="Jobs" />} />
+            <Route path="/grants" element={<StubPage title="Grants" />} />
+            <Route path="/programs" element={<StubPage title="Programs" />} />
+            <Route path="/wellbeing" element={<StubPage title="Wellbeing" />} />
+            <Route path="/about" element={<StubPage title="About What's On Youth" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
