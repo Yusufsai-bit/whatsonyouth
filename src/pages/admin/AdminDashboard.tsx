@@ -165,10 +165,12 @@ export function SourceBadge({ source }: { source: string }) {
   const styles: Record<string, string> = {
     user: 'bg-[#EBE9FF] text-[#3C3489]',
     admin: 'bg-[#FFF3D0] text-[#633806]',
+    ai_scan: 'bg-[#E6F1FB] text-[#0C447C]',
   };
   const labels: Record<string, string> = {
     user: 'User',
     admin: 'Admin',
+    ai_scan: 'AI scan',
   };
   return (
     <span className={`inline-block font-body text-xs font-medium px-2 py-0.5 rounded-full ${styles[source] || styles.user}`}>

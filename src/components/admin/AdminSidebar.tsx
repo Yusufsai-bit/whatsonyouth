@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, List, PlusCircle, Star, Users, Settings, Menu, X, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, List, PlusCircle, Star, Users, Settings, Menu, X, ExternalLink, ScanSearch } from 'lucide-react';
 
 const navItems = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Featured', href: '/admin/featured', icon: Star },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
+  { label: 'Scan log', href: '/admin/scan-log', icon: ScanSearch },
 ];
 
 export default function AdminSidebar() {

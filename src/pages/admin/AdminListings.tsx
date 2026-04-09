@@ -144,6 +144,7 @@ export default function AdminListings() {
             <option value="">All sources</option>
             <option value="user">User submitted</option>
             <option value="admin">Admin added</option>
+            <option value="ai_scan">AI scan</option>
           </select>
           <select value={expiryFilter} onChange={e => { setExpiryFilter(e.target.value); setPage(1); }} className={inputClass}>
             <option value="">All expiry</option>
