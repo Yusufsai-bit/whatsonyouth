@@ -58,7 +58,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      listings_public: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          link: string | null
+          location: string | null
+          organisation: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          link?: string | null
+          location?: string | null
+          organisation?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          link?: string | null
+          location?: string | null
+          organisation?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
