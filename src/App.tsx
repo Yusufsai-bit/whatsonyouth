@@ -11,6 +11,12 @@ import SubmitPage from "./pages/SubmitPage";
 import AccountPage from "./pages/AccountPage";
 import StubPage from "./pages/StubPage";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminListings from "./pages/admin/AdminListings";
+import AdminAddListing from "./pages/admin/AdminAddListing";
+import AdminEditListing from "./pages/admin/AdminEditListing";
+import AdminFeatured from "./pages/admin/AdminFeatured";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +39,12 @@ const App = () => (
             <Route path="/programs" element={<StubPage title="Programs" />} />
             <Route path="/wellbeing" element={<StubPage title="Wellbeing" />} />
             <Route path="/about" element={<StubPage title="About What's On Youth" />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/listings" element={<AdminListings />} />
+            <Route path="/admin/add" element={<AdminAddListing />} />
+            <Route path="/admin/listings/:id/edit" element={<AdminEditListing />} />
+            <Route path="/admin/featured" element={<AdminFeatured />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
