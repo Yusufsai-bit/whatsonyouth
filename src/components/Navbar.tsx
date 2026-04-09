@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/woy-logo-reversed.svg';
 
 const navLinks = [
@@ -17,6 +18,17 @@ const navLinks = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+    supabase.rpc('is_admin', { _user_id: user.id }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user]);
 
   return (
     <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 justify-between relative z-50 border-b border-brand-nav-border">
@@ -25,6 +37,15 @@ export default function Navbar() {
       </Link>
 
       <div className="hidden md:flex items-center gap-4">
+        {!loading && user && isAdmin && (
+          <Link
+            to="/admin"
+            className="flex items-center gap-1.5 text-brand-coral hover:text-brand-coral-light transition-colors duration-100 font-body text-sm font-medium"
+          >
+            <Shield size={14} />
+            <span>Admin</span>
+          </Link>
+        )}
         {!loading && user && (
           <Link
             to="/account"
@@ -75,6 +96,16 @@ export default function Navbar() {
             >
               Submit a listing
             </Link>
+            {!loading && user && isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="font-heading font-bold text-[22px] text-brand-coral hover:text-brand-coral-light transition-colors duration-100 flex items-center gap-2"
+              >
+                <Shield size={20} />
+                Admin
+              </Link>
+            )}
             {!loading && user ? (
               <Link
                 to="/account"
