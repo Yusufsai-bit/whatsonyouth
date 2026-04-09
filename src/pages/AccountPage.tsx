@@ -38,38 +38,38 @@ export default function AccountPage() {
   return (
     <>
       <Navbar />
-      <div className="bg-brand-page-bg min-h-screen px-6 py-12 md:py-16">
+      <div className="bg-white min-h-screen px-6 py-12 md:py-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-[28px] text-brand-forest">My account</h1>
+            <h1 className="text-[28px] text-brand-text-primary">My account</h1>
             <button
               onClick={signOut}
-              className="font-body text-sm text-brand-mid-teal hover:text-brand-teal transition-colors"
+              className="font-body text-sm text-brand-text-secondary hover:text-brand-violet transition-colors"
             >
               Log out
             </button>
           </div>
-          <p className="font-body text-base text-brand-mid-teal mb-8">
+          <p className="font-body text-base text-brand-text-secondary mb-8">
             Manage your submitted listings.
           </p>
 
-          <h2 className="text-xl text-brand-forest mb-4">My listings</h2>
+          <h2 className="text-xl text-brand-text-primary mb-4">My listings</h2>
 
           {listings.length === 0 ? (
-            <p className="font-body text-sm text-brand-mid-teal mb-6">You haven't submitted any listings yet.</p>
+            <p className="font-body text-sm text-brand-text-secondary mb-6">You haven't submitted any listings yet.</p>
           ) : (
             <div className="flex flex-col gap-4 mb-6">
               {listings.map((listing) => (
-                <div key={listing.id} className="bg-white border border-brand-seafoam rounded-xl p-5">
-                  <span className="inline-block bg-brand-mint text-brand-teal font-body font-medium text-xs rounded-full px-2.5 py-[3px]">
+                <div key={listing.id} className="bg-white border border-brand-card-border rounded-xl p-5">
+                  <span className="inline-block bg-brand-violet-surface text-brand-violet font-body font-medium text-xs rounded-full px-2.5 py-[3px]">
                     {listing.category}
                   </span>
-                  <h3 className="font-heading font-bold text-lg text-brand-forest mt-2">{listing.title}</h3>
-                  <p className="font-body text-sm text-brand-mid-teal mt-1">{listing.organisation}</p>
-                  <p className="font-body text-[13px] text-brand-mid-teal mt-1">{listing.location}</p>
-                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brand-seafoam">
-                    <button className="font-body font-medium text-sm text-brand-teal hover:underline">Edit</button>
-                    <div className="w-px h-4 bg-brand-seafoam" />
+                  <h3 className="font-heading font-bold text-lg text-brand-text-primary mt-2">{listing.title}</h3>
+                  <p className="font-body text-sm text-brand-text-secondary mt-1">{listing.organisation}</p>
+                  <p className="font-body text-[13px] text-brand-text-muted mt-1">{listing.location}</p>
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brand-card-border">
+                    <button className="font-body font-medium text-sm text-brand-violet hover:underline">Edit</button>
+                    <div className="w-px h-4 bg-brand-card-border" />
                     <button className="font-body font-medium text-sm text-brand-coral hover:underline">Remove listing</button>
                   </div>
                 </div>
