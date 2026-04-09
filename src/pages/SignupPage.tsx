@@ -29,42 +29,42 @@ export default function SignupPage() {
   return (
     <>
       <Navbar />
-      <div className="bg-brand-ghost min-h-screen flex items-start justify-center px-6 py-16">
-        <div className="bg-white border border-brand-mist rounded-xl p-10 w-full max-w-[480px]">
-          <h1 className="text-[28px] text-brand-ink">Create your free account</h1>
-          <p className="font-body text-base text-brand-muted-text mb-6">
+      <div className="bg-brand-page-bg min-h-screen flex items-start justify-center px-6 py-16">
+        <div className="bg-white border border-brand-seafoam rounded-xl p-10 w-full max-w-[480px]">
+          <h1 className="text-[28px] text-brand-forest">Create your free account</h1>
+          <p className="font-body text-base text-brand-mid-teal mb-6">
             Submit listings, save opportunities, and more.
           </p>
           {error && <p className="font-body text-sm text-brand-coral mb-4">{error}</p>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="font-body font-medium text-sm text-brand-ink block mb-1.5">First name</label>
+              <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">First name</label>
               <input
                 type="text"
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full border border-brand-mist rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-ink focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal"
               />
             </div>
             <div>
-              <label className="font-body font-medium text-sm text-brand-ink block mb-1.5">Email</label>
+              <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-brand-mist rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-ink focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal"
               />
             </div>
             <div>
-              <label className="font-body font-medium text-sm text-brand-ink block mb-1.5">Password</label>
+              <label className="font-body font-medium text-sm text-brand-forest block mb-1.5">Password</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-brand-mist rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-ink focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-seafoam rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-forest focus:outline-none focus:border-brand-teal"
               />
             </div>
             <button
@@ -75,9 +75,9 @@ export default function SignupPage() {
               {loading ? 'Creating account...' : 'Create free account'}
             </button>
           </form>
-          <p className="font-body text-sm text-brand-muted-text text-center mt-4">
+          <p className="font-body text-sm text-brand-mid-teal text-center mt-4">
             Already have an account?{' '}
-            <Link to="/login" className="text-brand-violet hover:underline">Log in</Link>
+            <Link to="/login" className="text-brand-teal hover:underline">Log in</Link>
           </p>
         </div>
       </div>

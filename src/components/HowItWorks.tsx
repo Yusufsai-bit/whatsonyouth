@@ -8,18 +8,18 @@ export default function HowItWorks() {
   return (
     <section className="bg-white px-6 py-12 md:px-16 md:py-16">
       <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-[28px] text-brand-ink">How it works</h2>
-        <p className="font-body text-base text-brand-muted-text mb-10">
+        <h2 className="text-[28px] text-brand-forest">How it works</h2>
+        <p className="font-body text-base text-brand-mid-teal mb-10">
           Three simple steps to find what you're looking for.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
             <div key={i} className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-brand-lavender flex items-center justify-center">
-                <span className="font-heading font-bold text-lg text-brand-violet">{i + 1}</span>
+              <div className="w-10 h-10 rounded-full bg-brand-mint flex items-center justify-center">
+                <span className="font-heading font-bold text-lg text-brand-teal">{i + 1}</span>
               </div>
-              <h3 className="text-lg text-brand-ink mt-3">{step.title}</h3>
-              <p className="font-body text-[15px] text-brand-muted-text max-w-[260px] mt-2">{step.desc}</p>
+              <h3 className="text-lg text-brand-forest mt-3">{step.title}</h3>
+              <p className="font-body text-[15px] text-brand-mid-teal max-w-[260px] mt-2">{step.desc}</p>
             </div>
           ))}
         </div>

@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       colors: {
@@ -52,17 +53,18 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          violet: "#5847E0",
-          ink: "#1E1756",
-          lavender: "#EBE9FF",
-          mist: "#CECBF6",
-          ghost: "#F2F0FF",
-          coral: "#D85A30",
-          "coral-light": "#F0997B",
-          "muted-text": "#534AB7",
-          "ink-mid": "#3C3489",
-          "ink-border": "#2D2370",
-          "light-purple": "#AFA9EC",
+          teal: '#1D9E75',
+          forest: '#04342C',
+          coral: '#D85A30',
+          'coral-light': '#F0997B',
+          mint: '#E1F5EE',
+          'page-bg': '#F0FAF5',
+          seafoam: '#9FE1CB',
+          'mid-teal': '#0F6E56',
+          'soft-teal': '#5DCAA5',
+          'dark-forest': '#085041',
+          'deep-forest': '#04342C',
+          'forest-divider': '#063D2E',
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
