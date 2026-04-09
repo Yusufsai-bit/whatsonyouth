@@ -38,6 +38,7 @@ export type Database = {
           contact_email: string
           created_at: string
           description: string
+          expiry_date: string | null
           featured_order: number | null
           id: string
           image_url: string | null
@@ -55,6 +56,7 @@ export type Database = {
           contact_email: string
           created_at?: string
           description: string
+          expiry_date?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           contact_email?: string
           created_at?: string
           description?: string
+          expiry_date?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
@@ -82,6 +85,45 @@ export type Database = {
           organisation?: string
           source?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_suspended: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_suspended?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_suspended?: boolean
           user_id?: string
         }
         Relationships: []
@@ -127,6 +169,16 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          last_sign_in_at: string
+          raw_user_meta_data: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -11,12 +11,15 @@ import SubmitPage from "./pages/SubmitPage";
 import AccountPage from "./pages/AccountPage";
 import StubPage from "./pages/StubPage";
 import NotFound from "./pages/NotFound";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminListings from "./pages/admin/AdminListings";
 import AdminAddListing from "./pages/admin/AdminAddListing";
 import AdminEditListing from "./pages/admin/AdminEditListing";
 import AdminFeatured from "./pages/admin/AdminFeatured";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +36,8 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/submit" element={<SubmitPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/events" element={<StubPage title="Events" />} />
             <Route path="/jobs" element={<StubPage title="Jobs" />} />
             <Route path="/grants" element={<StubPage title="Grants" />} />
@@ -45,6 +50,7 @@ const App = () => (
             <Route path="/admin/listings/:id/edit" element={<AdminEditListing />} />
             <Route path="/admin/featured" element={<AdminFeatured />} />
             <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
