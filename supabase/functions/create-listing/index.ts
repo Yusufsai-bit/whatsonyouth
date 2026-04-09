@@ -174,7 +174,6 @@ Deno.serve(async (req) => {
 
     // Update scan_log if scan_log_id provided
     if (body.scan_log_id) {
-      await supabase.rpc("", {}).catch(() => {});
       // Increment listings_created on the scan log entry
       const { data: logRow } = await supabase
         .from("scan_log")
