@@ -20,6 +20,7 @@ import AdminEditListing from "./pages/admin/AdminEditListing";
 import AdminFeatured from "./pages/admin/AdminFeatured";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminScanLog from "./pages/admin/AdminScanLog";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/admin/featured" element={<AdminFeatured />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/scan-log" element={<AdminScanLog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

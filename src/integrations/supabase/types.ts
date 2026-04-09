@@ -128,6 +128,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_log: {
+        Row: {
+          error_message: string | null
+          id: string
+          listings_created: number
+          listings_found: number
+          listings_skipped: number
+          scanned_at: string
+          source_url: string
+          status: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          listings_created?: number
+          listings_found?: number
+          listings_skipped?: number
+          scanned_at?: string
+          source_url: string
+          status?: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          listings_created?: number
+          listings_found?: number
+          listings_skipped?: number
+          scanned_at?: string
+          source_url?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       listings_public: {
