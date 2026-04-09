@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import logo from '@/assets/woy-logo-reversed.svg';
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -18,8 +19,8 @@ export default function Navbar() {
 
   return (
     <nav className="bg-brand-forest h-14 md:h-16 flex items-center px-6 md:px-16 justify-between relative z-50">
-      <Link to="/" className="font-heading font-bold text-lg text-brand-seafoam">
-        What's On Youth
+      <Link to="/">
+        <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
 
       <Link
