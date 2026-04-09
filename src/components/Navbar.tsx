@@ -18,7 +18,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="bg-brand-forest h-14 md:h-16 flex items-center px-6 md:px-16 justify-between relative z-50">
+    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 justify-between relative z-50 border-b border-brand-nav-border">
       <Link to="/">
         <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
@@ -31,7 +31,7 @@ export default function Navbar() {
       </Link>
 
       <button
-        className="md:hidden text-brand-seafoam"
+        className="md:hidden text-brand-nav-link"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
       >
@@ -39,9 +39,9 @@ export default function Navbar() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-brand-forest z-50 flex flex-col px-6 pt-4">
+        <div className="fixed inset-0 bg-brand-dark z-50 flex flex-col px-6 pt-4">
           <div className="flex justify-end">
-            <button onClick={() => setOpen(false)} aria-label="Close menu" className="text-brand-seafoam">
+            <button onClick={() => setOpen(false)} aria-label="Close menu" className="text-brand-nav-link">
               <X size={28} />
             </button>
           </div>
@@ -51,7 +51,7 @@ export default function Navbar() {
                 key={link.href}
                 to={link.href}
                 onClick={() => setOpen(false)}
-                className="font-heading font-bold text-[22px] text-white hover:text-brand-seafoam transition-colors duration-100"
+                className="font-heading font-bold text-[22px] text-brand-nav-link hover:text-white transition-colors duration-100"
               >
                 {link.label}
               </Link>
