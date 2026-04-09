@@ -14,17 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           category: string
           contact_email: string
           created_at: string
           description: string
+          featured_order: number | null
           id: string
+          image_url: string | null
           is_active: boolean
+          is_featured: boolean
           link: string
           location: string
           organisation: string
+          source: string
           title: string
           user_id: string
         }
@@ -33,11 +55,15 @@ export type Database = {
           contact_email: string
           created_at?: string
           description: string
+          featured_order?: number | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           link: string
           location: string
           organisation: string
+          source?: string
           title: string
           user_id: string
         }
@@ -46,11 +72,15 @@ export type Database = {
           contact_email?: string
           created_at?: string
           description?: string
+          featured_order?: number | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           link?: string
           location?: string
           organisation?: string
+          source?: string
           title?: string
           user_id?: string
         }
@@ -96,7 +126,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
