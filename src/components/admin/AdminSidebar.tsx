@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, List, PlusCircle, Star, Users, Menu, X } from 'lucide-react';
+import { LayoutDashboard, List, PlusCircle, Star, Users, Settings, Menu, X, ExternalLink } from 'lucide-react';
 
 const navItems = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'All listings', href: '/admin/listings', icon: List },
+  { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+  { label: 'Listings', href: '/admin/listings', icon: List },
   { label: 'Add listing', href: '/admin/add', icon: PlusCircle },
   { label: 'Featured', href: '/admin/featured', icon: Star },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminSidebar() {
@@ -40,8 +41,8 @@ export default function AdminSidebar() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-5 py-2.5 rounded-md font-body text-sm transition-colors duration-100 ${
                 active
-                  ? 'bg-[#1A1A1A] text-white border-l-2 border-brand-violet'
-                  : 'text-brand-text-muted hover:bg-[#1A1A1A] hover:text-white border-l-2 border-transparent'
+                  ? 'bg-[#1A1A1A] text-white border-l-[3px] border-brand-violet'
+                  : 'text-[#888888] hover:bg-[#1A1A1A] hover:text-white border-l-[3px] border-transparent'
               }`}
             >
               <item.icon size={16} />
@@ -51,37 +52,45 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-5 py-5 border-t border-brand-footer-divider">
-        <p className="font-body text-xs text-brand-text-secondary truncate">{user?.email}</p>
-        <button
-          onClick={signOut}
-          className="font-body text-[13px] text-brand-text-muted hover:text-white transition-colors mt-1"
-        >
-          Log out
-        </button>
+      <div className="px-5 py-5 border-t border-[#1A1A1A]">
+        <p className="font-body text-xs text-[#555555] truncate">{user?.email}</p>
+        <div className="flex flex-col gap-1 mt-2">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-body text-[13px] text-[#888888] hover:text-white transition-colors flex items-center gap-1.5"
+          >
+            View site <ExternalLink size={12} />
+          </a>
+          <button
+            onClick={signOut}
+            className="font-body text-[13px] text-[#888888] hover:text-white transition-colors text-left"
+          >
+            Log out
+          </button>
+        </div>
       </div>
     </div>
   );
 
   return (
     <>
-      {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-brand-dark text-white p-2 rounded-lg"
+        className="md:hidden fixed top-4 left-4 z-50 bg-[#0A0A0A] text-white p-2 rounded-lg"
         aria-label="Open admin menu"
       >
         <Menu size={20} />
       </button>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-[240px] h-full bg-brand-dark">
+          <div className="relative w-[240px] h-full bg-[#0A0A0A]">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 text-brand-text-muted"
+              className="absolute top-4 right-4 text-[#888888]"
               aria-label="Close menu"
             >
               <X size={20} />
@@ -91,8 +100,7 @@ export default function AdminSidebar() {
         </div>
       )}
 
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:flex-col md:w-[240px] md:min-h-screen bg-brand-dark flex-shrink-0">
+      <aside className="hidden md:flex md:flex-col md:w-[240px] md:min-h-screen bg-[#0A0A0A] flex-shrink-0">
         {sidebarContent}
       </aside>
     </>
