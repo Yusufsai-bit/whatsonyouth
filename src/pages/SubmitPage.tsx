@@ -3,16 +3,30 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Check } from 'lucide-react';
+import { z } from 'zod';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-const categories = ['Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'];
+const categories = ['Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'] as const;
+
+const listingSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required').max(150, 'Title must be under 150 characters'),
+  category: z.enum(categories, { errorMap: () => ({ message: 'Please select a category' }) }),
+  organisation: z.string().trim().min(1, 'Organisation is required').max(200, 'Organisation must be under 200 characters'),
+  location: z.string().trim().min(1, 'Location is required').max(200, 'Location must be under 200 characters'),
+  link: z.string().trim().url('Please enter a valid URL (e.g. https://example.com)').max(2000, 'URL is too long'),
+  description: z.string().trim().min(1, 'Description is required').max(300, 'Description must be under 300 characters'),
+  contact_email: z.string().trim().email('Please enter a valid email address').max(255, 'Email is too long'),
+});
+
+type FieldErrors = Partial<Record<keyof z.infer<typeof listingSchema>, string>>;
 
 export default function SubmitPage() {
   const { user, loading } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [form, setForm] = useState({
     title: '',
     category: '',
@@ -29,21 +43,40 @@ export default function SubmitPage() {
   const contactEmail = form.contact_email || user.email || '';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (errors[name as keyof FieldErrors]) {
+      setErrors({ ...errors, [name]: undefined });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const payload = { ...form, contact_email: contactEmail };
+    const result = listingSchema.safeParse(payload);
+
+    if (!result.success) {
+      const fieldErrors: FieldErrors = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof FieldErrors;
+        if (!fieldErrors[field]) fieldErrors[field] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
     setSubmitting(true);
     const { error } = await supabase.from('listings').insert({
       user_id: user.id,
-      title: form.title,
-      category: form.category,
-      organisation: form.organisation,
-      location: form.location,
-      link: form.link,
-      description: form.description,
-      contact_email: contactEmail,
+      title: result.data.title,
+      category: result.data.category,
+      organisation: result.data.organisation,
+      location: result.data.location,
+      link: result.data.link,
+      description: result.data.description,
+      contact_email: result.data.contact_email,
     });
     setSubmitting(false);
     if (!error) setSubmitted(true);
