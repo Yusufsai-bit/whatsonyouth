@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, List, PlusCircle, Star, Users, Settings, Menu, X, ExternalLink, ScanSearch } from 'lucide-react';
+import { LayoutDashboard, List, PlusCircle, Star, Radar, Users, Settings, Menu, X, ExternalLink, ScanSearch } from 'lucide-react';
 
 const navItems = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Listings', href: '/admin/listings', icon: List },
   { label: 'Add listing', href: '/admin/add', icon: PlusCircle },
   { label: 'Featured', href: '/admin/featured', icon: Star },
+  { label: 'Scanner', href: '/admin/scanner', icon: Radar },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'Scan log', href: '/admin/scan-log', icon: ScanSearch },
