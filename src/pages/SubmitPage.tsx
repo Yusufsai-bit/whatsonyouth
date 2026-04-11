@@ -128,6 +128,12 @@ export default function SubmitPage() {
     const payload = { ...form, contact_email: contactEmail };
     const result = listingSchema.safeParse(payload);
 
+    let hasImageError = false;
+    if (!imageFile) {
+      setImageError('Please upload an image for your listing.');
+      hasImageError = true;
+    }
+
     if (!result.success) {
       const fieldErrors: FieldErrors = {};
       for (const issue of result.error.issues) {
@@ -135,13 +141,15 @@ export default function SubmitPage() {
         if (!fieldErrors[field]) fieldErrors[field] = issue.message;
       }
       setErrors(fieldErrors);
-      // Scroll to first error
       const firstErrorField = Object.keys(fieldErrors)[0];
       if (firstErrorField && formRef.current) {
         const el = formRef.current.querySelector(`[name="${firstErrorField}"]`);
         el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return;
+    }
+
+    if (hasImageError) return;
     }
 
     setErrors({});
@@ -317,8 +325,8 @@ export default function SubmitPage() {
 
                 {/* Image upload */}
                 <div>
-                  <label className="font-body font-medium text-sm text-brand-text-primary block mb-1">Listing image (optional)</label>
-                  <p className="font-body text-xs text-brand-disabled-text mb-2">Add an image to make your listing stand out. PNG or JPG, max 5MB.</p>
+                  <label className="font-body font-medium text-sm text-brand-text-primary block mb-1">Listing image</label>
+                  <p className="font-body text-xs text-brand-disabled-text mb-2">Add an image for your listing. PNG or JPG, max 5MB.</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -342,7 +350,7 @@ export default function SubmitPage() {
                       onClick={() => fileInputRef.current?.click()}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleDrop}
-                      className="bg-brand-section-alt border-2 border-dashed border-brand-input-border rounded-xl p-8 text-center cursor-pointer hover:border-brand-violet transition-colors"
+                      className={`bg-brand-section-alt border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-brand-violet transition-colors ${imageError ? 'border-[#E24B4A]' : 'border-brand-input-border'}`}
                     >
                       <Upload size={24} className="mx-auto text-brand-text-muted mb-2" />
                       <p className="font-body text-sm text-brand-text-muted">Click to upload or drag and drop</p>
@@ -387,9 +395,9 @@ export default function SubmitPage() {
 
                 <button
                   type="submit"
-                  disabled={!confirmed || submitting}
+                  disabled={!confirmed || !imageFile || submitting}
                   className={`font-heading font-bold text-base rounded-lg px-7 py-3.5 mt-2 transition-colors duration-100 ${
-                    confirmed
+                    confirmed && imageFile
                       ? 'bg-brand-coral text-white hover:bg-brand-coral-light'
                       : 'bg-brand-disabled text-brand-disabled-text cursor-not-allowed'
                   }`}
