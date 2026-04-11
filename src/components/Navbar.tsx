@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield } from 'lucide-react';
+import { Menu, X, Shield, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/woy-logo-reversed.svg';
@@ -61,6 +61,9 @@ export default function Navbar() {
 
       {/* Desktop right side */}
       <div className="hidden md:flex items-center gap-4">
+        <Link to="/search" className="text-brand-nav-link hover:text-white transition-colors duration-100">
+          <Search size={18} />
+        </Link>
         {!loading && user && isAdmin && (
           <Link
             to="/admin"
@@ -111,6 +114,15 @@ export default function Navbar() {
             </button>
           </div>
           <div className="flex flex-col gap-5 mt-8">
+            <Link
+              to="/search"
+              onClick={() => setOpen(false)}
+              className={`font-heading font-bold text-[22px] transition-colors duration-100 ${
+                isActive('/search') ? 'text-white' : 'text-brand-nav-link hover:text-white'
+              }`}
+            >
+              Search
+            </Link>
             {mobileLinks.map((link) => (
               <Link
                 key={link.href}

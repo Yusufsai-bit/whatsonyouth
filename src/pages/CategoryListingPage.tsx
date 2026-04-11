@@ -188,6 +188,11 @@ export default function CategoryListingPage({ category }: { category: string }) 
               placeholder={`Search ${config.label.toLowerCase()}...`}
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && search.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(search.trim())}&category=${category}`);
+                }
+              }}
               className="w-full border border-brand-input-border rounded-lg py-2.5 pl-10 pr-3.5 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet"
             />
           </div>
