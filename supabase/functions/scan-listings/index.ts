@@ -16,6 +16,20 @@ function stripHtml(html: string): string {
   return text.slice(0, 12000);
 }
 
+function extractOgImage(html: string): string | null {
+  // Try og:image first
+  const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+  if (ogMatch?.[1]) return ogMatch[1];
+
+  // Try twitter:image
+  const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+  if (twMatch?.[1]) return twMatch[1];
+
+  return null;
+}
+
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
