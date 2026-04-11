@@ -32,6 +32,27 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_reports: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           category: string
