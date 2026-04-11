@@ -91,6 +91,7 @@ serve(async (req) => {
 
     // Auth check
     const SCAN_API_KEY = Deno.env.get("SCAN_API_KEY");
+    console.log("SCAN_API_KEY set:", !!SCAN_API_KEY, "length:", SCAN_API_KEY?.length, "scan_key length:", scan_key?.length);
     if (!scan_key || scan_key !== SCAN_API_KEY) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
         status: 401,
