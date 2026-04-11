@@ -147,7 +147,16 @@ export default function AccountPage() {
           {loadingListings ? (
             <div className="flex flex-col gap-4 mb-6">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="bg-[#F7F7F8] rounded-xl h-[180px] animate-pulse" />
+                <div key={i} className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
+                  <div className="flex flex-col sm:flex-row">
+                    <div className="w-full sm:w-40 h-32 skeleton-shimmer" />
+                    <div className="p-4 flex flex-col gap-2 flex-1">
+                      <div className="skeleton-shimmer rounded h-3 w-[40%]" />
+                      <div className="skeleton-shimmer rounded h-4 w-[70%]" />
+                      <div className="skeleton-shimmer rounded h-3 w-[50%]" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : listings.length === 0 ? (
