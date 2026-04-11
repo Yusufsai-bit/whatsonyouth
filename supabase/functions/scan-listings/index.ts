@@ -87,15 +87,40 @@ serve(async (req) => {
   }
 
   try {
-    const { sources, mode, scan_key } = await req.json();
+    const { sources, mode } = await req.json();
 
-    // Auth check
-    const SCAN_API_KEY = Deno.env.get("SCAN_API_KEY");
-    console.log("Auth debug - env key exists:", !!SCAN_API_KEY, "provided key exists:", !!scan_key);
-    if (SCAN_API_KEY && scan_key !== SCAN_API_KEY) {
-      console.log("Key mismatch - env first 4:", SCAN_API_KEY?.slice(0, 4), "provided first 4:", scan_key?.slice(0, 4));
+    // Auth check — verify caller is an admin via JWT
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
         status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await anonClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check admin status using service role to bypass RLS
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: adminData } = await serviceClient.from("admins").select("id").eq("user_id", user.id).maybeSingle();
+    if (!adminData) {
+      return new Response(JSON.stringify({ success: false, error: "Unauthorised — admin only" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -115,10 +140,7 @@ serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabase = serviceClient;
 
     const isLive = mode === "live";
     const results: any[] = [];
