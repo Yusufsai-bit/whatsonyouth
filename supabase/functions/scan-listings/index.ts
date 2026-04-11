@@ -91,9 +91,7 @@ serve(async (req) => {
 
     // Auth check
     const SCAN_API_KEY = Deno.env.get("SCAN_API_KEY");
-    console.log("Auth debug - env key exists:", !!SCAN_API_KEY, "provided key exists:", !!scan_key);
-    if (SCAN_API_KEY && scan_key !== SCAN_API_KEY) {
-      console.log("Key mismatch - env first 4:", SCAN_API_KEY?.slice(0, 4), "provided first 4:", scan_key?.slice(0, 4));
+    if (!scan_key || scan_key !== SCAN_API_KEY) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
