@@ -123,7 +123,7 @@ export default function ListingDetailPage() {
           <h1 className="font-heading font-bold text-[24px] text-brand-text-primary mb-4">
             This listing could not be found.
           </h1>
-          <Link to="/" className="font-body text-brand-violet hover:underline text-[15px]">
+          <Link to="/" className="font-body text-brand-violet hover:underline text-[15px] min-h-[44px] flex items-center">
             ← Back to homepage
           </Link>
         </div>
@@ -159,12 +159,12 @@ export default function ListingDetailPage() {
       />
       <Navbar />
 
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen overflow-x-hidden">
         {/* Back link */}
         <div className="px-6 md:px-16 py-4 max-w-7xl mx-auto">
           <button
             onClick={() => navigate(backRoute)}
-            className="flex items-center gap-1.5 font-body font-medium text-sm text-brand-violet hover:underline"
+            className="flex items-center gap-1.5 font-body font-medium text-sm text-brand-violet hover:underline min-h-[44px] w-full md:w-auto"
           >
             <ArrowLeft size={14} />
             Back to {listing.category}
@@ -177,7 +177,7 @@ export default function ListingDetailPage() {
             <span className="inline-block bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px] mb-2">
               {listing.category}
             </span>
-            <h1 className="font-heading font-bold text-[28px] md:text-[32px] text-brand-text-primary leading-[1.2] mt-2">
+            <h1 className="font-heading font-bold text-[24px] md:text-[32px] text-brand-text-primary leading-[1.2] mt-2">
               {listing.title}
             </h1>
             <p className="font-body text-sm text-brand-text-muted uppercase tracking-[0.04em] mt-2">
@@ -220,8 +220,8 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* Right sidebar */}
-          <div className="lg:w-[320px] flex-shrink-0">
+          {/* Right sidebar — becomes full-width on mobile */}
+          <div className="w-full lg:w-[320px] flex-shrink-0">
             <div className="lg:sticky lg:top-6 bg-white border border-brand-card-border rounded-xl p-6 space-y-5">
               {/* Date info */}
               {listing.expiry_date && (
@@ -245,7 +245,7 @@ export default function ListingDetailPage() {
                 href={listing.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 transition-colors hover:bg-brand-coral-light"
+                className="flex items-center justify-center gap-2 w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 transition-colors hover:bg-brand-coral-light min-h-[48px]"
               >
                 {ctaLabel}
                 <ExternalLink size={14} />
@@ -254,7 +254,7 @@ export default function ListingDetailPage() {
               {/* Share */}
               <button
                 onClick={handleCopy}
-                className="flex items-center justify-center gap-2 w-full border border-brand-card-border text-brand-text-primary font-body font-medium text-sm rounded-lg py-3 hover:bg-brand-section-alt transition-colors"
+                className="flex items-center justify-center gap-2 w-full border border-brand-card-border text-brand-text-primary font-body font-medium text-sm rounded-lg py-3 hover:bg-brand-section-alt transition-colors min-h-[48px]"
               >
                 {copied ? <><Check size={14} /> Link copied!</> : <><Copy size={14} /> Share this listing</>}
               </button>
@@ -267,7 +267,7 @@ export default function ListingDetailPage() {
               {/* Report */}
               <button
                 onClick={() => setShowReport(true)}
-                className="font-body text-xs text-brand-footer-link hover:underline"
+                className="font-body text-xs text-brand-footer-link hover:underline min-h-[44px]"
               >
                 Report this listing
               </button>
@@ -280,7 +280,7 @@ export default function ListingDetailPage() {
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
           <div className="bg-white rounded-xl p-6 w-full max-w-md relative">
-            <button onClick={() => { setShowReport(false); setReportSent(false); setReportReason(''); }} className="absolute top-4 right-4 text-brand-text-muted">
+            <button onClick={() => { setShowReport(false); setReportSent(false); setReportReason(''); }} className="absolute top-4 right-4 text-brand-text-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
               <X size={18} />
             </button>
             {reportSent ? (
@@ -302,7 +302,7 @@ export default function ListingDetailPage() {
                 <button
                   onClick={handleReport}
                   disabled={!reportReason.trim() || reportSubmitting}
-                  className="mt-3 w-full bg-brand-coral text-white font-heading font-bold text-sm rounded-lg py-3 hover:bg-brand-coral-light transition-colors disabled:opacity-50"
+                  className="mt-3 w-full bg-brand-coral text-white font-heading font-bold text-sm rounded-lg py-3 hover:bg-brand-coral-light transition-colors disabled:opacity-50 min-h-[48px]"
                 >
                   {reportSubmitting ? 'Submitting...' : 'Submit report'}
                 </button>

@@ -13,11 +13,6 @@ const categoryLinks = [
   { label: 'Wellbeing', href: '/wellbeing' },
 ];
 
-const mobileLinks = [
-  ...categoryLinks,
-  { label: 'About', href: '/about' },
-];
-
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
@@ -35,6 +30,9 @@ export default function Navbar() {
   }, [user]);
 
   const isActive = (href: string) => location.pathname === href;
+
+  const mobileLinkClass = "font-heading font-bold text-[20px] text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
+  const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
 
   return (
     <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 justify-between relative z-50 border-b border-brand-nav-border">
@@ -98,7 +96,7 @@ export default function Navbar() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden text-brand-nav-link"
+        className="md:hidden text-brand-nav-link min-w-[44px] min-h-[44px] flex items-center justify-center"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
       >
@@ -107,66 +105,90 @@ export default function Navbar() {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 bg-brand-dark z-50 flex flex-col px-6 pt-4">
+        <div className="fixed inset-0 bg-brand-dark z-50 flex flex-col px-6 pt-4 overflow-y-auto">
           <div className="flex justify-end">
-            <button onClick={() => setOpen(false)} aria-label="Close menu" className="text-brand-nav-link">
-              <X size={28} />
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className="text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+            >
+              <X size={24} />
             </button>
           </div>
-          <div className="flex flex-col gap-5 mt-8">
+          <div className="flex flex-col mt-6">
+            {/* Search */}
             <Link
               to="/search"
               onClick={() => setOpen(false)}
-              className={`font-heading font-bold text-[22px] transition-colors duration-100 ${
-                isActive('/search') ? 'text-white' : 'text-brand-nav-link hover:text-white'
-              }`}
+              className={isActive('/search') ? mobileLinkClass : mobileLinkInactive}
             >
               Search
             </Link>
-            {mobileLinks.map((link) => (
+
+            {/* Separator */}
+            <div className="border-b border-[#333] my-2" />
+
+            {/* Category links */}
+            {categoryLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 onClick={() => setOpen(false)}
-                className={`font-heading font-bold text-[22px] transition-colors duration-100 ${
-                  isActive(link.href) ? 'text-white' : 'text-brand-nav-link hover:text-white'
-                }`}
+                className={isActive(link.href) ? mobileLinkClass : mobileLinkInactive}
               >
                 {link.label}
               </Link>
             ))}
+
+            {/* Separator */}
+            <div className="border-b border-[#333] my-2" />
+
+            {/* Submit */}
             <Link
               to="/submit"
               onClick={() => setOpen(false)}
-              className="font-heading font-bold text-[22px] text-brand-nav-link hover:text-white transition-colors duration-100"
+              className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}
             >
               Submit a listing
             </Link>
-            {!loading && user && isAdmin && (
-              <Link
-                to="/admin"
-                onClick={() => setOpen(false)}
-                className="font-heading font-bold text-[22px] text-brand-coral hover:text-brand-coral-light transition-colors duration-100 flex items-center gap-2"
-              >
-                <Shield size={20} />
-                Admin
-              </Link>
-            )}
+
+            {/* Login / Account */}
             {!loading && user ? (
               <Link
                 to="/account"
                 onClick={() => setOpen(false)}
-                className="font-heading font-bold text-[22px] text-brand-coral hover:text-brand-coral-light transition-colors duration-100"
+                className={isActive('/account') ? mobileLinkClass : mobileLinkInactive}
               >
                 My account
               </Link>
-            ) : (
+            ) : !loading ? (
               <Link
                 to="/login"
                 onClick={() => setOpen(false)}
-                className="font-heading font-bold text-[22px] text-brand-coral hover:text-brand-coral-light transition-colors duration-100"
+                className={isActive('/login') ? mobileLinkClass : mobileLinkInactive}
               >
                 Log in
+              </Link>
+            ) : null}
+
+            {/* About */}
+            <Link
+              to="/about"
+              onClick={() => setOpen(false)}
+              className={isActive('/about') ? mobileLinkClass : mobileLinkInactive}
+            >
+              About
+            </Link>
+
+            {/* Admin (if applicable) */}
+            {!loading && user && isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="font-heading font-bold text-[20px] text-brand-coral hover:text-brand-coral-light py-3 border-b border-[#1A1A1A] min-h-[44px] flex items-center gap-2"
+              >
+                <Shield size={18} />
+                Admin
               </Link>
             )}
           </div>

@@ -6,6 +6,35 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 
+const categoryColors: Record<string, string> = {
+  Events: '#2D1B69',
+  Jobs: '#1A2A4A',
+  Grants: '#1A3A2A',
+  Programs: '#2D1B4A',
+  Wellbeing: '#2A1A3A',
+};
+
+const locations = [
+  'All Victoria', 'Melbourne CBD', 'Inner Melbourne', 'Northern Melbourne',
+  'Western Melbourne', 'Eastern Melbourne', 'South-East Melbourne', 'Geelong',
+  'Ballarat', 'Bendigo', 'Gippsland', 'Shepparton', 'Mildura', 'Warrnambool',
+  'Frankston', 'Online', 'Regional Victoria',
+];
+
+interface Listing {
+  id: string;
+  title: string;
+  organisation: string;
+  location: string;
+  description: string;
+  link: string;
+  image_url: string | null;
+  source: string;
+  created_at: string;
+  expiry_date: string | null;
+  category: string;
+}
+
 const ITEMS_PER_PAGE = 12;
 
 const categoryConfig: Record<string, {
@@ -63,26 +92,6 @@ const categoryConfig: Record<string, {
     slug: 'wellbeing',
   },
 };
-
-const locations = [
-  'All Victoria', 'Melbourne', 'Ballarat', 'Bendigo', 'Geelong',
-  'Gippsland', 'Shepparton', 'Mildura', 'Wodonga', 'Warrnambool',
-  'Frankston', 'Online', 'Regional Victoria',
-];
-
-interface Listing {
-  id: string;
-  title: string;
-  organisation: string;
-  location: string;
-  description: string;
-  link: string;
-  image_url: string | null;
-  source: string;
-  created_at: string;
-  expiry_date: string | null;
-  category: string;
-}
 
 function daysAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -151,7 +160,6 @@ export default function CategoryListingPage({ category }: { category: string }) 
     } else if (sort === 'az') {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
-    // newest is default order from DB
 
     return result;
   }, [listings, search, locationFilter, sort]);
@@ -204,56 +212,60 @@ export default function CategoryListingPage({ category }: { category: string }) 
 
       {/* Filter bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-brand-card-border px-6 py-4 md:px-16">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 max-w-[360px] min-w-[180px]">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-text-muted" />
-            <input
-              type="text"
-              placeholder={`Search ${config.label.toLowerCase()}...`}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && search.trim()) {
-                  navigate(`/search?q=${encodeURIComponent(search.trim())}&category=${category}`);
-                }
-              }}
-              className="w-full border border-brand-input-border rounded-lg py-2.5 pl-10 pr-3.5 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet"
-            />
-          </div>
+        <div className="max-w-7xl mx-auto">
+          {/* Mobile: search full width row 1, filters row 2 */}
+          <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
+            {/* Search */}
+            <div className="relative flex-1 md:max-w-[360px] min-w-[180px]">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-text-muted" />
+              <input
+                type="text"
+                placeholder={`Search ${config.label.toLowerCase()}...`}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && search.trim()) {
+                    navigate(`/search?q=${encodeURIComponent(search.trim())}&category=${category}`);
+                  }
+                }}
+                className="w-full border border-brand-input-border rounded-lg py-2.5 pl-10 pr-3.5 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[44px]"
+              />
+            </div>
 
-          {/* Location filter */}
-          <div className="relative">
-            <select
-              value={locationFilter}
-              onChange={e => setLocationFilter(e.target.value)}
-              className="appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white"
-            >
-              {locations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
-          </div>
+            {/* Location + Sort side by side */}
+            <div className="flex gap-3 flex-1 md:flex-none">
+              <div className="relative flex-1 md:flex-none">
+                <select
+                  value={locationFilter}
+                  onChange={e => setLocationFilter(e.target.value)}
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                >
+                  {locations.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+              </div>
 
-          {/* Sort */}
-          <div className="relative">
-            <select
-              value={sort}
-              onChange={e => setSort(e.target.value as any)}
-              className="appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white"
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="az">A–Z</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
-          </div>
+              <div className="relative flex-1 md:flex-none">
+                <select
+                  value={sort}
+                  onChange={e => setSort(e.target.value as any)}
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="az">A–Z</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+              </div>
+            </div>
 
-          {/* Count */}
-          <p className="font-body text-[13px] text-brand-text-muted ml-auto hidden sm:block">
-            Showing {visible.length} of {filtered.length} listings
-          </p>
+            {/* Count — hide on mobile */}
+            <p className="font-body text-[13px] text-brand-text-muted ml-auto hidden md:block">
+              Showing {visible.length} of {filtered.length} listings
+            </p>
+          </div>
         </div>
       </div>
 
@@ -278,7 +290,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
               {!hasFilters && (
                 <Link
                   to="/submit"
-                  className="mt-6 bg-brand-coral text-white font-heading font-bold text-sm rounded-lg px-6 py-3 transition-colors hover:bg-brand-coral-light"
+                  className="mt-6 bg-brand-coral text-white font-heading font-bold text-sm rounded-lg px-6 py-3 transition-colors hover:bg-brand-coral-light min-h-[44px]"
                 >
                   Submit a listing
                 </Link>
@@ -329,7 +341,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                               Submitted by community
                             </span>
                           )}
-                          <span className="font-body font-medium text-[13px] text-brand-violet ml-auto">
+                          <span className="font-body font-medium text-[13px] text-brand-violet ml-auto min-h-[44px] flex items-center">
                             View details →
                           </span>
                         </div>
@@ -343,7 +355,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 <div className="flex justify-center mt-10">
                   <button
                     onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
-                    className="bg-white border border-brand-card-border text-brand-text-primary font-body font-medium text-[15px] rounded-lg px-8 py-3 hover:bg-brand-section-alt transition-colors"
+                    className="bg-white border border-brand-card-border text-brand-text-primary font-body font-medium text-[15px] rounded-lg px-8 py-3 hover:bg-brand-section-alt transition-colors min-h-[48px]"
                   >
                     Load more
                   </button>
