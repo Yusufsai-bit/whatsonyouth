@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 export default function SignupPage() {
   const { signUp } = useAuth();
@@ -28,6 +29,7 @@ export default function SignupPage() {
 
   return (
     <>
+      <SEO title="Create a Free Account \u2014 What's On Youth" description="Create a free account to submit and manage listings on What's On Youth." noindex />
       <Navbar />
       <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
         <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">

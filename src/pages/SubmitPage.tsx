@@ -6,6 +6,7 @@ import { Check, Upload, Copy, MapPin, Calendar } from 'lucide-react';
 import { z } from 'zod';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const categories = ['Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'] as const;
 
@@ -258,6 +259,13 @@ export default function SubmitPage() {
 
   return (
     <>
+      <SEO
+        title="Submit a Listing \u2014 What's On Youth"
+        description="Share your event, job, grant, program, or wellbeing resource with young Victorians for free."
+        ogUrl="https://www.whatsonyouth.org.au/submit"
+        canonical="https://www.whatsonyouth.org.au/submit"
+        noindex
+      />
       <Navbar />
       <div className="bg-white min-h-screen px-6 py-12 md:py-16">
         <div className="max-w-7xl mx-auto flex gap-10">
