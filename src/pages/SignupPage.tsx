@@ -33,7 +33,7 @@ export default function SignupPage() {
         <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">
           <h1 className="text-[28px] text-brand-text-primary">Create your free account</h1>
           <p className="font-body text-base text-brand-text-secondary mb-6">
-            Submit listings, save opportunities, and more.
+            Submit listings and manage your opportunities.
           </p>
           {error && <p className="font-body text-sm text-brand-coral mb-4">{error}</p>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
