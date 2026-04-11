@@ -178,7 +178,37 @@ export default function AdminListings() {
           <button onClick={clearFilters} className="font-body text-[13px] text-[#5847E0] hover:underline">Clear filters</button>
         </div>
 
-        {selected.size > 0 && (
+        {pendingDrafts.length > 0 && (
+          <div className="bg-[#FFF8F0] border border-[#F5C68A] rounded-xl px-5 py-4 mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="text-[#D85A30] shrink-0" />
+              <div>
+                <p className="font-heading font-bold text-[15px] text-[#0A0A0A]">
+                  {pendingDrafts.length} draft listing{pendingDrafts.length !== 1 ? 's' : ''} pending review
+                </p>
+                <p className="font-body text-[13px] text-[#555555]">
+                  Scanned listings waiting to be reviewed and published.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={showDrafts}
+                className="font-heading font-bold text-[13px] border-2 border-[#0A0A0A] text-[#0A0A0A] px-4 py-2 rounded-lg hover:bg-[#F7F7F7]"
+              >
+                Review drafts
+              </button>
+              <button
+                onClick={activateAllDrafts}
+                className="font-heading font-bold text-[13px] bg-[#D85A30] text-white px-4 py-2 rounded-lg hover:bg-[#C04E28]"
+              >
+                Publish all
+              </button>
+            </div>
+          </div>
+        )}
+
+
           <div className="bg-[#0A0A0A] text-white rounded-xl px-5 py-3 mb-4 flex items-center gap-4 flex-wrap">
             <span className="font-body text-sm">{selected.size} selected</span>
             <button onClick={() => bulkAction('activate')} className="font-body text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">Activate</button>
