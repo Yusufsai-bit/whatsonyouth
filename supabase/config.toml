@@ -1,1 +1,4 @@
 project_id = "fmgkyrgsrsjiltubstry"
+
+[functions.scan-listings]
+verify_jwt = false
