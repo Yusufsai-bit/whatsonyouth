@@ -208,7 +208,7 @@ serve(async (req) => {
               is_active: isLive,
               is_featured: false,
               source: "ai_scan",
-              user_id: "00000000-0000-0000-0000-000000000000",
+              user_id: adminUserId,
             });
 
             if (insertErr) {
