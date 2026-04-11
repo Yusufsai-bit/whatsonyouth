@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import SkeletonCard from '@/components/SkeletonCard';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -220,7 +221,7 @@ export default function SearchPage() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-brand-section-alt rounded-xl h-[320px] animate-pulse" />
+                <SkeletonCard key={i} />
               ))}
             </div>
           ) : filtered.length === 0 ? (
