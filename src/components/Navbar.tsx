@@ -70,15 +70,21 @@ export default function Navbar() {
             <span>Admin</span>
           </Link>
         )}
-        {!loading && user && (
+        {!loading && user ? (
           <Link
             to="/account"
-            className="flex items-center gap-2 text-brand-nav-link hover:text-white transition-colors duration-100 font-body text-sm"
+            className="font-body font-medium text-sm text-brand-nav-link hover:text-white transition-colors duration-100"
           >
-            <User size={16} />
-            <span>{user.email}</span>
+            {user.user_metadata?.first_name || 'Account'}
           </Link>
-        )}
+        ) : !loading ? (
+          <Link
+            to="/login"
+            className="font-body font-medium text-sm text-brand-nav-link hover:text-white transition-colors duration-100"
+          >
+            Log in
+          </Link>
+        ) : null}
         <Link
           to="/submit"
           className="bg-brand-coral text-white font-body font-medium text-sm rounded-full px-[18px] py-2 transition-colors duration-100 hover:bg-brand-coral-light"
