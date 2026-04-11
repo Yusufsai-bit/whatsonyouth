@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { StatusBadge, SourceBadge } from '@/pages/admin/AdminDashboard';
-import { Pencil, Trash2, Star } from 'lucide-react';
+import { Pencil, Trash2, Star, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Listing {
