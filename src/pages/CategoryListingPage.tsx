@@ -4,6 +4,7 @@ import { Search, MapPin, Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -12,36 +13,54 @@ const categoryConfig: Record<string, {
   heading: string;
   subtext: string;
   placeholderColor: string;
+  seoTitle: string;
+  seoDescription: string;
+  slug: string;
 }> = {
   Events: {
     label: 'Events',
     heading: 'Events in Victoria',
     subtext: "Discover what's happening across Victoria",
     placeholderColor: '#2D1B69',
+    seoTitle: "Events in Victoria for Young People \u2014 What's On Youth",
+    seoDescription: "Find events happening across Victoria for young people aged 15\u201325. From Melbourne to regional Victoria, discover what\u2019s on near you.",
+    slug: 'events',
   },
   Jobs: {
     label: 'Jobs',
     heading: 'Jobs and internships',
     subtext: 'Find work, internships, and career opportunities',
     placeholderColor: '#1A2A4A',
+    seoTitle: "Jobs and Internships for Young Victorians \u2014 What's On Youth",
+    seoDescription: "Find entry-level jobs, internships, and career opportunities across Victoria for young people aged 15\u201325.",
+    slug: 'jobs',
   },
   Grants: {
     label: 'Grants',
     heading: 'Grants and funding',
     subtext: 'Funding opportunities for young Victorians',
     placeholderColor: '#1A3A2A',
+    seoTitle: "Grants and Funding for Young Victorians \u2014 What's On Youth",
+    seoDescription: "Discover grants, scholarships, and funding opportunities available to young Victorians aged 15\u201325. State, federal, and philanthropic funding.",
+    slug: 'grants',
   },
   Programs: {
     label: 'Programs',
     heading: 'Programs and courses',
     subtext: 'Courses, programs, and development opportunities',
     placeholderColor: '#2D1B4A',
+    seoTitle: "Programs and Courses for Young Victorians \u2014 What's On Youth",
+    seoDescription: "Find programs, courses, and development opportunities for young people aged 15\u201325 across Victoria.",
+    slug: 'programs',
   },
   Wellbeing: {
     label: 'Wellbeing',
     heading: 'Wellbeing and support',
     subtext: 'Support services and wellbeing resources',
     placeholderColor: '#2A1A3A',
+    seoTitle: "Wellbeing and Support for Young Victorians \u2014 What's On Youth",
+    seoDescription: "Find wellbeing resources, mental health support, and services for young Victorians aged 15\u201325. You don\u2019t have to figure it out alone.",
+    slug: 'wellbeing',
   },
 };
 
@@ -151,6 +170,12 @@ export default function CategoryListingPage({ category }: { category: string }) 
 
   return (
     <>
+      <SEO
+        title={config.seoTitle}
+        description={config.seoDescription}
+        ogUrl={`https://www.whatsonyouth.org.au/${config.slug}`}
+        canonical={`https://www.whatsonyouth.org.au/${config.slug}`}
+      />
       <Navbar />
 
       {/* Page header */}

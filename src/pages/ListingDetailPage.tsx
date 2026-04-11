@@ -4,6 +4,7 @@ import { MapPin, Calendar, ArrowLeft, Copy, Check, Flag, X, ExternalLink } from 
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
@@ -140,8 +141,22 @@ export default function ListingDetailPage() {
   const ctaLabel = listing.category === 'Events' ? 'Register' :
     listing.category === 'Jobs' ? 'Apply now' : 'Visit website';
 
+  const truncDesc = listing.description.length > 155
+    ? listing.description.slice(0, 155) + '...'
+    : listing.description;
+
   return (
     <>
+      <SEO
+        title={`${listing.title} \u2014 What's On Youth`}
+        description={truncDesc}
+        ogTitle={listing.title}
+        ogDescription={truncDesc}
+        ogUrl={`https://www.whatsonyouth.org.au/listings/${listing.id}`}
+        ogImage={listing.image_url || undefined}
+        ogType="article"
+        canonical={`https://www.whatsonyouth.org.au/listings/${listing.id}`}
+      />
       <Navbar />
 
       <div className="bg-white min-h-screen">

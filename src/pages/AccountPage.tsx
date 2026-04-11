@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 import PasswordStrengthBar from '@/components/PasswordStrengthBar';
 
 interface Listing {
@@ -79,6 +80,7 @@ export default function AccountPage() {
 
   return (
     <>
+      <SEO title="My Account \u2014 What's On Youth" description="Manage your listings and account settings." noindex />
       <Navbar />
       <div className="bg-white min-h-screen px-6 py-12 md:py-16">
         <div className="max-w-3xl mx-auto">

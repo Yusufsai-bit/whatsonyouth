@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 export default function LoginPage() {
   const { signIn } = useAuth();
@@ -27,6 +28,7 @@ export default function LoginPage() {
 
   return (
     <>
+      <SEO title="Log In \u2014 What's On Youth" description="Log in to your What's On Youth account." noindex />
       <Navbar />
       <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
         <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">

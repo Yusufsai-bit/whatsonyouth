@@ -4,6 +4,7 @@ import { Search, MapPin, Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -143,6 +144,12 @@ export default function SearchPage() {
 
   return (
     <>
+      <SEO
+        title="Search Opportunities \u2014 What's On Youth"
+        description="Search across events, jobs, grants, programs, and wellbeing support for young Victorians."
+        ogUrl="https://www.whatsonyouth.org.au/search"
+        canonical="https://www.whatsonyouth.org.au/search"
+      />
       <Navbar />
 
       {/* Search hero */}

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const stats = [
   { value: '15–25', label: 'Target age range' },
@@ -27,6 +28,12 @@ const beliefs = [
 export default function AboutPage() {
   return (
     <>
+      <SEO
+        title="About \u2014 What's On Youth"
+        description="What's On Youth is a free Victoria-wide platform connecting young people aged 15\u201325 with opportunities across the state."
+        ogUrl="https://www.whatsonyouth.org.au/about"
+        canonical="https://www.whatsonyouth.org.au/about"
+      />
       <Navbar />
 
       {/* Hero */}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 import { Mail } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
@@ -22,6 +23,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
+      <SEO title="Forgot Password \u2014 What's On Youth" description="Reset your What's On Youth password." noindex />
       <Navbar />
       <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
         <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">
