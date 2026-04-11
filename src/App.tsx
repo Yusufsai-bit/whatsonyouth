@@ -51,6 +51,7 @@ const App = () => (
             <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/listings" element={<AdminListings />} />
             <Route path="/admin/add" element={<AdminAddListing />} />
