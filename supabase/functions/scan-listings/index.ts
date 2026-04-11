@@ -179,7 +179,7 @@ serve(async (req) => {
 
         const html = await pageRes.text();
         const pageText = stripHtml(html);
-
+        const ogImage = extractOgImage(html);
         if (pageText.length < 50) {
           throw new Error("Page content too short to analyse");
         }
