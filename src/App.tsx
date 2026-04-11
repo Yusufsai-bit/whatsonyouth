@@ -14,6 +14,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CategoryListingPage from "./pages/CategoryListingPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
+import AboutPage from "./pages/AboutPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminListings from "./pages/admin/AdminListings";
 import AdminAddListing from "./pages/admin/AdminAddListing";
@@ -48,7 +49,7 @@ const App = () => (
             <Route path="/programs" element={<CategoryListingPage category="Programs" />} />
             <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/about" element={<StubPage title="About What's On Youth" />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/listings" element={<AdminListings />} />
             <Route path="/admin/add" element={<AdminAddListing />} />
