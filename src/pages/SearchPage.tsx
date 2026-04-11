@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
+import { getListingImage } from '@/lib/listing-image';
 
 const ITEMS_PER_PAGE = 12;
 
