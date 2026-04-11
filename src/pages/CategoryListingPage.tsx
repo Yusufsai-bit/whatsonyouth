@@ -311,8 +311,10 @@ export default function CategoryListingPage({ category }: { category: string }) 
                     >
                       {/* Image area */}
                       <div className="w-full h-40 relative" style={{ backgroundColor: config.placeholderColor }}>
-                        {listing.image_url && (
+                        {listing.image_url ? (
                           <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <img src={getListingImage(null, listing.category)} alt={listing.title} className="w-full h-full object-cover" loading="lazy" />
                         )}
                         <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                           {listing.category}
