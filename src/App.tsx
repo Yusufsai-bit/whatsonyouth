@@ -9,10 +9,11 @@ import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import SubmitPage from "./pages/SubmitPage";
 import AccountPage from "./pages/AccountPage";
-import StubPage from "./pages/StubPage";
 import NotFound from "./pages/NotFound";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import CategoryListingPage from "./pages/CategoryListingPage";
+import ListingDetailPage from "./pages/ListingDetailPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminListings from "./pages/admin/AdminListings";
 import AdminAddListing from "./pages/admin/AdminAddListing";
@@ -22,6 +23,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminScanLog from "./pages/admin/AdminScanLog";
 import AdminScanner from "./pages/admin/AdminScanner";
+import StubPage from "./pages/StubPage";
 
 const queryClient = new QueryClient();
 
@@ -40,11 +42,12 @@ const App = () => (
             <Route path="/account" element={<AccountPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/events" element={<StubPage title="Events" />} />
-            <Route path="/jobs" element={<StubPage title="Jobs" />} />
-            <Route path="/grants" element={<StubPage title="Grants" />} />
-            <Route path="/programs" element={<StubPage title="Programs" />} />
-            <Route path="/wellbeing" element={<StubPage title="Wellbeing" />} />
+            <Route path="/events" element={<CategoryListingPage category="Events" />} />
+            <Route path="/jobs" element={<CategoryListingPage category="Jobs" />} />
+            <Route path="/grants" element={<CategoryListingPage category="Grants" />} />
+            <Route path="/programs" element={<CategoryListingPage category="Programs" />} />
+            <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
+            <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/about" element={<StubPage title="About What's On Youth" />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/listings" element={<AdminListings />} />

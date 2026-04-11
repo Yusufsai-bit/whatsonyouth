@@ -242,7 +242,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
               <h2 className="font-heading font-bold text-[20px] text-brand-text-primary mb-2">No listings found</h2>
               <p className="font-body text-[15px] text-brand-text-muted text-center max-w-md">
                 {hasFilters
-                  ? 'Try adjusting your search or filters to find what you're looking for.'
+                  ? 'Try adjusting your search or filters to find what you\u2019re looking for.'
                   : `No ${config.label.toLowerCase()} listings yet — check back soon or submit one yourself.`}
               </p>
               {!hasFilters && (
