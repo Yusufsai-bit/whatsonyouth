@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Calendar } from 'lucide-react';
+import { getListingImage } from '@/lib/listing-image';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
