@@ -141,7 +141,6 @@ serve(async (req) => {
     }
 
     const supabase = serviceClient;
-    );
 
     const isLive = mode === "live";
     const results: any[] = [];
