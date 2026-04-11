@@ -14,6 +14,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CategoryListingPage from "./pages/CategoryListingPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
+import AboutPage from "./pages/AboutPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminListings from "./pages/admin/AdminListings";
 import AdminAddListing from "./pages/admin/AdminAddListing";
