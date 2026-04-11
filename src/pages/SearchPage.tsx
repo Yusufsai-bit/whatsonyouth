@@ -181,7 +181,7 @@ export default function SearchPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`font-body font-medium text-[13px] rounded-full px-4 py-1.5 border transition-colors duration-100 ${
+                className={`font-body font-medium text-[13px] rounded-full px-3 py-1.5 md:px-4 border transition-colors duration-100 min-h-[44px] ${
                   selectedCategory === cat
                     ? 'bg-brand-violet border-brand-violet text-white'
                     : 'bg-transparent border-[#333333] text-brand-footer-link hover:border-brand-footer-link'

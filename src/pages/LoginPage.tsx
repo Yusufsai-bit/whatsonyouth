@@ -30,8 +30,8 @@ export default function LoginPage() {
     <>
       <SEO title="Log In \u2014 What's On Youth" description="Log in to your What's On Youth account." noindex />
       <Navbar />
-      <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
-        <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">
+      <div className="bg-white min-h-screen flex items-start justify-center px-4 md:px-6 py-16">
+        <div className="bg-white border border-brand-card-border rounded-xl p-6 md:p-10 w-full max-w-[480px]">
           <h1 className="font-heading font-bold text-[28px] text-[#0A0A0A]">Welcome back</h1>
           <p className="font-body text-base text-[#555555] mb-6">
             Log in to submit and manage your listings.
@@ -45,7 +45,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-[#DDDDDD] rounded-lg px-3.5 py-3 font-body text-[15px] text-[#0A0A0A] focus:outline-none focus:border-[#5847E0]"
+                className="w-full border border-[#DDDDDD] rounded-lg px-3.5 py-3 font-body text-[15px] text-[#0A0A0A] focus:outline-none focus:border-[#5847E0] min-h-[48px]"
               />
             </div>
             <div>
@@ -55,10 +55,10 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-[#DDDDDD] rounded-lg px-3.5 py-3 font-body text-[15px] text-[#0A0A0A] focus:outline-none focus:border-[#5847E0]"
+                className="w-full border border-[#DDDDDD] rounded-lg px-3.5 py-3 font-body text-[15px] text-[#0A0A0A] focus:outline-none focus:border-[#5847E0] min-h-[48px]"
               />
               <div className="text-right mt-1.5">
-                <Link to="/forgot-password" className="font-body text-[13px] text-[#5847E0] hover:underline">
+                <Link to="/forgot-password" className="font-body text-[13px] text-[#5847E0] hover:underline min-h-[44px] inline-flex items-center">
                   Forgot your password?
                 </Link>
               </div>
@@ -66,7 +66,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 mt-2 transition-colors duration-100 hover:bg-brand-coral-light disabled:opacity-50"
+              className="w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 mt-2 transition-colors duration-100 hover:bg-brand-coral-light disabled:opacity-50 min-h-[48px]"
             >
               {loading ? 'Logging in...' : 'Log in'}
             </button>

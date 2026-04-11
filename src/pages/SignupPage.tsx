@@ -31,8 +31,8 @@ export default function SignupPage() {
     <>
       <SEO title="Create a Free Account \u2014 What's On Youth" description="Create a free account to submit and manage listings on What's On Youth." noindex />
       <Navbar />
-      <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
-        <div className="bg-white border border-brand-card-border rounded-xl p-10 w-full max-w-[480px]">
+      <div className="bg-white min-h-screen flex items-start justify-center px-4 md:px-6 py-16">
+        <div className="bg-white border border-brand-card-border rounded-xl p-6 md:p-10 w-full max-w-[480px]">
           <h1 className="text-[28px] text-brand-text-primary">Create your free account</h1>
           <p className="font-body text-base text-brand-text-secondary mb-6">
             Submit listings and manage your opportunities.
@@ -46,7 +46,7 @@ export default function SignupPage() {
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[48px]"
               />
             </div>
             <div>
@@ -56,7 +56,7 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[48px]"
               />
             </div>
             <div>
@@ -66,13 +66,13 @@ export default function SignupPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet"
+                className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[48px]"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 mt-2 transition-colors duration-100 hover:bg-brand-coral-light disabled:opacity-50"
+              className="w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 mt-2 transition-colors duration-100 hover:bg-brand-coral-light disabled:opacity-50 min-h-[48px]"
             >
               {loading ? 'Creating account...' : 'Create free account'}
             </button>
