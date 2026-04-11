@@ -267,7 +267,7 @@ export default function SubmitPage() {
         noindex
       />
       <Navbar />
-      <div className="bg-white min-h-screen px-6 py-12 md:py-16">
+      <div className="bg-white min-h-screen px-4 md:px-6 py-12 md:py-16">
         <div className="max-w-7xl mx-auto flex gap-10">
           {/* Form column */}
           <div className="flex-1 max-w-[640px]">
@@ -357,7 +357,7 @@ export default function SubmitPage() {
                       onClick={() => fileInputRef.current?.click()}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleDrop}
-                      className={`bg-brand-section-alt border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-brand-violet transition-colors ${imageError ? 'border-[#E24B4A]' : 'border-brand-input-border'}`}
+                      className={`bg-brand-section-alt border-2 border-dashed rounded-xl p-5 md:p-8 text-center cursor-pointer hover:border-brand-violet transition-colors ${imageError ? 'border-[#E24B4A]' : 'border-brand-input-border'}`}
                     >
                       <Upload size={24} className="mx-auto text-brand-text-muted mb-2" />
                       <p className="font-body text-sm text-brand-text-muted">Click to upload or drag and drop</p>
