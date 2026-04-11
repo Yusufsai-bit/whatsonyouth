@@ -107,8 +107,13 @@ export default function ListingDetailPage() {
     return (
       <>
         <Navbar />
-        <div className="bg-white min-h-screen flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-brand-violet border-t-transparent rounded-full animate-spin" />
+        <div className="bg-white min-h-screen px-6 md:px-16 py-12 max-w-7xl mx-auto">
+          <div className="skeleton-shimmer rounded-xl w-full h-[300px] mb-6" />
+          <div className="skeleton-shimmer rounded h-8 w-[60%] mb-4" />
+          <div className="skeleton-shimmer rounded h-4 w-[30%] mb-6" />
+          <div className="skeleton-shimmer rounded h-4 w-full mb-2" />
+          <div className="skeleton-shimmer rounded h-4 w-full mb-2" />
+          <div className="skeleton-shimmer rounded h-4 w-[80%]" />
         </div>
         <Footer />
       </>

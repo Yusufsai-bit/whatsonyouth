@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import SkeletonCard from '@/components/SkeletonCard';
 
 const ITEMS_PER_PAGE = 12;
 
