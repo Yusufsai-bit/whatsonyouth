@@ -4,6 +4,7 @@ import { Search, MapPin, Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const ITEMS_PER_PAGE = 12;
 
