@@ -150,7 +150,6 @@ export default function SubmitPage() {
     }
 
     if (hasImageError) return;
-    }
 
     setErrors({});
     setSubmitting(true);
