@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
-
+import { getListingImage } from '@/lib/listing-image';
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
   Jobs: '#1A2A4A',
