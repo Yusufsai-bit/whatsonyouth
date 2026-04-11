@@ -73,8 +73,32 @@ export default function FeaturedOpportunities() {
     })();
   }, []);
 
+  // Loading state
+  if (!loaded) {
+    return (
+      <section className="bg-white px-6 py-12 md:px-16 md:py-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="skeleton-shimmer rounded h-8 w-[260px] mb-2" />
+          <div className="skeleton-shimmer rounded h-4 w-[320px] mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col">
+                <div className="w-full h-40 skeleton-shimmer" />
+                <div className="p-4 flex flex-col gap-2">
+                  <div className="skeleton-shimmer rounded h-3 w-[40%]" />
+                  <div className="skeleton-shimmer rounded h-4 w-[80%]" />
+                  <div className="skeleton-shimmer rounded h-3 w-[50%]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   // Show fallback placeholder cards if no listings loaded
-  if (loaded && listings.length === 0) {
+  if (listings.length === 0) {
     return (
       <section className="bg-white px-6 py-12 md:px-16 md:py-16">
         <div className="max-w-7xl mx-auto">
