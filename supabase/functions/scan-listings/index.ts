@@ -47,27 +47,25 @@ Rules:
 Page content:
 ${pageText}`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4000,
+      model: "google/gemini-2.5-flash",
       messages: [{ role: "user", content: prompt }],
     }),
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Claude API error ${res.status}: ${errText}`);
+    throw new Error(`AI Gateway error ${res.status}: ${errText}`);
   }
 
   const data = await res.json();
-  const text = data.content?.[0]?.text || "[]";
+  const text = data.choices?.[0]?.message?.content || "[]";
 
   // Extract JSON array from response
   const match = text.match(/\[[\s\S]*\]/);
@@ -76,7 +74,7 @@ ${pageText}`;
   try {
     return JSON.parse(match[0]);
   } catch {
-    console.error("Failed to parse Claude response:", text.slice(0, 500));
+    console.error("Failed to parse AI response:", text.slice(0, 500));
     return [];
   }
 }
@@ -132,9 +130,9 @@ serve(async (req) => {
       });
     }
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
-      return new Response(JSON.stringify({ success: false, error: "ANTHROPIC_API_KEY not configured" }), {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ success: false, error: "LOVABLE_API_KEY not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -170,8 +168,8 @@ serve(async (req) => {
           throw new Error("Page content too short to analyse");
         }
 
-        // Step 2: Extract listings via Claude
-        const listings = await extractListings(pageText, source, ANTHROPIC_API_KEY);
+        // Step 2: Extract listings via Lovable AI
+        const listings = await extractListings(pageText, source, LOVABLE_API_KEY);
         found = listings.length;
 
         // Step 3: Insert listings
