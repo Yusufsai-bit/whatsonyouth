@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/programs" element={<CategoryListingPage category="Programs" />} />
             <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/about" element={<StubPage title="About What's On Youth" />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/listings" element={<AdminListings />} />
             <Route path="/admin/add" element={<AdminAddListing />} />
