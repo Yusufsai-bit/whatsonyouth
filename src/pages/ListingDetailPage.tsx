@@ -194,7 +194,8 @@ export default function ListingDetailPage() {
               {listing.image_url ? (
                 <img src={listing.image_url} alt={listing.title} className="w-full max-h-[360px] object-cover" />
               ) : (
-                <div className="w-full h-[200px]" />
+                <img src={getListingImage(null, listing.category)} alt={listing.title} className="w-full max-h-[360px] object-cover" loading="lazy" />
+              )}
               )}
             </div>
 
