@@ -17,6 +17,7 @@ import CategoryListingPage from "./pages/CategoryListingPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import AboutPage from "./pages/AboutPage";
 import SearchPage from "./pages/SearchPage";
+import EditListingPage from "./pages/EditListingPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminListings from "./pages/admin/AdminListings";
 import AdminAddListing from "./pages/admin/AdminAddListing";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/programs" element={<CategoryListingPage category="Programs" />} />
             <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
+            <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
