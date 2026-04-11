@@ -104,18 +104,20 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await anonClient.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = claimsData.claims.sub;
-    // Check admin status
-    const { data: adminData } = await anonClient.from("admins").select("id").eq("user_id", userId).maybeSingle();
+    // Check admin status using service role to bypass RLS
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: adminData } = await serviceClient.from("admins").select("id").eq("user_id", user.id).maybeSingle();
     if (!adminData) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised — admin only" }), {
         status: 403,
