@@ -144,6 +144,12 @@ export default function SearchPage() {
 
   return (
     <>
+      <SEO
+        title="Search Opportunities \u2014 What's On Youth"
+        description="Search across events, jobs, grants, programs, and wellbeing support for young Victorians."
+        ogUrl="https://www.whatsonyouth.org.au/search"
+        canonical="https://www.whatsonyouth.org.au/search"
+      />
       <Navbar />
 
       {/* Search hero */}
