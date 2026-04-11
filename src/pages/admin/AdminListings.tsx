@@ -209,6 +209,7 @@ export default function AdminListings() {
         )}
 
 
+        {selected.size > 0 && (
           <div className="bg-[#0A0A0A] text-white rounded-xl px-5 py-3 mb-4 flex items-center gap-4 flex-wrap">
             <span className="font-body text-sm">{selected.size} selected</span>
             <button onClick={() => bulkAction('activate')} className="font-body text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">Activate</button>
