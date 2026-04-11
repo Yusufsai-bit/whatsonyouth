@@ -68,6 +68,29 @@ export default function AdminListings() {
     });
   }, [listings, search, categoryFilter, statusFilter, sourceFilter, expiryFilter]);
 
+  const pendingDrafts = useMemo(() => 
+    listings.filter(l => !l.is_active && l.source === 'ai_scan'), 
+    [listings]
+  );
+
+  const showDrafts = () => {
+    setStatusFilter('inactive');
+    setSourceFilter('ai_scan');
+    setCategoryFilter('');
+    setSearch('');
+    setExpiryFilter('');
+    setPage(1);
+  };
+
+  const activateAllDrafts = async () => {
+    const ids = pendingDrafts.map(l => l.id);
+    for (const id of ids) {
+      await supabase.from('listings').update({ is_active: true }).eq('id', id);
+    }
+    toast.success(`${ids.length} draft listings published`);
+    fetchListings();
+  };
+
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
