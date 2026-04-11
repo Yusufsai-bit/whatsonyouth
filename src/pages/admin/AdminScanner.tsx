@@ -137,12 +137,10 @@ export default function AdminScanner() {
     setSummary(null);
 
     try {
-      // Get scan key from platform_settings
-      const { data: settingsData } = await supabase.from('platform_settings').select('value').eq('key', 'scan_api_key').single();
-      
-      const scanKey = settingsData?.value;
-      if (!scanKey) {
-        toast.error('Scan API key not configured in platform settings');
+      // Get the user's auth token for admin verification
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast.error('Not authenticated — please log in again');
         setScanning(false);
         return;
       }
@@ -153,12 +151,11 @@ export default function AdminScanner() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           sources: activeSources.map(s => ({ name: s.name, url: s.url, category: s.category })),
           mode,
-          scan_key: scanKey,
         }),
       });
 
