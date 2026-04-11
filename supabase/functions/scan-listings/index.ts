@@ -16,6 +16,20 @@ function stripHtml(html: string): string {
   return text.slice(0, 12000);
 }
 
+function extractOgImage(html: string): string | null {
+  // Try og:image first
+  const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+  if (ogMatch?.[1]) return ogMatch[1];
+
+  // Try twitter:image
+  const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+  if (twMatch?.[1]) return twMatch[1];
+
+  return null;
+}
+
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
@@ -165,7 +179,7 @@ serve(async (req) => {
 
         const html = await pageRes.text();
         const pageText = stripHtml(html);
-
+        const ogImage = extractOgImage(html);
         if (pageText.length < 50) {
           throw new Error("Page content too short to analyse");
         }
@@ -196,6 +210,24 @@ serve(async (req) => {
               continue;
             }
 
+            // Try to get OG image from the listing's own page
+            let listingImage = ogImage; // fallback to source page OG image
+            if (listing.link !== source.url) {
+              try {
+                const listingRes = await fetch(listing.link, {
+                  headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
+                  signal: AbortSignal.timeout(8000),
+                });
+                if (listingRes.ok) {
+                  const listingHtml = await listingRes.text();
+                  const listingOg = extractOgImage(listingHtml);
+                  if (listingOg) listingImage = listingOg;
+                }
+              } catch {
+                // Ignore — use source OG or null
+              }
+            }
+
             const { error: insertErr } = await supabase.from("listings").insert({
               title: (listing.title || "").slice(0, 200),
               category: listing.category,
@@ -205,6 +237,7 @@ serve(async (req) => {
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               expiry_date: listing.expiry_date || null,
+              image_url: listingImage || null,
               is_active: isLive,
               is_featured: false,
               source: "ai_scan",

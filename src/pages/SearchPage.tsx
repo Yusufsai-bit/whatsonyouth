@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
+import { getListingImage } from '@/lib/listing-image';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -256,8 +257,10 @@ export default function SearchPage() {
                       className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 cursor-pointer"
                     >
                       <div className="w-full h-40 relative" style={{ backgroundColor: color }}>
-                        {listing.image_url && (
+                        {listing.image_url ? (
                           <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <img src={getListingImage(null, listing.category)} alt={listing.title} className="w-full h-full object-cover" loading="lazy" />
                         )}
                         <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                           {listing.category}

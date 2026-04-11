@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
-
+import { getListingImage } from '@/lib/listing-image';
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
   Jobs: '#1A2A4A',
@@ -194,7 +194,7 @@ export default function ListingDetailPage() {
               {listing.image_url ? (
                 <img src={listing.image_url} alt={listing.title} className="w-full max-h-[360px] object-cover" />
               ) : (
-                <div className="w-full h-[200px]" />
+                <img src={getListingImage(null, listing.category)} alt={listing.title} className="w-full max-h-[360px] object-cover" loading="lazy" />
               )}
             </div>
 
