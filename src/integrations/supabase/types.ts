@@ -153,6 +153,9 @@ export type Database = {
         Row: {
           error_message: string | null
           id: string
+          images_from_unsplash: number | null
+          images_pending: number | null
+          images_resolved: number | null
           listings_created: number
           listings_found: number
           listings_skipped: number
@@ -163,6 +166,9 @@ export type Database = {
         Insert: {
           error_message?: string | null
           id?: string
+          images_from_unsplash?: number | null
+          images_pending?: number | null
+          images_resolved?: number | null
           listings_created?: number
           listings_found?: number
           listings_skipped?: number
@@ -173,6 +179,9 @@ export type Database = {
         Update: {
           error_message?: string | null
           id?: string
+          images_from_unsplash?: number | null
+          images_pending?: number | null
+          images_resolved?: number | null
           listings_created?: number
           listings_found?: number
           listings_skipped?: number
