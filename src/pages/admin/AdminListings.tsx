@@ -245,7 +245,31 @@ export default function AdminListings() {
         )}
 
 
-        {selected.size > 0 && (
+        {/* Batch image resolve */}
+        <div className="bg-white border border-[#EBEBEB] rounded-xl px-5 py-4 mb-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <ImageIcon size={20} className="text-[#5847E0] shrink-0" />
+            <div>
+              <p className="font-heading font-bold text-[15px] text-[#0A0A0A]">Resolve missing images</p>
+              <p className="font-body text-[13px] text-[#555555]">
+                Find and fix listings without images using og:image and Unsplash.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={resolveImages}
+            disabled={resolving}
+            className="font-heading font-bold text-[13px] bg-[#5847E0] text-white px-4 py-2 rounded-lg hover:bg-[#4838C0] disabled:opacity-60"
+          >
+            {resolving ? `Resolving ${resolveProgress.current} of ${resolveProgress.total}...` : 'Resolve missing images'}
+          </button>
+        </div>
+        {resolving && (
+          <div className="mb-4">
+            <Progress value={resolveProgress.total > 0 ? (resolveProgress.current / resolveProgress.total) * 100 : 0} className="h-2 bg-[#F0EEFF] [&>div]:bg-[#5847E0]" />
+          </div>
+        )}
+
           <div className="bg-[#0A0A0A] text-white rounded-xl px-5 py-3 mb-4 flex items-center gap-4 flex-wrap">
             <span className="font-body text-sm">{selected.size} selected</span>
             <button onClick={() => bulkAction('activate')} className="font-body text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">Activate</button>
