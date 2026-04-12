@@ -47,10 +47,13 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-brand-footer-divider mt-8 pt-5">
-        <p className="font-body text-[13px] text-brand-footer-text text-center">
+      <div className="max-w-7xl mx-auto border-t border-brand-footer-divider mt-8 pt-5 flex flex-col sm:flex-row items-center justify-center gap-2">
+        <p className="font-body text-[13px] text-brand-footer-text">
           © 2025 What's On Youth. Built for young Victorians.
         </p>
+        <span className="font-body text-[12px]" style={{ color: '#555555' }}>
+          Photos from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: '#555555' }}>Unsplash</a>
+        </span>
       </div>
     </footer>
   );
