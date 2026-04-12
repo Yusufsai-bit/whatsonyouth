@@ -76,7 +76,7 @@ export default function Navbar() {
             to="/account"
             className="font-body font-medium text-sm text-brand-nav-link hover:text-white transition-colors duration-100"
           >
-            {user.user_metadata?.first_name || 'Account'}
+            Account
           </Link>
         ) : !loading ? (
           <Link
