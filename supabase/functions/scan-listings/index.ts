@@ -165,6 +165,7 @@ serve(async (req) => {
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       let found = 0, created = 0, skipped = 0;
+      let imagesResolved = 0, imagesUnsplash = 0, imagesPending = 0;
       let status = "success";
       let errorMessage: string | null = null;
 
