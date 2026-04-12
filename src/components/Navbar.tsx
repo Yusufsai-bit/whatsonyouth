@@ -35,13 +35,13 @@ export default function Navbar() {
   const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
 
   return (
-    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 justify-between relative z-50 border-b border-brand-nav-border">
-      <Link to="/">
+    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 z-50 border-b border-brand-nav-border">
+      <Link to="/" className="shrink-0">
         <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
 
       {/* Desktop category links */}
-      <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+      <div className="hidden md:flex flex-1 items-center justify-center gap-8">
         {categoryLinks.map(link => (
           <Link
             key={link.href}
