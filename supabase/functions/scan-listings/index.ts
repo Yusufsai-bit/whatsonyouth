@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resolveImage } from "../resolve-listing-image/index.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -159,6 +160,7 @@ serve(async (req) => {
     const isLive = mode === "live";
     const results: any[] = [];
     let totalFound = 0, totalCreated = 0, totalSkipped = 0, totalErrors = 0;
+    let totalImagesResolved = 0, totalImagesUnsplash = 0, totalImagesPending = 0;
 
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
@@ -228,25 +230,8 @@ serve(async (req) => {
               continue;
             }
 
-            // Try to get OG image from the listing's own page
-            let listingImage = ogImage; // fallback to source page OG image
-            if (listing.link !== source.url) {
-              try {
-                const listingRes = await fetch(listing.link, {
-                  headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-                  signal: AbortSignal.timeout(8000),
-                });
-                if (listingRes.ok) {
-                  const listingHtml = await listingRes.text();
-                  const listingOg = extractOgImage(listingHtml);
-                  if (listingOg) listingImage = listingOg;
-                }
-              } catch {
-                // Ignore — use source OG or null
-              }
-            }
-
-            const { error: insertErr } = await supabase.from("listings").insert({
+            // Insert listing first (no image yet)
+            const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
               title: (listing.title || "").slice(0, 200),
               category: listing.category,
               organisation: (listing.organisation || source.name).slice(0, 200),
@@ -255,18 +240,37 @@ serve(async (req) => {
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               expiry_date: listing.expiry_date || null,
-              image_url: listingImage || null,
+              image_url: ogImage || null,
               is_active: isLive,
               is_featured: false,
               source: "admin",
               user_id: adminUserId,
-            });
+            }).select("id").maybeSingle();
 
             if (insertErr) {
               console.error("Insert error:", insertErr);
               skipped++;
             } else {
               created++;
+
+              // Resolve image for newly inserted listing
+              if (inserted?.id) {
+                try {
+                  const imgResult = await resolveImage(
+                    inserted.id,
+                    listing.link,
+                    listing.title || "",
+                    listing.category,
+                    supabase
+                  );
+                  if (imgResult.source === "og") imagesResolved++;
+                  else if (imgResult.source === "unsplash") imagesUnsplash++;
+                  else if (!imgResult.url) imagesPending++;
+                } catch (imgErr) {
+                  console.error("Image resolve error:", imgErr);
+                  imagesPending++;
+                }
+              }
             }
           } catch (e) {
             console.error("Listing insert error:", e);
@@ -286,6 +290,9 @@ serve(async (req) => {
         listings_found: found,
         listings_created: created,
         listings_skipped: skipped,
+        images_resolved: imagesResolved,
+        images_from_unsplash: imagesUnsplash,
+        images_pending: imagesPending,
         status,
         error_message: errorMessage,
       });
@@ -293,6 +300,9 @@ serve(async (req) => {
       totalFound += found;
       totalCreated += created;
       totalSkipped += skipped;
+      totalImagesResolved += imagesResolved;
+      totalImagesUnsplash += imagesUnsplash;
+      totalImagesPending += imagesPending;
 
       results.push({
         source: source.name,
@@ -319,6 +329,9 @@ serve(async (req) => {
           listings_created: totalCreated,
           listings_skipped: totalSkipped,
           errors: totalErrors,
+          images_resolved: totalImagesResolved,
+          images_from_unsplash: totalImagesUnsplash,
+          images_pending: totalImagesPending,
         },
         results,
       }),
