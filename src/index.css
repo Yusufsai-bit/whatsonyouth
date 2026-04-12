@@ -10,9 +10,11 @@
 }
 
 .skeleton-shimmer {
+  display: block;
   background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+  min-height: 16px;
 }
 
 @layer base {
