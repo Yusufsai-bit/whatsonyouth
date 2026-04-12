@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { StatusBadge, SourceBadge } from '@/pages/admin/AdminDashboard';
-import { Pencil, Trash2, Star, AlertCircle } from 'lucide-react';
+import { Pencil, Trash2, Star, AlertCircle, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
 
 interface Listing {
   id: string;
@@ -34,7 +35,8 @@ export default function AdminListings() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
+  const [resolving, setResolving] = useState(false);
+  const [resolveProgress, setResolveProgress] = useState({ current: 0, total: 0, ogCount: 0, unsplashCount: 0, pendingCount: 0 });
   const fetchListings = async () => {
     let query = supabase
       .from('listings')
@@ -143,6 +145,40 @@ export default function AdminListings() {
   };
 
   const clearFilters = () => { setSearch(''); setCategoryFilter(''); setStatusFilter(''); setSourceFilter(''); setExpiryFilter(''); setPage(1); };
+
+  const resolveImages = async () => {
+    const { data: missing } = await supabase
+      .from('listings')
+      .select('id, title, category, link')
+      .or('image_url.is.null,image_url.eq.')
+      .eq('is_active', true);
+    if (!missing || missing.length === 0) {
+      toast.info('All listings already have images');
+      return;
+    }
+    if (!confirm(`${missing.length} listings need images. Resolve now?`)) return;
+    setResolving(true);
+    setResolveProgress({ current: 0, total: missing.length, ogCount: 0, unsplashCount: 0, pendingCount: 0 });
+    let og = 0, unsplash = 0, pending = 0;
+    for (let i = 0; i < missing.length; i++) {
+      const l = missing[i];
+      try {
+        const { data } = await supabase.functions.invoke('resolve-listing-image', {
+          body: { listing_id: l.id, listing_url: l.link, listing_title: l.title, category: l.category },
+        });
+        if (data?.source === 'og') og++;
+        else if (data?.source === 'unsplash') unsplash++;
+        else pending++;
+      } catch {
+        pending++;
+      }
+      setResolveProgress({ current: i + 1, total: missing.length, ogCount: og, unsplashCount: unsplash, pendingCount: pending });
+      if (i < missing.length - 1) await new Promise(r => setTimeout(r, 600));
+    }
+    setResolving(false);
+    toast.success(`Done — ${og + unsplash} images resolved, ${og} from og:image, ${unsplash} from Unsplash, ${pending} still pending`);
+    fetchListings();
+  };
 
   const inputClass = "border border-[#DDDDDD] rounded-lg px-3.5 py-2.5 font-body text-sm text-[#0A0A0A] focus:outline-none focus:border-[#5847E0] bg-white";
 
