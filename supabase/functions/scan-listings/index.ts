@@ -198,6 +198,24 @@ serve(async (req) => {
               listing.category = source.category;
             }
 
+            // Validate listing link returns a valid page
+            try {
+              const linkCheck = await fetch(listing.link, {
+                method: "HEAD",
+                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
+                signal: AbortSignal.timeout(8000),
+              });
+              if (!linkCheck.ok) {
+                console.warn(`Skipping broken link (${linkCheck.status}): ${listing.link}`);
+                skipped++;
+                continue;
+              }
+            } catch {
+              console.warn(`Skipping unreachable link: ${listing.link}`);
+              skipped++;
+              continue;
+            }
+
             // Duplicate check
             const { data: existing } = await supabase
               .from("listings")
@@ -240,7 +258,7 @@ serve(async (req) => {
               image_url: listingImage || null,
               is_active: isLive,
               is_featured: false,
-              source: "ai_scan",
+              source: "admin",
               user_id: adminUserId,
             });
 

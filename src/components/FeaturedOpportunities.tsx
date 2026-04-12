@@ -186,9 +186,9 @@ export default function FeaturedOpportunities() {
                         Community
                       </span>
                     )}
-                    {listing.source === 'ai_scan' && (
+                    {listing.source === 'admin' && (
                       <span className="bg-[#E6F1FB] text-[#0C447C] font-body text-[10px] rounded-full px-2 py-0.5">
-                        AI curated
+                        Admin
                       </span>
                     )}
                     <span className="font-body font-medium text-[13px] text-brand-violet ml-auto">

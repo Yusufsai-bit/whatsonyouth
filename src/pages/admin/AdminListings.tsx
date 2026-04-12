@@ -69,13 +69,13 @@ export default function AdminListings() {
   }, [listings, search, categoryFilter, statusFilter, sourceFilter, expiryFilter]);
 
   const pendingDrafts = useMemo(() => 
-    listings.filter(l => !l.is_active && l.source === 'ai_scan'), 
+    listings.filter(l => !l.is_active && l.source === 'admin'), 
     [listings]
   );
 
   const showDrafts = () => {
     setStatusFilter('inactive');
-    setSourceFilter('ai_scan');
+    setSourceFilter('admin');
     setCategoryFilter('');
     setSearch('');
     setExpiryFilter('');
@@ -167,7 +167,7 @@ export default function AdminListings() {
             <option value="">All sources</option>
             <option value="user">User submitted</option>
             <option value="admin">Admin added</option>
-            <option value="ai_scan">AI scan</option>
+            <option value="admin">Admin / Scanner</option>
           </select>
           <select value={expiryFilter} onChange={e => { setExpiryFilter(e.target.value); setPage(1); }} className={inputClass}>
             <option value="">All expiry</option>

@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
       expiry_date: body.expiry_date || null,
       is_active: body.is_active !== undefined ? Boolean(body.is_active) : true,
       is_featured: false,
-      source: body.source || "ai_scan",
+      source: body.source || "admin",
       user_id: "00000000-0000-0000-0000-000000000000", // system placeholder for AI listings
     };
 
