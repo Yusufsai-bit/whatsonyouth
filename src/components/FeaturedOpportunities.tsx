@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Calendar } from 'lucide-react';
-import { getListingImage } from '@/lib/listing-image';
+import ListingCardImage from '@/components/ListingCardImage';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
@@ -19,6 +19,7 @@ interface Listing {
   location: string;
   category: string;
   image_url: string | null;
+  link: string;
   source: string;
   created_at: string;
   is_featured: boolean;
@@ -48,7 +49,7 @@ export default function FeaturedOpportunities() {
       // Fetch featured first
       const { data: featured } = await supabase
         .from('listings')
-        .select('id, title, organisation, location, category, image_url, source, created_at, is_featured')
+        .select('id, title, organisation, location, category, image_url, link, source, created_at, is_featured')
         .eq('is_featured', true)
         .eq('is_active', true)
         .order('featured_order', { ascending: true })
@@ -61,7 +62,7 @@ export default function FeaturedOpportunities() {
         const existingIds = results.map(r => r.id);
         const { data: recent } = await supabase
           .from('listings')
-          .select('id, title, organisation, location, category, image_url, source, created_at, is_featured')
+          .select('id, title, organisation, location, category, image_url, link, source, created_at, is_featured')
           .eq('is_active', true)
           .not('id', 'in', `(${existingIds.length ? existingIds.join(',') : '00000000-0000-0000-0000-000000000000'})`)
           .order('created_at', { ascending: false })
@@ -149,12 +150,15 @@ export default function FeaturedOpportunities() {
                 onClick={() => navigate(`/listings/${listing.id}`)}
                 className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="w-full h-40 relative" style={{ backgroundColor: color }}>
-                  {listing.image_url ? (
-                    <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={getListingImage(null, listing.category)} alt={listing.title} className="w-full h-full object-cover" loading="lazy" />
-                  )}
+                <div className="w-full h-40 relative">
+                  <ListingCardImage
+                    listingId={listing.id}
+                    imageUrl={listing.image_url}
+                    title={listing.title}
+                    category={listing.category}
+                    link={listing.link}
+                    className="w-full h-40"
+                  />
                   <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                     {listing.category}
                   </span>
