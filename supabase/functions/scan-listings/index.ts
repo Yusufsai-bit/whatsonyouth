@@ -240,7 +240,7 @@ serve(async (req) => {
               image_url: listingImage || null,
               is_active: isLive,
               is_featured: false,
-              source: "ai_scan",
+              source: "admin",
               user_id: adminUserId,
             });
 
