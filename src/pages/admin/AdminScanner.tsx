@@ -59,7 +59,7 @@ export default function AdminScanner() {
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
   const [logLines, setLogLines] = useState<string[]>([]);
-  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number } | null>(null);
+  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number; images_resolved: number; images_from_unsplash: number; images_pending: number } | null>(null);
 
   // Add source form
   const [newUrl, setNewUrl] = useState('');
@@ -185,6 +185,9 @@ export default function AdminScanner() {
         found: data.summary.listings_found,
         created: data.summary.listings_created,
         skipped: data.summary.listings_skipped,
+        images_resolved: data.summary.images_resolved || 0,
+        images_from_unsplash: data.summary.images_from_unsplash || 0,
+        images_pending: data.summary.images_pending || 0,
       });
       setProgress(activeSources.length);
       fetchRecentLogs();
@@ -254,12 +257,15 @@ export default function AdminScanner() {
               />
 
               {summary && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 lg:grid-cols-7 gap-3">
                   {[
                     { label: 'Sources', value: summary.scanned },
                     { label: 'Found', value: summary.found },
                     { label: 'Created', value: summary.created },
                     { label: 'Skipped', value: summary.skipped },
+                    { label: 'OG Images', value: summary.images_resolved },
+                    { label: 'Unsplash', value: summary.images_from_unsplash },
+                    { label: 'Pending', value: summary.images_pending },
                   ].map(s => (
                     <div key={s.label} className="bg-[#F7F7F7] rounded-lg p-3 text-center">
                       <div className="font-heading font-bold text-xl text-[#0A0A0A]">{s.value}</div>
