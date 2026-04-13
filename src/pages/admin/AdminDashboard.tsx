@@ -44,6 +44,25 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ total: 0, active: 0, featured: 0, thisWeek: 0 });
   const [recent, setRecent] = useState<RecentListing[]>([]);
   const [categories, setCategories] = useState<CategoryCount[]>([]);
+  const [lastScan, setLastScan] = useState<LastScan | null>(null);
+
+  function getNextScanDate(): string {
+    const now = new Date();
+    const days = [1, 4]; // Monday & Thursday UTC = Tuesday & Friday AEST
+    const candidates: Date[] = [];
+    for (let offset = 0; offset <= 7; offset++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() + offset);
+      d.setUTCHours(21, 0, 0, 0); // 9pm UTC = 7am AEST
+      if (days.includes(d.getUTCDay()) && d > now) {
+        candidates.push(d);
+      }
+    }
+    if (candidates.length === 0) return 'Unknown';
+    const next = candidates[0];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return `${dayNames[next.getDay()]} ${next.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} 7:00 AM AEST`;
+  }
 
   const fetchData = async () => {
     const { data: all } = await supabase.from('listings').select('id, is_active, is_featured, created_at, category');
@@ -58,7 +77,6 @@ export default function AdminDashboard() {
         thisWeek: weekCount,
       });
 
-      // Category breakdown (active only)
       const catMap: Record<string, number> = {};
       all.filter(l => l.is_active).forEach(l => {
         catMap[l.category] = (catMap[l.category] || 0) + 1;
@@ -75,6 +93,14 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
       .limit(8);
     if (recentData) setRecent(recentData);
+
+    // Fetch last auto-scan
+    const { data: scanData } = await supabase
+      .from('scan_log')
+      .select('scanned_at, listings_created, status')
+      .order('scanned_at', { ascending: false })
+      .limit(1);
+    if (scanData && scanData.length > 0) setLastScan(scanData[0]);
   };
 
   useEffect(() => { fetchData(); }, []);
