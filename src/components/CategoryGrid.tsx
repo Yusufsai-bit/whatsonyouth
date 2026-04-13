@@ -28,6 +28,14 @@ export default function CategoryGrid() {
       });
   }, []);
 
+  const categoryColors: Record<string, string> = {
+    Events:    '#2D1B69',
+    Jobs:      '#1A2A4A',
+    Grants:    '#1A3A2A',
+    Programs:  '#0A2A3A',
+    Wellbeing: '#2A1A3A',
+  };
+
   return (
     <section className="bg-brand-section-alt px-6 py-12 md:px-16 md:py-16">
       <div className="max-w-7xl mx-auto">
@@ -43,7 +51,7 @@ export default function CategoryGrid() {
                 to={cat.href}
                 className="bg-white border border-brand-card-border rounded-xl p-5 pt-5 pb-5 transition-all duration-150 hover:border-brand-violet hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 group"
               >
-                <div className="w-10 h-10 bg-brand-violet rounded-lg mb-2.5" />
+                <div className="w-10 h-10 rounded-lg mb-2.5" style={{ backgroundColor: categoryColors[cat.name] || '#5847E0' }} />
                 <p className="font-heading font-bold text-[15px] text-brand-text-primary">{cat.name}</p>
                 <p className="font-body text-[13px] text-brand-text-muted mt-1">{cat.desc}</p>
                 <p className="font-body text-xs mt-1.5" style={{ color: count ? '#888888' : '#AAAAAA' }}>
