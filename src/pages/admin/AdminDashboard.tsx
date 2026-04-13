@@ -11,6 +11,12 @@ interface Stats {
   thisWeek: number;
 }
 
+interface LastScan {
+  scanned_at: string;
+  listings_created: number;
+  status: string;
+}
+
 interface RecentListing {
   id: string;
   title: string;
