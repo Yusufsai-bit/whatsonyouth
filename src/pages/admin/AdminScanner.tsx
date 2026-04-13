@@ -65,6 +65,7 @@ export default function AdminScanner() {
   const [newUrl, setNewUrl] = useState('');
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [validating, setValidating] = useState(false);
 
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -107,20 +108,57 @@ export default function AdminScanner() {
       toast.error('Fill in all fields');
       return;
     }
+
+    try {
+      new URL(newUrl);
+    } catch {
+      toast.error('Please enter a valid URL starting with https://');
+      return;
+    }
+
+    if (!newUrl.startsWith('https://')) {
+      toast.error('URL must start with https://');
+      return;
+    }
+
+    setValidating(true);
+    toast.info('Checking URL...');
+
+    try {
+      const { data: valData, error: valError } = await supabase.functions.invoke(
+        'validate-source-url',
+        { body: { url: newUrl } }
+      );
+
+      if (valError || !valData?.reachable) {
+        setValidating(false);
+        toast.error(
+          `URL check failed: ${valData?.reason || 'This URL appears to be unreachable or blocked. Please verify it loads in your browser.'}`
+        );
+        return;
+      }
+    } catch {
+      setValidating(false);
+      toast.error('Could not validate URL. Please check it loads in your browser.');
+      return;
+    }
+
+    setValidating(false);
+
     const { data, error } = await supabase.from('scan_sources').insert({
       url: newUrl,
       name: newName,
       category: newCategory,
     } as any).select();
     if (error) {
-      toast.error(error.message.includes('duplicate') ? 'URL already exists' : error.message);
+      toast.error(error.message.includes('duplicate') ? 'This URL is already a source' : error.message);
       return;
     }
     if (data) setSources(prev => [...prev, data[0] as unknown as ScanSource]);
     setNewUrl('');
     setNewName('');
     setNewCategory('');
-    toast.success('Source added');
+    toast.success('Source added and verified ✓');
   };
 
   const runScan = async () => {
@@ -329,9 +367,10 @@ export default function AdminScanner() {
             </Select>
             <button
               onClick={addSource}
-              className="px-4 py-2 rounded-lg bg-[#5847E0] text-white font-body text-sm font-medium hover:bg-[#4838C0] transition-colors flex items-center gap-1.5"
+              disabled={validating}
+              className="px-4 py-2 rounded-lg bg-[#5847E0] text-white font-body text-sm font-medium hover:bg-[#4838C0] transition-colors flex items-center gap-1.5 disabled:opacity-60"
             >
-              <Plus size={14} /> Add
+              {validating ? 'Checking URL...' : <><Plus size={14} /> Add</>}
             </button>
           </div>
 
