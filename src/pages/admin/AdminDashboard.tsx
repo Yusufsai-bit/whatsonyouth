@@ -130,6 +130,27 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        {/* Last auto-scan card */}
+        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5 mb-8">
+          <p className="font-body text-[13px] text-[#888888]">Last auto-scan</p>
+          {lastScan ? (
+            <>
+              <p className="font-heading font-bold text-lg text-[#0A0A0A] mt-1">
+                {new Date(lastScan.scanned_at).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="font-body text-sm text-[#0A0A0A] mt-1">
+                {lastScan.listings_created} listing{lastScan.listings_created !== 1 ? 's' : ''} created
+                <span className={`ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full ${lastScan.status === 'success' ? 'bg-[#E1F5EE] text-[#085041]' : 'bg-[#FFF3D0] text-[#633806]'}`}>
+                  {lastScan.status}
+                </span>
+              </p>
+            </>
+          ) : (
+            <p className="font-body text-sm text-[#888888] mt-1">No scans yet</p>
+          )}
+          <p className="font-body text-xs text-[#888888] mt-2">Next scan: {getNextScanDate()}</p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent listings */}
           <div className="bg-white border border-[#EBEBEB] rounded-xl">
