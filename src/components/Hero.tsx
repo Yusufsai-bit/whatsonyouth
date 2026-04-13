@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const heroCards = [
-  { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80' },
+  { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&q=80' },
   { label: 'Jobs', bg: '#1A2A4A', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&q=80' },
   { label: 'Grants', bg: '#1A3A2A', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80' },
   { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=80' },
