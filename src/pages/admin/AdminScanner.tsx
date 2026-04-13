@@ -65,6 +65,7 @@ export default function AdminScanner() {
   const [newUrl, setNewUrl] = useState('');
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [validating, setValidating] = useState(false);
 
   const logRef = useRef<HTMLDivElement>(null);
 
