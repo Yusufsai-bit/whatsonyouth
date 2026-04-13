@@ -35,7 +35,7 @@ export default function Navbar() {
   const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
 
   return (
-    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 sticky top-0 z-50 border-b border-brand-nav-border">
+    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 fixed top-0 left-0 right-0 z-40 border-b border-brand-nav-border">
       <Link to="/" className="shrink-0">
         <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
@@ -105,7 +105,7 @@ export default function Navbar() {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 bg-brand-dark z-50 flex flex-col px-6 pt-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-brand-dark z-40 flex flex-col px-6 pt-4 overflow-y-auto">
           <div className="flex justify-end">
             <button
               onClick={() => setOpen(false)}
