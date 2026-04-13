@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 
 const heroCards = [
-  { label: 'Events', bg: '#2D1B69' },
-  { label: 'Jobs', bg: '#1A3A2A' },
-  { label: 'Grants', bg: '#3D1515' },
-  { label: 'Programs', bg: '#0A2A3D' },
+  { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80' },
+  { label: 'Jobs', bg: '#1A2A4A', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&q=80' },
+  { label: 'Grants', bg: '#1A3A2A', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80' },
+  { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=80' },
 ];
 
 export default function Hero() {
@@ -46,6 +46,13 @@ export default function Hero() {
                 className="rounded-xl relative overflow-hidden"
                 style={{ backgroundColor: card.bg }}
               >
+                <img
+                  src={card.image}
+                  alt={card.label}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-black/20" />
                 <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
                   {card.label}
                 </span>
@@ -63,6 +70,13 @@ export default function Hero() {
                 className="rounded-xl relative overflow-hidden h-[140px]"
                 style={{ backgroundColor: card.bg }}
               >
+                <img
+                  src={card.image}
+                  alt={card.label}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-black/20" />
                 <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
                   {card.label}
                 </span>
