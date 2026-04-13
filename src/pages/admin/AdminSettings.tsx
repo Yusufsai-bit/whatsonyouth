@@ -18,9 +18,17 @@ function timeAgoShort(dateStr: string) {
   return `${days} day${days > 1 ? 's' : ''} ago`;
 }
 
+interface RecentScan {
+  scanned_at: string;
+  listings_created: number;
+  listings_found: number;
+  status: string;
+}
+
 export default function AdminSettings() {
   const [settings, setSettings] = useState<Record<string, { value: string; updated_at: string }>>({});
   const [loading, setLoading] = useState(true);
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
 
   const fetchSettings = async () => {
     const { data } = await supabase.from('platform_settings').select('key, value, updated_at');
