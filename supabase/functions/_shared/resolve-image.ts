@@ -16,20 +16,50 @@ function extractOgImage(html: string): string | null {
   return null;
 }
 
+const CATEGORY_QUERY_VARIANTS: Record<string, string[]> = {
+  Events: [
+    'young people festival victoria australia',
+    'community event outdoor gathering australia',
+    'youth concert performance arts melbourne',
+    'students workshop activity learning group',
+    'celebration festival crowd young adults',
+  ],
+  Jobs: [
+    'young professional office workplace australia',
+    'graduate career business meeting team',
+    'apprentice tradie working tools australia',
+    'retail customer service young worker',
+    'internship desk computer modern office',
+  ],
+  Grants: [
+    'community funding opportunity grant success',
+    'young entrepreneur startup idea planning',
+    'creative arts funding studio workshop',
+    'nonprofit community project collaboration',
+    'innovation ideas whiteboard brainstorm',
+  ],
+  Programs: [
+    'youth leadership program outdoors team',
+    'students learning workshop skill development',
+    'community volunteers helping together',
+    'sport recreation youth active outdoors',
+    'mentorship coaching young people growth',
+  ],
+  Wellbeing: [
+    'mental health calm nature peaceful australia',
+    'counselling support wellbeing conversation',
+    'yoga meditation wellness calm mindful',
+    'friends talking support outdoor park',
+    'healthcare professional warm caring support',
+  ],
+};
+
 function buildSearchQuery(
   title: string,
   category: string,
-  organisation: string
 ): string {
-  const categoryQueries: Record<string, string> = {
-    Events: 'young people event festival victoria',
-    Jobs: 'young professional workplace career australia',
-    Grants: 'community grant funding opportunity australia',
-    Programs: 'youth program learning development australia',
-    Wellbeing: 'mental health support wellbeing calm',
-  };
-
-  return categoryQueries[category] || 'young people victoria australia';
+  const variants = CATEGORY_QUERY_VARIANTS[category] || ['young people victoria opportunity'];
+  return variants[Math.floor(Math.random() * variants.length)];
 }
 
 export async function resolveImage(
@@ -84,11 +114,11 @@ export async function resolveImage(
     }
   } catch { /* page fetch failed */ }
 
-  // Step 3: Unsplash with category-based queries
+  // Step 3: Unsplash with category-based query rotation
   const unsplashKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
   if (unsplashKey) {
     try {
-      const query = buildSearchQuery(listingTitle, category, '');
+      const query = buildSearchQuery(listingTitle, category);
       const params = new URLSearchParams({
         query,
         per_page: "5",

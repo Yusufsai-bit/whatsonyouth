@@ -17,16 +17,29 @@ function stripHtml(html: string): string {
   return text.slice(0, 20000);
 }
 
-function extractOgImage(html: string): string | null {
-  const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-  if (ogMatch?.[1]) return ogMatch[1];
-
-  const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
-  if (twMatch?.[1]) return twMatch[1];
-
-  return null;
+function normaliseLocation(location: string): string {
+  if (!location) return 'Victoria';
+  const l = location.trim();
+  const map: Record<string, string> = {
+    'melb': 'Melbourne',
+    'melbourne, vic': 'Melbourne',
+    'melbourne, victoria': 'Melbourne',
+    'vic': 'Victoria',
+    'victoria, australia': 'Victoria',
+    'state-wide': 'Victoria-wide',
+    'statewide': 'Victoria-wide',
+    'across victoria': 'Victoria-wide',
+    'all of victoria': 'Victoria-wide',
+    'remote': 'Online',
+    'virtual': 'Online',
+    'zoom': 'Online',
+    'web': 'Online',
+    'australia-wide': 'Australia-wide',
+    'national': 'Australia-wide',
+    'australia wide': 'Australia-wide',
+  };
+  const lower = l.toLowerCase();
+  return map[lower] || l;
 }
 
 function passesQualityCheck(listing: any): {
@@ -129,7 +142,30 @@ ${pageText}`;
   try {
     return JSON.parse(match[0]);
   } catch {
-    console.error("Failed to parse AI response:", text.slice(0, 500));
+    console.warn("First parse failed, retrying...");
+    try {
+      const retry = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [{ role: "user", content: prompt + "\n\nIMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation." }],
+        }),
+      });
+      if (retry.ok) {
+        const retryData = await retry.json();
+        const retryText = retryData.choices?.[0]?.message?.content || "[]";
+        const retryMatch = retryText.match(/\[[\s\S]*\]/);
+        if (retryMatch) {
+          return JSON.parse(retryMatch[0]);
+        }
+      }
+    } catch {
+      // Retry also failed
+    }
     return [];
   }
 }
@@ -196,11 +232,20 @@ serve(async (req) => {
 
     const supabase = serviceClient;
 
+    const scanSessionId = crypto.randomUUID();
     const results: any[] = [];
     let totalFound = 0, totalCreated = 0, totalSkipped = 0, totalErrors = 0;
     let totalImagesResolved = 0, totalImagesUnsplash = 0, totalImagesPending = 0;
 
-    // In-memory deduplication
+    // Pre-load ALL existing links from DB into memory
+    const { data: existingListings } = await supabase
+      .from('listings')
+      .select('link');
+    const existingLinks = new Set(
+      (existingListings || []).map((l: any) => l.link)
+    );
+
+    // Also track links inserted this run
     const insertedLinks = new Set<string>();
 
     // Collect pending image IDs for post-scan resolution
@@ -211,17 +256,36 @@ serve(async (req) => {
       category: string;
     }> = [];
 
+    // Time budgets
+    const SCAN_START = Date.now();
+    const MAX_SCAN_MS = 120000; // 2 minute total budget
+    const MAX_SOURCE_MS = 25000; // 25s per source
+
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       let found = 0, created = 0, skipped = 0;
       let status = "success";
       let errorMessage: string | null = null;
 
+      // Skip if we've used more than 80% of budget
+      if (Date.now() - SCAN_START > MAX_SCAN_MS * 0.8) {
+        results.push({
+          source: source.name,
+          url: source.url,
+          found: 0,
+          created: 0,
+          skipped: 0,
+          status: 'skipped',
+          error: 'Scan time budget exceeded',
+        });
+        continue;
+      }
+
       try {
         // Step 1: Fetch page
         const pageRes = await fetch(source.url, {
           headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-          signal: AbortSignal.timeout(20000),
+          signal: AbortSignal.timeout(MAX_SOURCE_MS),
         });
 
         if (!pageRes.ok) {
@@ -230,7 +294,6 @@ serve(async (req) => {
 
         const html = await pageRes.text();
         const pageText = stripHtml(html);
-        const ogImage = extractOgImage(html);
         if (pageText.length < 50) {
           throw new Error("Page content too short to analyse");
         }
@@ -255,14 +318,8 @@ serve(async (req) => {
               continue;
             }
 
-            // Database duplicate check
-            const { data: existing } = await supabase
-              .from("listings")
-              .select("id")
-              .eq("link", listing.link)
-              .limit(1);
-
-            if (existing && existing.length > 0) {
+            // Pre-loaded DB dedup check
+            if (existingLinks.has(listing.link)) {
               skipped++;
               continue;
             }
@@ -275,35 +332,16 @@ serve(async (req) => {
               continue;
             }
 
-            // Link validation — skip entirely if broken
-            let linkValid = true;
-            try {
-              const linkCheck = await fetch(listing.link, {
-                method: "HEAD",
-                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-                signal: AbortSignal.timeout(5000),
-              });
-              linkValid = linkCheck.ok;
-            } catch {
-              linkValid = false;
-            }
-
-            if (!linkValid) {
-              console.log(`Skipping broken link: ${listing.link}`);
-              skipped++;
-              continue;
-            }
-
             const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
               title: (listing.title || "").slice(0, 200),
               category: listing.category,
               organisation: (listing.organisation || source.name).slice(0, 200),
-              location: (listing.location || "Victoria").slice(0, 200),
+              location: normaliseLocation(listing.location || "Victoria").slice(0, 200),
               link: listing.link,
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               expiry_date: listing.expiry_date || null,
-              image_url: ogImage || null,
+              image_url: null,
               is_active: true,
               is_featured: false,
               source: "ai_scan",
@@ -316,6 +354,7 @@ serve(async (req) => {
             } else {
               created++;
               insertedLinks.add(listing.link);
+              existingLinks.add(listing.link);
 
               // Collect for post-scan image resolution
               if (inserted?.id) {
@@ -341,6 +380,7 @@ serve(async (req) => {
 
       // Step 4: Log to scan_log
       await supabase.from("scan_log").insert({
+        scan_session_id: scanSessionId,
         source_url: source.url,
         listings_found: found,
         listings_created: created,
@@ -351,6 +391,28 @@ serve(async (req) => {
         status,
         error_message: errorMessage,
       });
+
+      // Circuit breaker: auto-disable after 3 consecutive failures
+      if (status === 'error') {
+        const { data: recentLogs } = await supabase
+          .from('scan_log')
+          .select('status')
+          .eq('source_url', source.url)
+          .order('scanned_at', { ascending: false })
+          .limit(3);
+
+        const allFailed = recentLogs &&
+          recentLogs.length >= 3 &&
+          recentLogs.every((l: any) => l.status === 'error');
+
+        if (allFailed) {
+          await supabase
+            .from('scan_sources')
+            .update({ is_active: false } as any)
+            .eq('url', source.url);
+          console.log(`Auto-disabled source after 3 failures: ${source.url}`);
+        }
+      }
 
       totalFound += found;
       totalCreated += created;
@@ -372,24 +434,37 @@ serve(async (req) => {
       }
     }
 
-    // Post-scan: resolve images for all inserted listings
-    for (const item of pendingImageIds) {
-      try {
-        const imgResult = await resolveImage(
-          item.id,
-          item.link,
-          item.title,
-          item.category,
-          supabase
-        );
-        if (imgResult.source === "og") totalImagesResolved++;
-        else if (imgResult.source === "unsplash") totalImagesUnsplash++;
-        else totalImagesPending++;
-      } catch {
-        totalImagesPending++;
-      }
-      await new Promise((r) => setTimeout(r, 300));
+    // Fire image resolution async — don't await
+    if (pendingImageIds.length > 0) {
+      (async () => {
+        for (const item of pendingImageIds) {
+          try {
+            await resolveImage(
+              item.id, item.link,
+              item.title, item.category, supabase
+            );
+          } catch { /* silent */ }
+          await new Promise(r => setTimeout(r, 400));
+        }
+      })();
     }
+
+    // Set image stats to pending since we fired async
+    totalImagesPending = pendingImageIds.length;
+
+    // Session summary log entry
+    await supabase.from('scan_log').insert({
+      scan_session_id: scanSessionId,
+      source_url: '__session_summary__',
+      listings_found: totalFound,
+      listings_created: totalCreated,
+      listings_skipped: totalSkipped,
+      images_resolved: 0,
+      images_from_unsplash: 0,
+      images_pending: totalImagesPending,
+      status: totalErrors === 0 ? 'success' : totalErrors === sources.length ? 'error' : 'partial',
+      error_message: totalErrors > 0 ? `${totalErrors} source(s) failed` : null,
+    });
 
     // Auto-deactivate expired listings
     const today = new Date().toISOString().split("T")[0];
