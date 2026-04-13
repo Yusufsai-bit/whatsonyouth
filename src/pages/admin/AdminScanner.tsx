@@ -289,12 +289,40 @@ export default function AdminScanner() {
             All scanned listings are published automatically after passing quality checks.
           </p>
 
+          <div className="mt-4">
+            <p className="font-body text-sm font-medium text-[#0A0A0A] mb-2">Scan category</p>
+            <div className="flex flex-wrap gap-2">
+              {['all', 'Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setScanCategory(cat)}
+                  className={`font-body text-sm px-4 py-2 rounded-lg border transition-colors duration-100 ${
+                    scanCategory === cat
+                      ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
+                      : 'bg-white text-[#555555] border-[#EBEBEB] hover:border-[#0A0A0A]'
+                  }`}
+                >
+                  {cat === 'all' ? 'All categories' : cat}
+                </button>
+              ))}
+            </div>
+            <p className="font-body text-xs text-[#888888] mt-2">
+              {scanCategory === 'all'
+                ? `${sources.filter(s => s.is_active).length} active sources`
+                : `${sources.filter(s => s.is_active && s.category === scanCategory).length} ${scanCategory} sources`}
+            </p>
+          </div>
+
           <button
             onClick={runScan}
             disabled={scanning}
             className="w-full mt-4 py-3.5 rounded-lg bg-[#D85A30] text-white font-heading font-bold text-base disabled:opacity-60 hover:bg-[#C04F28] transition-colors"
           >
-            {scanning ? `Scanning... (${progress} of ${progressTotal} sources)` : 'Run scan now'}
+            {scanning
+              ? `Scanning... (${progress} of ${progressTotal} sources)`
+              : scanCategory === 'all'
+                ? 'Run full scan'
+                : `Scan ${scanCategory} only`}
           </button>
 
           {(scanning || summary) && (
