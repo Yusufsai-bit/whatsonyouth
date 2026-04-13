@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Trash2, Plus, Play, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -66,11 +65,15 @@ export default function AdminScanner() {
   const [newCategory, setNewCategory] = useState('');
   const [validating, setValidating] = useState(false);
 
+  // Source health
+  const [sourceHealth, setSourceHealth] = useState<Record<string, string>>({});
+
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSources();
     fetchRecentLogs();
+    fetchSourceHealth();
   }, []);
 
   useEffect(() => {
@@ -86,8 +89,27 @@ export default function AdminScanner() {
   };
 
   const fetchRecentLogs = async () => {
-    const { data } = await supabase.from('scan_log').select('*').order('scanned_at', { ascending: false }).limit(10);
+    const { data } = await supabase.from('scan_log').select('*').neq('source_url', '__session_summary__').order('scanned_at', { ascending: false }).limit(10);
     if (data) setRecentLogs(data as ScanLogEntry[]);
+  };
+
+  const fetchSourceHealth = async () => {
+    const { data } = await supabase
+      .from('scan_log')
+      .select('source_url, status')
+      .neq('source_url', '__session_summary__')
+      .order('scanned_at', { ascending: false })
+      .limit(200);
+
+    if (data) {
+      const health: Record<string, string> = {};
+      data.forEach((log: any) => {
+        if (!health[log.source_url]) {
+          health[log.source_url] = log.status;
+        }
+      });
+      setSourceHealth(health);
+    }
   };
 
   const toggleSource = async (id: string, isActive: boolean) => {
@@ -160,21 +182,14 @@ export default function AdminScanner() {
     toast.success('Source added and verified ✓');
   };
 
-  const runScan = async () => {
-    const activeSources = sources.filter(s => s.is_active);
-    if (activeSources.length === 0) {
-      toast.error('No active sources to scan');
-      return;
-    }
-
+  const runScanWithSources = async (scanSources: { name: string; url: string; category: string }[], label: string) => {
     setScanning(true);
     setProgress(0);
-    setProgressTotal(activeSources.length);
-    setLogLines([`▶ Starting scan of ${activeSources.length} sources...`]);
+    setProgressTotal(scanSources.length);
+    setLogLines([`▶ ${label}...`]);
     setSummary(null);
 
     try {
-      // Get the user's auth token for admin verification
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         toast.error('Not authenticated — please log in again');
@@ -190,9 +205,7 @@ export default function AdminScanner() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          sources: activeSources.map(s => ({ name: s.name, url: s.url, category: s.category })),
-        }),
+        body: JSON.stringify({ sources: scanSources }),
       });
 
       const data = await res.json();
@@ -204,7 +217,6 @@ export default function AdminScanner() {
         return;
       }
 
-      // Process results
       const lines: string[] = [];
       (data.results as ScanResult[]).forEach((r, i) => {
         setProgress(i + 1);
@@ -225,8 +237,9 @@ export default function AdminScanner() {
         images_from_unsplash: data.summary.images_from_unsplash || 0,
         images_pending: data.summary.images_pending || 0,
       });
-      setProgress(activeSources.length);
+      setProgress(scanSources.length);
       fetchRecentLogs();
+      fetchSourceHealth();
       toast.success(`Scan complete — ${data.summary.listings_created} new listings created`);
     } catch (e: any) {
       setLogLines(prev => [...prev, `❌ Error: ${e.message}`]);
@@ -234,6 +247,25 @@ export default function AdminScanner() {
     } finally {
       setScanning(false);
     }
+  };
+
+  const runScan = async () => {
+    const activeSources = sources.filter(s => s.is_active);
+    if (activeSources.length === 0) {
+      toast.error('No active sources to scan');
+      return;
+    }
+    await runScanWithSources(
+      activeSources.map(s => ({ name: s.name, url: s.url, category: s.category })),
+      `Starting scan of ${activeSources.length} sources`
+    );
+  };
+
+  const rescanSource = async (source: ScanSource) => {
+    await runScanWithSources(
+      [{ name: source.name, url: source.url, category: source.category }],
+      `Rescanning ${source.name}`
+    );
   };
 
   return (
@@ -247,7 +279,7 @@ export default function AdminScanner() {
             <div>
               <h2 className="font-heading font-bold text-[20px] text-[#0A0A0A]">AI listing scanner</h2>
               <p className="font-body text-sm text-[#555555] mt-1">
-                Scans Victorian websites and automatically extracts listings for young people using Claude AI.
+                Scans Victorian websites and automatically extracts listings for young people using AI.
               </p>
             </div>
           </div>
@@ -360,7 +392,8 @@ export default function AdminScanner() {
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Name</th>
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">URL</th>
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Category</th>
-                  <th className="px-3 py-2.5 w-10"></th>
+                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Last scan</th>
+                  <th className="px-3 py-2.5 w-16"></th>
                 </tr>
               </thead>
               <tbody>
@@ -379,6 +412,23 @@ export default function AdminScanner() {
                       </span>
                     </td>
                     <td className="px-3">
+                      {sourceHealth[s.url] === 'success' ? (
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#1D9E75]" title="Last scan succeeded" />
+                      ) : sourceHealth[s.url] === 'error' ? (
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#E24B4A]" title="Last scan failed — 3 failures will auto-disable this source" />
+                      ) : (
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#DDDDDD]" title="Not yet scanned" />
+                      )}
+                    </td>
+                    <td className="px-3 flex items-center gap-1">
+                      <button
+                        onClick={() => rescanSource(s)}
+                        disabled={scanning}
+                        className="text-[#CCCCCC] hover:text-[#5847E0] transition-colors"
+                        title="Rescan this source only"
+                      >
+                        <Play size={12} />
+                      </button>
                       <button onClick={() => removeSource(s.id)} className="text-[#CCCCCC] hover:text-red-500 transition-colors">
                         <Trash2 size={14} />
                       </button>

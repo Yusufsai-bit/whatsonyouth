@@ -47,7 +47,7 @@ serve(async (req) => {
       .replace(/\s+/g, " ")
       .trim();
 
-    if (stripped.length < 200) {
+    if (stripped.length < 1000) {
       return new Response(
         JSON.stringify({
           reachable: false,
