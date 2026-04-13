@@ -37,6 +37,13 @@ export default function AdminSettings() {
       data.forEach(s => { map[s.key] = { value: s.value || '', updated_at: s.updated_at }; });
       setSettings(map);
     }
+    // Fetch recent scans
+    const { data: scans } = await supabase
+      .from('scan_log')
+      .select('scanned_at, listings_created, listings_found, status')
+      .order('scanned_at', { ascending: false })
+      .limit(3);
+    if (scans) setRecentScans(scans);
     setLoading(false);
   };
 
