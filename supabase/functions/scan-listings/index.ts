@@ -14,16 +14,14 @@ function stripHtml(html: string): string {
   text = text.replace(/<style[\s\S]*?<\/style>/gi, "");
   text = text.replace(/<[^>]+>/g, " ");
   text = text.replace(/\s+/g, " ").trim();
-  return text.slice(0, 12000);
+  return text.slice(0, 20000);
 }
 
 function extractOgImage(html: string): string | null {
-  // Try og:image first
   const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
     || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
   if (ogMatch?.[1]) return ogMatch[1];
 
-  // Try twitter:image
   const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
     || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
   if (twMatch?.[1]) return twMatch[1];
@@ -36,28 +34,38 @@ async function extractListings(
   source: { name: string; url: string; category: string },
   apiKey: string
 ): Promise<any[]> {
-  const prompt = `You are a listings extractor for What's On Youth — a Victorian platform for young people aged 15-25.
+  const prompt = `You are a listings extractor for What's On Youth — a Victorian platform for young people aged 15-25 living in Victoria, Australia.
 
-Analyse this webpage from '${source.name}' (${source.url}) and extract ALL opportunities relevant to young Victorians aged 15-25.
+Analyse this webpage from '${source.name}' (${source.url}) and extract opportunities that meet ALL of these criteria:
+
+1. Relevant to young people aged 15-25
+2. Available in Victoria, Australia OR available online to Australians
+3. Currently open or upcoming — not past events
+
+Reject anything that is:
+- Only available outside Victoria (unless online)
+- Targeted at adults over 25 or children under 15
+- A past event or closed opportunity
+- A generic article, blog post, or news item with no specific opportunity to apply for or attend
+- A commercial product or paid service
 
 Look for: events, jobs, grants, programs, volunteering, leadership, wellbeing support, arts, sport.
 
-Return ONLY a valid JSON array — no markdown, no explanation.
+Return ONLY a valid JSON array — no markdown, no explanation, no other text whatsoever.
 
-Each object must have exactly:
-- title: string (max 150 chars)
+Each object must have exactly these fields:
+- title: string (clear specific title, max 150 chars)
 - category: exactly one of: Events, Jobs, Grants, Programs, Wellbeing
-- organisation: string
-- location: string (suburb, city, Victoria-wide, or Online)
-- link: full URL (use ${source.url} if no specific URL found)
-- description: string (1-2 sentences, max 400 chars)
-- contact_email: string (or empty string)
+- organisation: string (who runs it)
+- location: string (suburb, city, "Victoria-wide", "Regional Victoria", or "Online")
+- link: full URL to this specific opportunity — if no specific URL use ${source.url}
+- description: 1-2 sentences, max 400 chars — what it is, who it is for, key dates or benefit
+- contact_email: string (or empty string "")
 - expiry_date: YYYY-MM-DD string (or null)
 
-Rules:
-- Only include opportunities genuinely for ages 15-25
-- If nothing relevant found, return []
-- Return ONLY the JSON array, nothing else
+If nothing meets all criteria, return []
+
+Return ONLY the JSON array, nothing else.
 
 Page content:
 ${pageText}`;
@@ -82,7 +90,6 @@ ${pageText}`;
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content || "[]";
 
-  // Extract JSON array from response
   const match = text.match(/\[[\s\S]*\]/);
   if (!match) return [];
 
@@ -102,7 +109,7 @@ serve(async (req) => {
   try {
     const { sources, mode } = await req.json();
 
-    // Auth check — verify caller is an admin via JWT
+    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
@@ -125,7 +132,6 @@ serve(async (req) => {
       });
     }
 
-    // Check admin status using service role to bypass RLS
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -162,10 +168,20 @@ serve(async (req) => {
     let totalFound = 0, totalCreated = 0, totalSkipped = 0, totalErrors = 0;
     let totalImagesResolved = 0, totalImagesUnsplash = 0, totalImagesPending = 0;
 
+    // In-memory deduplication
+    const insertedLinks = new Set<string>();
+
+    // Collect pending image IDs for post-scan resolution
+    const pendingImageIds: Array<{
+      id: string;
+      link: string;
+      title: string;
+      category: string;
+    }> = [];
+
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       let found = 0, created = 0, skipped = 0;
-      let imagesResolved = 0, imagesUnsplash = 0, imagesPending = 0;
       let status = "success";
       let errorMessage: string | null = null;
 
@@ -201,25 +217,26 @@ serve(async (req) => {
               listing.category = source.category;
             }
 
-            // Validate listing link returns a valid page
-            try {
-              const linkCheck = await fetch(listing.link, {
-                method: "HEAD",
-                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-                signal: AbortSignal.timeout(8000),
-              });
-              if (!linkCheck.ok) {
-                console.warn(`Skipping broken link (${linkCheck.status}): ${listing.link}`);
-                skipped++;
-                continue;
-              }
-            } catch {
-              console.warn(`Skipping unreachable link: ${listing.link}`);
+            // In-memory dedup check
+            if (insertedLinks.has(listing.link)) {
               skipped++;
               continue;
             }
 
-            // Duplicate check
+            // Non-blocking URL quality check
+            let linkValid = true;
+            try {
+              const linkCheck = await fetch(listing.link, {
+                method: "HEAD",
+                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
+                signal: AbortSignal.timeout(5000),
+              });
+              linkValid = linkCheck.ok;
+            } catch {
+              linkValid = false;
+            }
+
+            // Database duplicate check
             const { data: existing } = await supabase
               .from("listings")
               .select("id")
@@ -231,20 +248,23 @@ serve(async (req) => {
               continue;
             }
 
-            // Insert listing first (no image yet)
+            // Determine active status and description
+            const shouldBeActive = linkValid ? isLive : false;
+            const descriptionPrefix = linkValid ? "" : "[Link needs review] ";
+
             const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
               title: (listing.title || "").slice(0, 200),
               category: listing.category,
               organisation: (listing.organisation || source.name).slice(0, 200),
               location: (listing.location || "Victoria").slice(0, 200),
               link: listing.link,
-              description: (listing.description || "").slice(0, 500),
+              description: descriptionPrefix + (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               expiry_date: listing.expiry_date || null,
               image_url: ogImage || null,
-              is_active: isLive,
+              is_active: shouldBeActive,
               is_featured: false,
-              source: "admin",
+              source: "ai_scan",
               user_id: adminUserId,
             }).select("id").maybeSingle();
 
@@ -253,24 +273,16 @@ serve(async (req) => {
               skipped++;
             } else {
               created++;
+              insertedLinks.add(listing.link);
 
-              // Resolve image for newly inserted listing
+              // Collect for post-scan image resolution
               if (inserted?.id) {
-                try {
-                  const imgResult = await resolveImage(
-                    inserted.id,
-                    listing.link,
-                    listing.title || "",
-                    listing.category,
-                    supabase
-                  );
-                  if (imgResult.source === "og") imagesResolved++;
-                  else if (imgResult.source === "unsplash") imagesUnsplash++;
-                  else if (!imgResult.url) imagesPending++;
-                } catch (imgErr) {
-                  console.error("Image resolve error:", imgErr);
-                  imagesPending++;
-                }
+                pendingImageIds.push({
+                  id: inserted.id,
+                  link: listing.link,
+                  title: listing.title || "",
+                  category: listing.category,
+                });
               }
             }
           } catch (e) {
@@ -285,15 +297,15 @@ serve(async (req) => {
         console.error(`Error scanning ${source.name}:`, e);
       }
 
-      // Step 4: Log to scan_log
+      // Step 4: Log to scan_log (images counted after resolution)
       await supabase.from("scan_log").insert({
         source_url: source.url,
         listings_found: found,
         listings_created: created,
         listings_skipped: skipped,
-        images_resolved: imagesResolved,
-        images_from_unsplash: imagesUnsplash,
-        images_pending: imagesPending,
+        images_resolved: 0,
+        images_from_unsplash: 0,
+        images_pending: 0,
         status,
         error_message: errorMessage,
       });
@@ -301,9 +313,6 @@ serve(async (req) => {
       totalFound += found;
       totalCreated += created;
       totalSkipped += skipped;
-      totalImagesResolved += imagesResolved;
-      totalImagesUnsplash += imagesUnsplash;
-      totalImagesPending += imagesPending;
 
       results.push({
         source: source.name,
@@ -317,9 +326,36 @@ serve(async (req) => {
 
       // Delay between sources
       if (i < sources.length - 1) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 800));
       }
     }
+
+    // Post-scan: resolve images for all inserted listings
+    for (const item of pendingImageIds) {
+      try {
+        const imgResult = await resolveImage(
+          item.id,
+          item.link,
+          item.title,
+          item.category,
+          supabase
+        );
+        if (imgResult.source === "og") totalImagesResolved++;
+        else if (imgResult.source === "unsplash") totalImagesUnsplash++;
+        else totalImagesPending++;
+      } catch {
+        totalImagesPending++;
+      }
+      await new Promise((r) => setTimeout(r, 300));
+    }
+
+    // Auto-deactivate expired listings
+    const today = new Date().toISOString().split("T")[0];
+    await supabase
+      .from("listings")
+      .update({ is_active: false })
+      .lt("expiry_date", today)
+      .eq("is_active", true);
 
     return new Response(
       JSON.stringify({
