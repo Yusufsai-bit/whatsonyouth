@@ -159,6 +159,7 @@ export type Database = {
           listings_created: number
           listings_found: number
           listings_skipped: number
+          scan_session_id: string | null
           scanned_at: string
           source_url: string
           status: string
@@ -172,6 +173,7 @@ export type Database = {
           listings_created?: number
           listings_found?: number
           listings_skipped?: number
+          scan_session_id?: string | null
           scanned_at?: string
           source_url: string
           status?: string
@@ -185,6 +187,7 @@ export type Database = {
           listings_created?: number
           listings_found?: number
           listings_skipped?: number
+          scan_session_id?: string | null
           scanned_at?: string
           source_url?: string
           status?: string
