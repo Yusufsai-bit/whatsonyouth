@@ -29,6 +29,39 @@ function extractOgImage(html: string): string | null {
   return null;
 }
 
+function passesQualityCheck(listing: any): {
+  passes: boolean;
+  reason: string;
+} {
+  if (!listing.title || listing.title.length < 10)
+    return { passes: false, reason: 'Title too short' };
+
+  if (!listing.description || listing.description.length < 80)
+    return { passes: false, reason: 'Description too short' };
+
+  if (!listing.organisation || listing.organisation.length < 3)
+    return { passes: false, reason: 'Missing organisation' };
+
+  if (!listing.link || !listing.link.startsWith('http'))
+    return { passes: false, reason: 'Invalid link' };
+
+  if (!listing.location || listing.location.length < 3)
+    return { passes: false, reason: 'Missing location' };
+
+  const loc = listing.location.toLowerCase();
+  const validLocations = [
+    'victoria', 'melbourne', 'vic', 'online',
+    'ballarat', 'bendigo', 'geelong', 'shepparton',
+    'wodonga', 'mildura', 'warrnambool', 'frankston',
+    'gippsland', 'regional', 'australia', 'national'
+  ];
+  const isVictorianOrOnline = validLocations.some(v => loc.includes(v));
+  if (!isVictorianOrOnline)
+    return { passes: false, reason: `Location "${listing.location}" not Victorian or online` };
+
+  return { passes: true, reason: '' };
+}
+
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
@@ -107,7 +140,7 @@ serve(async (req) => {
   }
 
   try {
-    const { sources, mode } = await req.json();
+    const { sources } = await req.json();
 
     // Auth check
     const authHeader = req.headers.get("Authorization");
@@ -163,7 +196,6 @@ serve(async (req) => {
 
     const supabase = serviceClient;
 
-    const isLive = mode === "live";
     const results: any[] = [];
     let totalFound = 0, totalCreated = 0, totalSkipped = 0, totalErrors = 0;
     let totalImagesResolved = 0, totalImagesUnsplash = 0, totalImagesPending = 0;
@@ -223,19 +255,6 @@ serve(async (req) => {
               continue;
             }
 
-            // Non-blocking URL quality check
-            let linkValid = true;
-            try {
-              const linkCheck = await fetch(listing.link, {
-                method: "HEAD",
-                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-                signal: AbortSignal.timeout(5000),
-              });
-              linkValid = linkCheck.ok;
-            } catch {
-              linkValid = false;
-            }
-
             // Database duplicate check
             const { data: existing } = await supabase
               .from("listings")
@@ -248,9 +267,32 @@ serve(async (req) => {
               continue;
             }
 
-            // Determine active status and description
-            const shouldBeActive = linkValid ? isLive : false;
-            const descriptionPrefix = linkValid ? "" : "[Link needs review] ";
+            // Quality check — skip entirely if it fails
+            const quality = passesQualityCheck(listing);
+            if (!quality.passes) {
+              console.log(`Quality skip: ${listing.title} — ${quality.reason}`);
+              skipped++;
+              continue;
+            }
+
+            // Link validation — skip entirely if broken
+            let linkValid = true;
+            try {
+              const linkCheck = await fetch(listing.link, {
+                method: "HEAD",
+                headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
+                signal: AbortSignal.timeout(5000),
+              });
+              linkValid = linkCheck.ok;
+            } catch {
+              linkValid = false;
+            }
+
+            if (!linkValid) {
+              console.log(`Skipping broken link: ${listing.link}`);
+              skipped++;
+              continue;
+            }
 
             const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
               title: (listing.title || "").slice(0, 200),
@@ -258,11 +300,11 @@ serve(async (req) => {
               organisation: (listing.organisation || source.name).slice(0, 200),
               location: (listing.location || "Victoria").slice(0, 200),
               link: listing.link,
-              description: descriptionPrefix + (listing.description || "").slice(0, 500),
+              description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               expiry_date: listing.expiry_date || null,
               image_url: ogImage || null,
-              is_active: shouldBeActive,
+              is_active: true,
               is_featured: false,
               source: "ai_scan",
               user_id: adminUserId,
@@ -297,7 +339,7 @@ serve(async (req) => {
         console.error(`Error scanning ${source.name}:`, e);
       }
 
-      // Step 4: Log to scan_log (images counted after resolution)
+      // Step 4: Log to scan_log
       await supabase.from("scan_log").insert({
         source_url: source.url,
         listings_found: found,

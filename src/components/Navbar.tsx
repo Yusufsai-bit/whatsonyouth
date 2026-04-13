@@ -35,13 +35,13 @@ export default function Navbar() {
   const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
 
   return (
-    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 z-50 border-b border-brand-nav-border">
+    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 sticky top-0 z-50 border-b border-brand-nav-border">
       <Link to="/" className="shrink-0">
         <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
 
       {/* Desktop category links */}
-      <div className="hidden md:flex flex-1 items-center justify-center gap-8">
+      <div className="hidden md:flex items-center justify-center gap-6 flex-1 mx-8">
         {categoryLinks.map(link => (
           <Link
             key={link.href}
@@ -58,7 +58,7 @@ export default function Navbar() {
       </div>
 
       {/* Desktop right side */}
-      <div className="hidden md:flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-3">
         <Link to="/search" className="text-brand-nav-link hover:text-white transition-colors duration-100">
           <Search size={18} />
         </Link>

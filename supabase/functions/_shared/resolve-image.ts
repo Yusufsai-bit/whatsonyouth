@@ -16,13 +16,21 @@ function extractOgImage(html: string): string | null {
   return null;
 }
 
-const CATEGORY_MODIFIERS: Record<string, string> = {
-  Events: "event victoria australia",
-  Jobs: "career workplace professional",
-  Grants: "community youth opportunity",
-  Programs: "youth program learning",
-  Wellbeing: "mental health calm support",
-};
+function buildSearchQuery(
+  title: string,
+  category: string,
+  organisation: string
+): string {
+  const categoryQueries: Record<string, string> = {
+    Events: 'young people event festival victoria',
+    Jobs: 'young professional workplace career australia',
+    Grants: 'community grant funding opportunity australia',
+    Programs: 'youth program learning development australia',
+    Wellbeing: 'mental health support wellbeing calm',
+  };
+
+  return categoryQueries[category] || 'young people victoria australia';
+}
 
 export async function resolveImage(
   listingId: string,
@@ -76,16 +84,16 @@ export async function resolveImage(
     }
   } catch { /* page fetch failed */ }
 
-  // Step 3: Unsplash
+  // Step 3: Unsplash with category-based queries
   const unsplashKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
   if (unsplashKey) {
     try {
-      const modifier = CATEGORY_MODIFIERS[category] || "";
-      const query = `${listingTitle.slice(0, 60)} ${modifier}`.trim();
+      const query = buildSearchQuery(listingTitle, category, '');
       const params = new URLSearchParams({
         query,
-        per_page: "3",
+        per_page: "5",
         orientation: "landscape",
+        content_filter: "high",
         client_id: unsplashKey,
       });
       const res = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
@@ -93,14 +101,18 @@ export async function resolveImage(
       });
       if (res.ok) {
         const data = await res.json();
-        const first = data.results?.[0];
-        if (first?.urls?.regular) {
-          const imgUrl = first.urls.regular;
-          await supabase
-            .from("listings")
-            .update({ image_url: imgUrl })
-            .eq("id", listingId);
-          return { url: imgUrl, source: "unsplash" };
+        const results = data.results || [];
+        if (results.length > 0) {
+          const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+          const selected = results[randomIndex];
+          if (selected?.urls?.regular) {
+            const imgUrl = selected.urls.regular;
+            await supabase
+              .from("listings")
+              .update({ image_url: imgUrl })
+              .eq("id", listingId);
+            return { url: imgUrl, source: "unsplash" };
+          }
         }
       }
     } catch { /* unsplash failed */ }

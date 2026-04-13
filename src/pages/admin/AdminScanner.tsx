@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Trash2, Plus, Play, Zap, FileText } from 'lucide-react';
+import { Trash2, Plus, Play, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ScanSource {
@@ -54,7 +54,6 @@ export default function AdminScanner() {
   const [sources, setSources] = useState<ScanSource[]>([]);
   const [recentLogs, setRecentLogs] = useState<ScanLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<'draft' | 'live'>('draft');
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
@@ -171,7 +170,7 @@ export default function AdminScanner() {
     setScanning(true);
     setProgress(0);
     setProgressTotal(activeSources.length);
-    setLogLines([`▶ Starting scan of ${activeSources.length} sources in ${mode} mode...`]);
+    setLogLines([`▶ Starting scan of ${activeSources.length} sources...`]);
     setSummary(null);
 
     try {
@@ -193,7 +192,6 @@ export default function AdminScanner() {
         },
         body: JSON.stringify({
           sources: activeSources.map(s => ({ name: s.name, url: s.url, category: s.category })),
-          mode,
         }),
       });
 
@@ -254,30 +252,9 @@ export default function AdminScanner() {
             </div>
           </div>
 
-          <div className="flex gap-2 mt-5">
-            <button
-              onClick={() => setMode('draft')}
-              className={`flex-1 py-2.5 rounded-lg font-body text-sm font-medium transition-colors border ${
-                mode === 'draft'
-                  ? 'bg-[#F5F3FF] border-[#5847E0] text-[#5847E0]'
-                  : 'bg-white border-[#EBEBEB] text-[#888888] hover:border-[#CCCCCC]'
-              }`}
-            >
-              <FileText size={14} className="inline mr-1.5 -mt-0.5" />
-              Draft mode — review before publishing
-            </button>
-            <button
-              onClick={() => setMode('live')}
-              className={`flex-1 py-2.5 rounded-lg font-body text-sm font-medium transition-colors border ${
-                mode === 'live'
-                  ? 'bg-[#FFF3E0] border-[#D85A30] text-[#D85A30]'
-                  : 'bg-white border-[#EBEBEB] text-[#888888] hover:border-[#CCCCCC]'
-              }`}
-            >
-              <Play size={14} className="inline mr-1.5 -mt-0.5" />
-              Auto-publish — go live immediately
-            </button>
-          </div>
+          <p className="font-body text-sm text-[#555555] mt-3 bg-[#F7F7F7] rounded-lg px-4 py-2.5">
+            All scanned listings are published automatically after passing quality checks.
+          </p>
 
           <button
             onClick={runScan}

@@ -146,9 +146,15 @@ export default function ListingDetailPage() {
   const ctaLabel = listing.category === 'Events' ? 'Register' :
     listing.category === 'Jobs' ? 'Apply now' : 'Visit website';
 
-  const truncDesc = listing.description.length > 155
-    ? listing.description.slice(0, 155) + '...'
-    : listing.description;
+  const cleanDescription = (desc: string | null) => {
+    if (!desc) return '';
+    return desc.replace(/^\[Link needs review\]\s*/i, '').trim();
+  };
+
+  const cleanDesc = cleanDescription(listing.description);
+  const truncDesc = cleanDesc.length > 155
+    ? cleanDesc.slice(0, 155) + '...'
+    : cleanDesc;
 
   return (
     <>
@@ -204,7 +210,7 @@ export default function ListingDetailPage() {
             {/* Description */}
             <div className="mt-6">
               <p className="font-body text-base text-brand-text-secondary leading-[1.7] whitespace-pre-line">
-                {listing.description}
+                {cleanDesc}
               </p>
             </div>
 
