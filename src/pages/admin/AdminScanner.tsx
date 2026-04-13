@@ -54,6 +54,7 @@ export default function AdminScanner() {
   const [recentLogs, setRecentLogs] = useState<ScanLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [scanCategory, setScanCategory] = useState<string>('all');
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
   const [logLines, setLogLines] = useState<string[]>([]);
