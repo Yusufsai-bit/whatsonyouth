@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -31,6 +32,14 @@ import StubPage from "./pages/StubPage";
 
 const queryClient = new QueryClient();
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
@@ -38,7 +47,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
+          <div className="pt-14 md:pt-[60px]">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -67,6 +78,7 @@ const App = () => (
             <Route path="/admin/scan-log" element={<AdminScanLog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </div>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
