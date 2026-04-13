@@ -251,7 +251,7 @@ export default function AdminScanner() {
   };
 
   const runScan = async () => {
-    const activeSources = sources.filter(s => s.is_active);
+    const activeSources = sources.filter(s => s.is_active && (scanCategory === 'all' || s.category === scanCategory));
     if (activeSources.length === 0) {
       toast.error('No active sources to scan');
       return;
