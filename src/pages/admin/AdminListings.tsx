@@ -71,13 +71,16 @@ export default function AdminListings() {
   }, [listings, search, categoryFilter, statusFilter, sourceFilter, expiryFilter]);
 
   const pendingDrafts = useMemo(() => 
-    listings.filter(l => !l.is_active && l.source === 'admin'), 
+    listings.filter(l => 
+      !l.is_active && 
+      (l.source === 'admin' || l.source === 'ai_scan')
+    ), 
     [listings]
   );
 
   const showDrafts = () => {
     setStatusFilter('inactive');
-    setSourceFilter('admin');
+    setSourceFilter('');
     setCategoryFilter('');
     setSearch('');
     setExpiryFilter('');
@@ -203,7 +206,7 @@ export default function AdminListings() {
             <option value="">All sources</option>
             <option value="user">User submitted</option>
             <option value="admin">Admin added</option>
-            <option value="admin">Admin / Scanner</option>
+            <option value="ai_scan">AI Scanner</option>
           </select>
           <select value={expiryFilter} onChange={e => { setExpiryFilter(e.target.value); setPage(1); }} className={inputClass}>
             <option value="">All expiry</option>
@@ -274,6 +277,7 @@ export default function AdminListings() {
           <div className="bg-[#0A0A0A] text-white rounded-xl px-5 py-3 mb-4 flex items-center gap-4 flex-wrap">
             <span className="font-body text-sm">{selected.size} selected</span>
             <button onClick={() => bulkAction('activate')} className="font-body text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">Activate</button>
+            <button onClick={() => bulkAction('activate')} className="font-body text-sm bg-[#1D9E75]/20 hover:bg-[#1D9E75]/30 text-[#4ADE80] px-3 py-1.5 rounded-lg">Publish selected</button>
             <button onClick={() => bulkAction('deactivate')} className="font-body text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">Deactivate</button>
             <button onClick={() => bulkAction('delete')} className="font-body text-sm bg-red-500/20 hover:bg-red-500/30 text-red-300 px-3 py-1.5 rounded-lg">Delete selected</button>
           </div>
@@ -335,6 +339,15 @@ export default function AdminListings() {
                     </td>
                     <td className="px-3">
                       <div className="flex items-center gap-2">
+                        {!l.is_active && (
+                          <button
+                            onClick={() => toggleActive(l.id, false)}
+                            className="font-body text-xs bg-[#1D9E75] text-white px-2.5 py-1 rounded-lg hover:bg-[#178a65] whitespace-nowrap"
+                            title="Publish this listing"
+                          >
+                            Publish
+                          </button>
+                        )}
                         <Link to={`/admin/listings/${l.id}/edit`} className="text-[#888888] hover:text-[#5847E0]"><Pencil size={15} /></Link>
                         <button onClick={() => setDeleteId(l.id)} className="text-[#888888] hover:text-[#D85A30]"><Trash2 size={15} /></button>
                       </div>
