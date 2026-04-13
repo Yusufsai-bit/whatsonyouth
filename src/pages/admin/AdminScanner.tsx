@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Trash2, Plus, Play, Zap, FileText } from 'lucide-react';
+import { Trash2, Plus, Play, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ScanSource {
