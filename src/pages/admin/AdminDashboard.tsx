@@ -11,6 +11,12 @@ interface Stats {
   thisWeek: number;
 }
 
+interface LastScan {
+  scanned_at: string;
+  listings_created: number;
+  status: string;
+}
+
 interface RecentListing {
   id: string;
   title: string;
@@ -38,6 +44,25 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ total: 0, active: 0, featured: 0, thisWeek: 0 });
   const [recent, setRecent] = useState<RecentListing[]>([]);
   const [categories, setCategories] = useState<CategoryCount[]>([]);
+  const [lastScan, setLastScan] = useState<LastScan | null>(null);
+
+  function getNextScanDate(): string {
+    const now = new Date();
+    const days = [1, 4]; // Monday & Thursday UTC = Tuesday & Friday AEST
+    const candidates: Date[] = [];
+    for (let offset = 0; offset <= 7; offset++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() + offset);
+      d.setUTCHours(21, 0, 0, 0); // 9pm UTC = 7am AEST
+      if (days.includes(d.getUTCDay()) && d > now) {
+        candidates.push(d);
+      }
+    }
+    if (candidates.length === 0) return 'Unknown';
+    const next = candidates[0];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return `${dayNames[next.getDay()]} ${next.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} 7:00 AM AEST`;
+  }
 
   const fetchData = async () => {
     const { data: all } = await supabase.from('listings').select('id, is_active, is_featured, created_at, category');
@@ -52,7 +77,6 @@ export default function AdminDashboard() {
         thisWeek: weekCount,
       });
 
-      // Category breakdown (active only)
       const catMap: Record<string, number> = {};
       all.filter(l => l.is_active).forEach(l => {
         catMap[l.category] = (catMap[l.category] || 0) + 1;
@@ -69,6 +93,14 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
       .limit(8);
     if (recentData) setRecent(recentData);
+
+    // Fetch last auto-scan
+    const { data: scanData } = await supabase
+      .from('scan_log')
+      .select('scanned_at, listings_created, status')
+      .order('scanned_at', { ascending: false })
+      .limit(1);
+    if (scanData && scanData.length > 0) setLastScan(scanData[0]);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -96,6 +128,27 @@ export default function AdminDashboard() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Last auto-scan card */}
+        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5 mb-8">
+          <p className="font-body text-[13px] text-[#888888]">Last auto-scan</p>
+          {lastScan ? (
+            <>
+              <p className="font-heading font-bold text-lg text-[#0A0A0A] mt-1">
+                {new Date(lastScan.scanned_at).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="font-body text-sm text-[#0A0A0A] mt-1">
+                {lastScan.listings_created} listing{lastScan.listings_created !== 1 ? 's' : ''} created
+                <span className={`ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full ${lastScan.status === 'success' ? 'bg-[#E1F5EE] text-[#085041]' : 'bg-[#FFF3D0] text-[#633806]'}`}>
+                  {lastScan.status}
+                </span>
+              </p>
+            </>
+          ) : (
+            <p className="font-body text-sm text-[#888888] mt-1">No scans yet</p>
+          )}
+          <p className="font-body text-xs text-[#888888] mt-2">Next scan: {getNextScanDate()}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

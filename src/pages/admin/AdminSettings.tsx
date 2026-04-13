@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 function timeAgoShort(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -15,9 +18,17 @@ function timeAgoShort(dateStr: string) {
   return `${days} day${days > 1 ? 's' : ''} ago`;
 }
 
+interface RecentScan {
+  scanned_at: string;
+  listings_created: number;
+  listings_found: number;
+  status: string;
+}
+
 export default function AdminSettings() {
   const [settings, setSettings] = useState<Record<string, { value: string; updated_at: string }>>({});
   const [loading, setLoading] = useState(true);
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
 
   const fetchSettings = async () => {
     const { data } = await supabase.from('platform_settings').select('key, value, updated_at');
@@ -26,6 +37,13 @@ export default function AdminSettings() {
       data.forEach(s => { map[s.key] = { value: s.value || '', updated_at: s.updated_at }; });
       setSettings(map);
     }
+    // Fetch recent scans
+    const { data: scans } = await supabase
+      .from('scan_log')
+      .select('scanned_at, listings_created, listings_found, status')
+      .order('scanned_at', { ascending: false })
+      .limit(3);
+    if (scans) setRecentScans(scans);
     setLoading(false);
   };
 
@@ -140,6 +158,72 @@ export default function AdminSettings() {
           <div className="flex items-center gap-3 mt-4">
             <button onClick={() => saveKeys(listingsKeys)} className="bg-[#5847E0] text-white font-heading font-bold text-sm rounded-lg px-5 py-2.5">Save</button>
             {latestUpdate(listingsKeys) && <span className="font-body text-xs text-[#888888]">Last updated {latestUpdate(listingsKeys)}</span>}
+          </div>
+        </div>
+
+        {/* Scanner schedule */}
+        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6">
+          <h2 className="font-heading font-bold text-lg text-[#0A0A0A] mb-4">Scanner schedule</h2>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-body font-medium text-sm text-[#0A0A0A]">Auto-scan enabled</p>
+                <p className="font-body text-xs text-[#888888] mt-0.5">Automatically scan sources on schedule</p>
+              </div>
+              <Switch
+                checked={getValue('auto_scan_enabled') !== 'false'}
+                onCheckedChange={(checked) => {
+                  setValue('auto_scan_enabled', checked ? 'true' : 'false');
+                }}
+              />
+            </div>
+
+            <div className="bg-[#F7F7F7] rounded-lg px-4 py-3">
+              <p className="font-body text-sm text-[#888888]">Scans run every Tuesday and Friday at 7:00 AM AEST</p>
+            </div>
+
+            <div>
+              <p className={labelClass}>Publish mode for scheduled scans</p>
+              <RadioGroup
+                value={getValue('auto_scan_mode') || 'live'}
+                onValueChange={(val) => setValue('auto_scan_mode', val)}
+                className="mt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="live" id="scan-mode-live" />
+                  <Label htmlFor="scan-mode-live" className="font-body text-sm text-[#0A0A0A] cursor-pointer">Auto-publish</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="draft" id="scan-mode-draft" />
+                  <Label htmlFor="scan-mode-draft" className="font-body text-sm text-[#0A0A0A] cursor-pointer">Save as drafts</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {recentScans.length > 0 && (
+              <div>
+                <p className={labelClass}>Recent scheduled scans</p>
+                <div className="divide-y divide-[#F0F0F0] border border-[#EBEBEB] rounded-lg overflow-hidden">
+                  {recentScans.map((scan, i) => (
+                    <div key={i} className="px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <p className="font-body text-sm text-[#0A0A0A]">
+                          {new Date(scan.scanned_at).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p className="font-body text-xs text-[#888888]">{scan.listings_found} found · {scan.listings_created} created</p>
+                      </div>
+                      <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${scan.status === 'success' ? 'bg-[#E1F5EE] text-[#085041]' : 'bg-[#FFF3D0] text-[#633806]'}`}>
+                        {scan.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mt-4">
+            <button onClick={() => saveKeys(['auto_scan_enabled', 'auto_scan_mode'])} className="bg-[#5847E0] text-white font-heading font-bold text-sm rounded-lg px-5 py-2.5">Save</button>
+            {latestUpdate(['auto_scan_enabled', 'auto_scan_mode']) && <span className="font-body text-xs text-[#888888]">Last updated {latestUpdate(['auto_scan_enabled', 'auto_scan_mode'])}</span>}
           </div>
         </div>
       </div>
