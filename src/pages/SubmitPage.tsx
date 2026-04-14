@@ -309,7 +309,18 @@ export default function SubmitPage() {
               </p>
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="bg-white border border-brand-card-border rounded-xl p-8">
+            <form ref={formRef} onSubmit={handleSubmit} className="bg-white border border-brand-card-border rounded-xl p-8 relative">
+              {/* Honeypot */}
+              <input
+                type="text"
+                name="website_url"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, width: 0 }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
               <div className="flex flex-col gap-5">
                 {/* Title */}
                 <div>
