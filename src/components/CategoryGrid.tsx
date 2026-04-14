@@ -7,8 +7,8 @@ const categories = [
   { name: 'Events', desc: "What's on near you", href: '/events' },
   { name: 'Jobs', desc: 'Find work and internships', href: '/jobs' },
   { name: 'Grants', desc: 'Funding for your ideas', href: '/grants' },
-  { name: 'Programs', desc: 'Courses and opportunities', href: '/programs' },
-  { name: 'Wellbeing', desc: 'Support when you need it', href: '/wellbeing' },
+  { name: 'Programs', desc: 'Youth programs and workshops', href: '/programs' },
+  { name: 'Wellbeing', desc: 'Mental health and wellbeing support', href: '/wellbeing' },
 ];
 
 export default function CategoryGrid() {
@@ -40,8 +40,11 @@ export default function CategoryGrid() {
   return (
     <section className="bg-brand-section-alt px-6 py-12 md:px-16 md:py-16">
       <div className="max-w-7xl mx-auto">
-        <p className="font-body font-medium text-[13px] text-brand-violet uppercase tracking-[0.06em] mb-6">
+        <p className="font-body font-medium text-[13px] text-brand-violet uppercase tracking-[0.06em] mb-1">
           Browse by category
+        </p>
+        <p className="font-body text-sm text-brand-text-muted mb-6">
+          Curated from 43 verified Victorian sources · Updated every Tuesday and Friday
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {categories.map((cat) => {

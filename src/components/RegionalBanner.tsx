@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const locations = ['Ballarat', 'Bendigo', 'Geelong', 'Gippsland', 'Shepparton'];
 
 export default function RegionalBanner() {
@@ -13,12 +15,13 @@ export default function RegionalBanner() {
         </p>
         <div className="flex flex-wrap justify-center gap-2 mt-6">
           {locations.map((loc) => (
-            <span
+            <Link
               key={loc}
+              to={`/search?location=${encodeURIComponent(loc)}`}
               className="border border-brand-loc-border text-brand-text-muted font-body text-sm rounded-full px-3.5 py-1.5 transition-colors duration-150 hover:border-brand-violet hover:text-white"
             >
               {loc}
-            </span>
+            </Link>
           ))}
         </div>
       </div>
