@@ -5,6 +5,7 @@ const heroCards = [
   { label: 'Jobs', bg: '#1A2A4A', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&q=80' },
   { label: 'Grants', bg: '#1A3A2A', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80' },
   { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=80' },
+  { label: 'Wellbeing', bg: '#2A1A3A', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80' },
 ];
 
 export default function Hero() {
@@ -37,10 +38,10 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Desktop image grid */}
+        {/* Desktop image grid — first 4 only */}
         <div className="hidden md:flex items-center justify-center flex-1">
           <div className="w-[480px] h-[360px] grid grid-cols-2 gap-2">
-            {heroCards.map((card) => (
+            {heroCards.slice(0, 4).map((card) => (
               <div
                 key={card.label}
                 className="rounded-xl relative overflow-hidden"
@@ -61,7 +62,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Mobile image grid */}
+        {/* Mobile image grid — all 5 */}
         <div className="flex md:hidden mt-8">
           <div className="w-full grid grid-cols-2 gap-2">
             {heroCards.map((card) => (

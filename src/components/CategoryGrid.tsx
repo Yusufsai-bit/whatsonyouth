@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Briefcase, Award, BookOpen, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { supabase } from '@/integrations/supabase/client';
 
 const categories = [
   { name: 'Events', desc: "What's on near you", href: '/events' },
