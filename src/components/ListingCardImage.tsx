@@ -74,7 +74,7 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
       {src && (
         <img
           src={src}
-          alt=""
+          alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
           onError={handleError}

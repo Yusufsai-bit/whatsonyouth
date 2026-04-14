@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
@@ -6,33 +7,45 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
-import SignupPage from "./pages/SignupPage";
-import LoginPage from "./pages/LoginPage";
-import SubmitPage from "./pages/SubmitPage";
-import AccountPage from "./pages/AccountPage";
 import NotFound from "./pages/NotFound";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import CategoryListingPage from "./pages/CategoryListingPage";
-import ListingDetailPage from "./pages/ListingDetailPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import SearchPage from "./pages/SearchPage";
-import EditListingPage from "./pages/EditListingPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminListings from "./pages/admin/AdminListings";
-import AdminAddListing from "./pages/admin/AdminAddListing";
-import AdminEditListing from "./pages/admin/AdminEditListing";
-import AdminFeatured from "./pages/admin/AdminFeatured";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminScanLog from "./pages/admin/AdminScanLog";
-import AdminScanner from "./pages/admin/AdminScanner";
-import StubPage from "./pages/StubPage";
+import BackToTop from "@/components/BackToTop";
+import AdminGuard from "@/components/admin/AdminGuard";
 
-const queryClient = new QueryClient();
+const Index = lazy(() => import('./pages/Index'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SubmitPage = lazy(() => import('./pages/SubmitPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const CategoryListingPage = lazy(() => import('./pages/CategoryListingPage'));
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const EditListingPage = lazy(() => import('./pages/EditListingPage'));
+const StubPage = lazy(() => import('./pages/StubPage'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminListings = lazy(() => import('./pages/admin/AdminListings'));
+const AdminAddListing = lazy(() => import('./pages/admin/AdminAddListing'));
+const AdminEditListing = lazy(() => import('./pages/admin/AdminEditListing'));
+const AdminFeatured = lazy(() => import('./pages/admin/AdminFeatured'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminScanLog = lazy(() => import('./pages/admin/AdminScanLog'));
+const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -52,6 +65,11 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <div className="pt-14 md:pt-[60px]">
+          <Suspense fallback={
+            <div className="min-h-screen bg-white flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#5847E0] border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -71,18 +89,20 @@ const App = () => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/listings" element={<AdminListings />} />
-            <Route path="/admin/add" element={<AdminAddListing />} />
-            <Route path="/admin/listings/:id/edit" element={<AdminEditListing />} />
-            <Route path="/admin/featured" element={<AdminFeatured />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/scanner" element={<AdminScanner />} />
-            <Route path="/admin/scan-log" element={<AdminScanLog />} />
+            <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+            <Route path="/admin/listings" element={<AdminGuard><AdminListings /></AdminGuard>} />
+            <Route path="/admin/add" element={<AdminGuard><AdminAddListing /></AdminGuard>} />
+            <Route path="/admin/listings/:id/edit" element={<AdminGuard><AdminEditListing /></AdminGuard>} />
+            <Route path="/admin/featured" element={<AdminGuard><AdminFeatured /></AdminGuard>} />
+            <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
+            <Route path="/admin/settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
+            <Route path="/admin/scanner" element={<AdminGuard><AdminScanner /></AdminGuard>} />
+            <Route path="/admin/scan-log" element={<AdminGuard><AdminScanLog /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </div>
+          <BackToTop />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

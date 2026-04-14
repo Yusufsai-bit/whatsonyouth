@@ -19,16 +19,20 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     }
 
     supabase
-      .from('admins')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+      .rpc('is_admin', { _user_id: user.id })
       .then(({ data }) => {
         setIsAdmin(!!data);
       });
   }, [user, loading]);
 
-  if (loading || isAdmin === null) return null;
+  if (loading || isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#5847E0] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!user) return <Navigate to="/login" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
