@@ -24,7 +24,7 @@ const listingSchema = z.object({
   category: z.enum(categories, { errorMap: () => ({ message: 'Please select a category' }) }),
   organisation: z.string().trim().min(1, 'Organisation is required').max(200, 'Organisation must be under 200 characters'),
   location: z.string().trim().min(1, 'Location is required').max(200, 'Location must be under 200 characters'),
-  link: z.string().trim().url('Please enter a valid URL (e.g. https://example.com)').max(2000, 'URL is too long'),
+  link: z.string().trim().url('Please enter a valid URL').refine(v => v.startsWith('https://'), 'Link must start with https://').pipe(z.string().max(2000, 'URL is too long')),
   description: z.string().trim().min(1, 'Description is required').max(300, 'Description must be under 300 characters'),
   contact_email: z.string().trim().email('Please enter a valid email address').max(255, 'Email is too long'),
 });
@@ -392,6 +392,7 @@ export default function SubmitPage() {
                 <div>
                   <label className="font-body font-medium text-sm text-brand-text-primary block mb-1.5">Website or application link</label>
                   <input type="url" name="link" required maxLength={2000} value={form.link} onChange={handleChange} placeholder="https://example.com" className={`${inputClass('link')} placeholder:text-brand-text-muted`} />
+                  <p className="font-body text-xs text-brand-text-muted mt-1">Must start with https://</p>
                   {errors.link && <p className="font-body text-xs text-[#E24B4A] mt-1">{errors.link}</p>}
                 </div>
 

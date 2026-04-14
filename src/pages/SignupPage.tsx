@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail } from 'lucide-react';
+import PasswordStrengthBar from '@/components/PasswordStrengthBar';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -101,6 +102,7 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-brand-input-border rounded-lg px-3.5 py-3 font-body text-[15px] text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[48px]"
                 />
+                <PasswordStrengthBar password={password} />
               </div>
               <button
                 type="submit"
