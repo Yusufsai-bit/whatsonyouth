@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
               </p>
               <Link
                 to="/login"
-                className="inline-block mt-6 bg-[#D85A30] text-white font-heading font-bold text-base rounded-lg px-7 py-3 transition-colors hover:bg-[#F0997B]"
+                className="inline-block mt-6 bg-[#C04A22] text-white font-heading font-bold text-base rounded-lg px-7 py-3 transition-colors hover:bg-[#D96840]"
               >
                 Go to log in
               </Link>
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
           ) : (
             <>
               <h1 className="font-heading font-bold text-[28px] text-[#0A0A0A]">Choose a new password</h1>
-              {error && <p className="font-body text-sm text-[#D85A30] mt-3">{error}</p>}
+              {error && <p className="font-body text-sm text-[#C04A22] mt-3">{error}</p>}
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-6">
                 <div>
                   <label className="font-body font-medium text-sm text-[#0A0A0A] block mb-1.5">New password</label>
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#D85A30] text-white font-heading font-bold text-base rounded-lg py-3.5 transition-colors duration-100 hover:bg-[#F0997B] disabled:opacity-50"
+                  className="w-full bg-[#C04A22] text-white font-heading font-bold text-base rounded-lg py-3.5 transition-colors duration-100 hover:bg-[#D96840] disabled:opacity-50"
                 >
                   {loading ? 'Updating...' : 'Set new password'}
                 </button>

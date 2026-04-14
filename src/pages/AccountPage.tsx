@@ -167,7 +167,7 @@ export default function AccountPage() {
               </p>
               <Link
                 to="/submit"
-                className="bg-[#D85A30] text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 transition-colors duration-100 hover:bg-[#F0997B]"
+                className="bg-[#C04A22] text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 transition-colors duration-100 hover:bg-[#D96840]"
               >
                 Submit your first listing
               </Link>
@@ -231,7 +231,7 @@ export default function AccountPage() {
 
           <Link
             to="/submit"
-            className="inline-block bg-[#D85A30] text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 transition-colors duration-100 hover:bg-[#F0997B]"
+            className="inline-block bg-[#C04A22] text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 transition-colors duration-100 hover:bg-[#D96840]"
           >
             Submit a new listing
           </Link>
@@ -246,7 +246,7 @@ export default function AccountPage() {
                 </div>
               )}
               {pwError && (
-                <p className="font-body text-sm text-[#D85A30] mb-4">{pwError}</p>
+                <p className="font-body text-sm text-[#C04A22] mb-4">{pwError}</p>
               )}
               <form onSubmit={handlePasswordChange} className="flex flex-col gap-4">
                 <div>
