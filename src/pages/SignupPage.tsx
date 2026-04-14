@@ -15,10 +15,25 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [lastAttempt, setLastAttempt] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const now = Date.now();
+    if (now - lastAttempt < 3000) {
+      setError('Please wait before trying again.');
+      return;
+    }
+    if (attemptCount >= 5) {
+      setError('Too many attempts. Please try again later.');
+      return;
+    }
+    setLastAttempt(now);
+    setAttemptCount(c => c + 1);
+
     setLoading(true);
     const { error } = await signUp(email, password, firstName);
     setLoading(false);

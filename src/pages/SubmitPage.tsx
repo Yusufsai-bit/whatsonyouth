@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, Upload, Copy, MapPin, Calendar } from 'lucide-react';
+import { Check, Upload, Copy, MapPin, Calendar, Plus } from 'lucide-react';
 import { z } from 'zod';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -92,7 +92,42 @@ export default function SubmitPage() {
   const formRef = useRef<HTMLFormElement>(null);
 
   if (loading) return null;
-  if (!user) return <Navigate to="/signup" replace />;
+  if (!user) {
+    return (
+      <>
+        <SEO
+          title="Submit a Listing — What's On Youth"
+          description="Share your event, job, grant, program, or wellbeing resource with young Victorians for free."
+          noindex
+        />
+        <Navbar />
+        <div className="bg-white min-h-screen flex items-start justify-center px-4 md:px-6 py-16">
+          <div className="text-center max-w-[480px]">
+            <div className="w-16 h-16 rounded-full bg-brand-violet-surface flex items-center justify-center mx-auto mb-5">
+              <Plus size={28} className="text-brand-violet" />
+            </div>
+            <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mb-3">Submit a listing</h1>
+            <p className="font-body text-base text-brand-text-secondary mb-6">
+              Create a free account to share opportunities with young Victorians across the state.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link to="/signup" className="bg-brand-coral text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 hover:bg-brand-coral-light transition-colors min-h-[48px] flex items-center">
+                Create free account
+              </Link>
+              <Link to="/login" className="border border-brand-card-border text-brand-text-primary font-heading font-bold text-[15px] rounded-lg px-6 py-3 hover:bg-brand-section-alt transition-colors min-h-[48px] flex items-center">
+                Log in
+              </Link>
+            </div>
+            <p className="font-body text-sm text-brand-text-secondary text-center mt-4">
+              Already have an account?{' '}
+              <Link to="/login" className="text-brand-violet hover:underline">Log in here</Link>
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   const contactEmail = form.contact_email || user.email || '';
 

@@ -359,12 +359,15 @@ export default function CategoryListingPage({ category }: { category: string }) 
               </div>
 
               {hasMore && (
-                <div className="flex justify-center mt-10">
+                <div className="flex flex-col items-center mt-10 gap-3">
+                  <p className="font-body text-sm text-brand-text-muted">
+                    Showing {Math.min(visibleCount, filtered.length)} of {filtered.length} listings
+                  </p>
                   <button
                     onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
-                    className="bg-white border border-brand-card-border text-brand-text-primary font-body font-medium text-[15px] rounded-lg px-8 py-3 hover:bg-brand-section-alt transition-colors min-h-[48px]"
+                    className="bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-heading font-bold text-sm rounded-lg px-8 py-3 hover:bg-[#F7F7F7] transition-colors min-h-[48px]"
                   >
-                    Load more
+                    Load more {category.toLowerCase()}
                   </button>
                 </div>
               )}

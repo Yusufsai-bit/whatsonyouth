@@ -16,6 +16,7 @@ const platformLinks = [
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
   { label: 'Privacy policy', href: '/privacy' },
+  { label: 'Instagram ↗', href: 'https://instagram.com/whatsonyouth', external: true },
 ];
 
 export default function Footer() {
@@ -40,16 +41,22 @@ export default function Footer() {
         <div>
           <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Platform</p>
           {platformLinks.map((link) => (
-            <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
-              {link.label}
-            </Link>
+            'external' in link && link.external ? (
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
+                {link.label}
+              </Link>
+            )
           ))}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto border-t border-brand-footer-divider mt-8 pt-5 flex flex-col sm:flex-row items-center justify-center gap-2">
         <p className="font-body text-[13px] text-brand-footer-text">
-          © 2025 What's On Youth. Built for young Victorians.
+          © {new Date().getFullYear()} What's On Youth. Built for young Victorians.
         </p>
         <span className="font-body text-[12px]" style={{ color: '#555555' }}>
           Photos from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: '#555555' }}>Unsplash</a>

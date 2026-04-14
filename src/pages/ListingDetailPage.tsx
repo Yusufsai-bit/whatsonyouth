@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, ArrowLeft, Copy, Check, Flag, X, ExternalLink } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import { MapPin, Calendar, ArrowLeft, Copy, Check, Flag, X, ExternalLink, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import ListingCardImage from '@/components/ListingCardImage';
+
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
   Jobs: '#1A2A4A',
@@ -156,10 +158,33 @@ export default function ListingDetailPage() {
     ? cleanDesc.slice(0, 155) + '...'
     : cleanDesc;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": listing.category === 'Events' ? "Event" : "JobPosting",
+    "name": listing.title,
+    "description": cleanDesc,
+    "url": listing.link,
+    "organizer": {
+      "@type": "Organization",
+      "name": listing.organisation,
+    },
+    "location": {
+      "@type": "Place",
+      "name": listing.location,
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Victoria",
+        "addressCountry": "AU",
+      },
+    },
+    ...(listing.expiry_date && { "validThrough": listing.expiry_date }),
+    ...(listing.image_url && { "image": listing.image_url }),
+  };
+
   return (
     <>
       <SEO
-        title={`${listing.title} \u2014 What's On Youth`}
+        title={`${listing.title} — What's On Youth`}
         description={truncDesc}
         ogTitle={listing.title}
         ogDescription={truncDesc}
@@ -168,18 +193,21 @@ export default function ListingDetailPage() {
         ogType="article"
         canonical={`https://www.whatsonyouth.org.au/listings/${listing.id}`}
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       <Navbar />
 
       <div className="bg-white min-h-screen overflow-x-hidden">
-        {/* Back link */}
+        {/* Breadcrumbs */}
         <div className="px-6 md:px-16 py-4 max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate(backRoute)}
-            className="flex items-center gap-1.5 font-body font-medium text-sm text-brand-violet hover:underline min-h-[44px] w-full md:w-auto"
-          >
-            <ArrowLeft size={14} />
-            Back to {listing.category}
-          </button>
+          <nav className="flex items-center gap-1.5 font-body text-sm min-h-[44px] flex-wrap" aria-label="Breadcrumb">
+            <Link to="/" className="text-brand-text-muted hover:text-brand-violet transition-colors">Home</Link>
+            <ChevronRight size={14} className="text-brand-text-muted flex-shrink-0" />
+            <Link to={backRoute} className="text-brand-text-muted hover:text-brand-violet transition-colors">{listing.category}</Link>
+            <ChevronRight size={14} className="text-brand-text-muted flex-shrink-0" />
+            <span className="text-brand-text-primary font-medium truncate max-w-[200px] md:max-w-[400px]">{listing.title}</span>
+          </nav>
         </div>
 
         <div className="px-6 md:px-16 pb-16 max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
@@ -234,10 +262,9 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* Right sidebar — becomes full-width on mobile */}
+          {/* Right sidebar */}
           <div className="w-full lg:w-[320px] flex-shrink-0">
             <div className="lg:sticky lg:top-6 bg-white border border-brand-card-border rounded-xl p-6 space-y-5">
-              {/* Date info */}
               {listing.expiry_date && (
                 <div>
                   <p className="font-body font-medium text-[13px] text-brand-text-muted">
@@ -254,7 +281,6 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              {/* CTA */}
               <a
                 href={listing.link}
                 target="_blank"
@@ -265,7 +291,6 @@ export default function ListingDetailPage() {
                 <ExternalLink size={14} />
               </a>
 
-              {/* Share */}
               <button
                 onClick={handleCopy}
                 className="flex items-center justify-center gap-2 w-full border border-brand-card-border text-brand-text-primary font-body font-medium text-sm rounded-lg py-3 hover:bg-brand-section-alt transition-colors min-h-[48px]"
@@ -273,12 +298,10 @@ export default function ListingDetailPage() {
                 {copied ? <><Check size={14} /> Link copied!</> : <><Copy size={14} /> Share this listing</>}
               </button>
 
-              {/* Posted date */}
               <p className="font-body text-[13px] text-brand-text-muted">
                 Listed {daysAgo(listing.created_at)}
               </p>
 
-              {/* Report */}
               <button
                 onClick={() => setShowReport(true)}
                 className="font-body text-xs text-brand-footer-link hover:underline min-h-[44px]"
