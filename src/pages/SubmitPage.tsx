@@ -211,6 +211,7 @@ export default function SubmitPage() {
 
     setSubmitting(false);
     if (!error && data) {
+      setLastSubmitTime(Date.now());
       setNewListingId(data.id);
       setSubmitted(true);
     }
