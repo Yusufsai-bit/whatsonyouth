@@ -14,8 +14,8 @@ const platformLinks = [
   { label: 'Sign up', href: '/signup' },
   { label: 'Log in', href: '/login' },
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/about' },
-  { label: 'Privacy policy', href: '/about' },
+  { label: 'Contact', href: '/contact' },
+  { label: 'Privacy policy', href: '/privacy' },
 ];
 
 export default function Footer() {

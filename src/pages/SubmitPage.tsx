@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -80,6 +81,8 @@ export default function SubmitPage() {
     description: '',
     contact_email: '',
   });
+  const [honeypot, setHoneypot] = useState('');
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState('');
@@ -126,6 +129,19 @@ export default function SubmitPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Honeypot check
+    if (honeypot) {
+      toast.success('Listing submitted successfully!');
+      return;
+    }
+
+    // Rate limiting
+    const now = Date.now();
+    if (now - lastSubmitTime < 60000) {
+      toast.error('Please wait a moment before submitting again.');
+      return;
+    }
+
     const payload = { ...form, contact_email: contactEmail };
     const result = listingSchema.safeParse(payload);
 
@@ -151,6 +167,16 @@ export default function SubmitPage() {
     }
 
     if (hasImageError) return;
+
+    // Minimum content checks
+    if (result.data.title.length < 10) {
+      toast.error('Title must be at least 10 characters.');
+      return;
+    }
+    if (result.data.description.trim().length > 0 && result.data.description.trim().length < 30) {
+      toast.error('Description must be at least 30 characters if provided.');
+      return;
+    }
 
     setErrors({});
     setSubmitting(true);
@@ -185,6 +211,7 @@ export default function SubmitPage() {
 
     setSubmitting(false);
     if (!error && data) {
+      setLastSubmitTime(Date.now());
       setNewListingId(data.id);
       setSubmitted(true);
     }
@@ -282,7 +309,18 @@ export default function SubmitPage() {
               </p>
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="bg-white border border-brand-card-border rounded-xl p-8">
+            <form ref={formRef} onSubmit={handleSubmit} className="bg-white border border-brand-card-border rounded-xl p-8 relative">
+              {/* Honeypot */}
+              <input
+                type="text"
+                name="website_url"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, width: 0 }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
               <div className="flex flex-col gap-5">
                 {/* Title */}
                 <div>

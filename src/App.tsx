@@ -17,6 +17,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CategoryListingPage from "./pages/CategoryListingPage";
 import ListingDetailPage from "./pages/ListingDetailPage";
 import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import SearchPage from "./pages/SearchPage";
 import EditListingPage from "./pages/EditListingPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -66,6 +68,8 @@ const App = () => (
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/listings" element={<AdminListings />} />
