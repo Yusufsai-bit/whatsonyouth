@@ -29,8 +29,8 @@ export default function AboutPage() {
   return (
     <>
       <SEO
-        title="About \u2014 What's On Youth"
-        description="What's On Youth is a free Victoria-wide platform connecting young people aged 15\u201325 with opportunities across the state."
+        title="About — What's On Youth"
+        description="What's On Youth is a free Victoria-wide platform connecting young people aged 15–25 with opportunities across the state."
         ogUrl="https://www.whatsonyouth.org.au/about"
         canonical="https://www.whatsonyouth.org.au/about"
       />
@@ -47,6 +47,9 @@ export default function AboutPage() {
           </h1>
           <p className="font-body text-lg text-brand-footer-link leading-[1.7] max-w-[560px] mt-5">
             What's On Youth is a free platform that connects young people aged 15–25 across Victoria with events, jobs, grants, programs, and wellbeing support — all in one place.
+          </p>
+          <p className="font-body text-base text-brand-footer-link leading-[1.7] max-w-[560px] mt-4">
+            What's On Youth is an independent platform built and run by Yusuf Sai, a young Victorian passionate about making opportunity discovery easier for everyone across the state.
           </p>
         </div>
       </section>
