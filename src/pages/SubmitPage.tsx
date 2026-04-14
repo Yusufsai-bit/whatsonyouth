@@ -292,7 +292,9 @@ export default function SubmitPage() {
               </button>
             </div>
             {copied && <p className="font-body text-xs mt-1" style={{ color: '#1D9E75' }}>Copied!</p>}
-
+            <p className="font-body text-sm text-brand-text-muted mt-4 max-w-[440px] mx-auto">
+              Share this link with your community to spread the word. Your listing will remain live until its expiry date or until you remove it from your account.
+            </p>
             <div className="flex gap-3 justify-center mt-8">
               <Link
                 to={`/listings/${newListingId}`}

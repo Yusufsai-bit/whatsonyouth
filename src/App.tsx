@@ -26,6 +26,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const EditListingPage = lazy(() => import('./pages/EditListingPage'));
 const StubPage = lazy(() => import('./pages/StubPage'));
+const SavedListingsPage = lazy(() => import('./pages/SavedListingsPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminListings = lazy(() => import('./pages/admin/AdminListings'));
 const AdminAddListing = lazy(() => import('./pages/admin/AdminAddListing'));
@@ -89,6 +90,7 @@ const App = () => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/saved" element={<SavedListingsPage />} />
             <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
             <Route path="/admin/listings" element={<AdminGuard><AdminListings /></AdminGuard>} />
             <Route path="/admin/add" element={<AdminGuard><AdminAddListing /></AdminGuard>} />
