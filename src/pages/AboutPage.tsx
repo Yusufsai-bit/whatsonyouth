@@ -112,10 +112,10 @@ export default function AboutPage() {
             Have a question, want to partner with us, or found something that needs fixing?
           </p>
           <a
-            href="mailto:hello@whatsonyouth.org.au"
+            href="mailto:info@whatsonyouth.org.au"
             className="font-heading font-bold text-[20px] text-brand-coral hover:text-brand-coral-light transition-colors"
           >
-            hello@whatsonyouth.org.au
+            info@whatsonyouth.org.au
           </a>
           <p className="font-body text-[13px] text-brand-text-secondary mt-3">
             We aim to respond within 2 business days.
