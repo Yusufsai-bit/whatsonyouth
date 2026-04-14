@@ -25,7 +25,7 @@ const sections = [
   },
   {
     title: 'Contact',
-    body: 'For privacy enquiries contact us at hello@whatsonyouth.org.au',
+    body: 'For privacy enquiries contact us at info@whatsonyouth.org.au',
   },
 ];
 

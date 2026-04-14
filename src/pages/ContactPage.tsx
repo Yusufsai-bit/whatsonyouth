@@ -31,8 +31,8 @@ export default function ContactPage() {
               <p className="font-body text-sm text-brand-text-secondary mb-4">
                 For questions about the platform, partnerships, or media enquiries.
               </p>
-              <a href="mailto:hello@whatsonyouth.org.au" className="font-body text-sm text-brand-violet hover:underline">
-                hello@whatsonyouth.org.au
+              <a href="mailto:info@whatsonyouth.org.au" className="font-body text-sm text-brand-violet hover:underline">
+                info@whatsonyouth.org.au
               </a>
             </div>
 
