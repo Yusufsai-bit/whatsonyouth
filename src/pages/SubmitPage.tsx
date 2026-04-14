@@ -80,6 +80,8 @@ export default function SubmitPage() {
     description: '',
     contact_email: '',
   });
+  const [honeypot, setHoneypot] = useState('');
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState('');
@@ -125,6 +127,19 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot check
+    if (honeypot) {
+      toast.success('Listing submitted successfully!');
+      return;
+    }
+
+    // Rate limiting
+    const now = Date.now();
+    if (now - lastSubmitTime < 60000) {
+      toast.error('Please wait a moment before submitting again.');
+      return;
+    }
 
     const payload = { ...form, contact_email: contactEmail };
     const result = listingSchema.safeParse(payload);
