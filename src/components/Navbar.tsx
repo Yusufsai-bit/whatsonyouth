@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Heart, Shield, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import useSavedListings from '@/hooks/useSavedListings';
 import logo from '@/assets/woy-logo-reversed.svg';
 
 const categoryLinks = [
@@ -17,7 +18,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const location = useLocation();
+  const location = window.location;
+  const { savedIds } = useSavedListings();
 
   useEffect(() => {
     if (!user) {
@@ -29,7 +31,8 @@ export default function Navbar() {
     });
   }, [user]);
 
-  const isActive = (href: string) => location.pathname === href;
+  const pathname = window.location.pathname;
+  const isActive = (href: string) => pathname === href;
 
   const mobileLinkClass = "font-heading font-bold text-[20px] text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
   const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
@@ -61,6 +64,14 @@ export default function Navbar() {
       <div className="hidden md:flex items-center gap-3">
         <Link to="/search" className="text-brand-nav-link hover:text-white transition-colors duration-100">
           <Search size={18} />
+        </Link>
+        <Link to="/saved" className="relative text-brand-nav-link hover:text-white transition-colors duration-100">
+          <Heart size={18} />
+          {savedIds.length > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-brand-coral text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+              {savedIds.length > 9 ? '9+' : savedIds.length}
+            </span>
+          )}
         </Link>
         {!loading && user && isAdmin && (
           <Link
@@ -95,13 +106,23 @@ export default function Navbar() {
       </div>
 
       {/* Mobile hamburger */}
-      <button
-        className="md:hidden text-brand-nav-link min-w-[44px] min-h-[44px] flex items-center justify-center"
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-      >
-        <Menu size={24} />
-      </button>
+      <div className="md:hidden flex items-center gap-2 ml-auto">
+        <Link to="/saved" className="relative text-brand-nav-link hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <Heart size={20} />
+          {savedIds.length > 0 && (
+            <span className="absolute top-1 right-1 bg-brand-coral text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+              {savedIds.length > 9 ? '9+' : savedIds.length}
+            </span>
+          )}
+        </Link>
+        <button
+          className="text-brand-nav-link min-w-[44px] min-h-[44px] flex items-center justify-center"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
 
       {/* Mobile overlay */}
       {open && (
@@ -112,75 +133,38 @@ export default function Navbar() {
               aria-label="Close menu"
               className="text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
-              <X size={24} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
           <div className="flex flex-col mt-6">
-            {/* Search */}
-            <Link
-              to="/search"
-              onClick={() => setOpen(false)}
-              className={isActive('/search') ? mobileLinkClass : mobileLinkInactive}
-            >
+            <Link to="/search" onClick={() => setOpen(false)} className={isActive('/search') ? mobileLinkClass : mobileLinkInactive}>
               Search
             </Link>
-
-            {/* Separator */}
             <div className="border-b border-[#333] my-2" />
-
-            {/* Category links */}
             {categoryLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setOpen(false)}
-                className={isActive(link.href) ? mobileLinkClass : mobileLinkInactive}
-              >
+              <Link key={link.href} to={link.href} onClick={() => setOpen(false)} className={isActive(link.href) ? mobileLinkClass : mobileLinkInactive}>
                 {link.label}
               </Link>
             ))}
-
-            {/* Separator */}
             <div className="border-b border-[#333] my-2" />
-
-            {/* Submit */}
-            <Link
-              to="/submit"
-              onClick={() => setOpen(false)}
-              className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}
-            >
+            <Link to="/saved" onClick={() => setOpen(false)} className={isActive('/saved') ? mobileLinkClass : mobileLinkInactive}>
+              Saved {savedIds.length > 0 && `(${savedIds.length})`}
+            </Link>
+            <Link to="/submit" onClick={() => setOpen(false)} className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}>
               Submit a listing
             </Link>
-
-            {/* Login / Account */}
             {!loading && user ? (
-              <Link
-                to="/account"
-                onClick={() => setOpen(false)}
-                className={isActive('/account') ? mobileLinkClass : mobileLinkInactive}
-              >
+              <Link to="/account" onClick={() => setOpen(false)} className={isActive('/account') ? mobileLinkClass : mobileLinkInactive}>
                 My account
               </Link>
             ) : !loading ? (
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className={isActive('/login') ? mobileLinkClass : mobileLinkInactive}
-              >
+              <Link to="/login" onClick={() => setOpen(false)} className={isActive('/login') ? mobileLinkClass : mobileLinkInactive}>
                 Log in
               </Link>
             ) : null}
-
-            {/* About */}
-            <Link
-              to="/about"
-              onClick={() => setOpen(false)}
-              className={isActive('/about') ? mobileLinkClass : mobileLinkInactive}
-            >
+            <Link to="/about" onClick={() => setOpen(false)} className={isActive('/about') ? mobileLinkClass : mobileLinkInactive}>
               About
             </Link>
-
-            {/* Admin (if applicable) */}
             {!loading && user && isAdmin && (
               <Link
                 to="/admin"
