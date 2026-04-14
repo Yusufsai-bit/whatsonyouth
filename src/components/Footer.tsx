@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/woy-logo-reversed.svg';
 
 const exploreLinks = [
@@ -20,9 +22,34 @@ const platformLinks = [
 ];
 
 export default function Footer() {
+  const [digestEmail, setDigestEmail] = useState('');
+  const [digestSubmitted, setDigestSubmitted] = useState(false);
+  const [digestError, setDigestError] = useState('');
+  const [digestLoading, setDigestLoading] = useState(false);
+
+  const handleDigest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!digestEmail.trim()) return;
+    setDigestLoading(true);
+    setDigestError('');
+
+    const { error } = await supabase.from('digest_subscribers').insert({ email: digestEmail.trim().toLowerCase() });
+
+    setDigestLoading(false);
+    if (error) {
+      if (error.code === '23505') {
+        setDigestError('Already subscribed!');
+      } else {
+        setDigestError('Something went wrong. Try again.');
+      }
+    } else {
+      setDigestSubmitted(true);
+    }
+  };
+
   return (
     <footer className="bg-brand-dark px-6 py-10 md:px-16 md:py-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <img src={logo} alt="What's On Youth" className="h-[26px] mb-2" />
           <p className="font-body text-sm text-brand-footer-text mt-2">Your opportunities, all in one place.</p>
@@ -51,6 +78,36 @@ export default function Footer() {
               </Link>
             )
           ))}
+        </div>
+
+        <div>
+          <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Stay updated</p>
+          <p className="font-body text-sm text-brand-footer-text mb-3">New opportunities every Tuesday and Friday.</p>
+          <form onSubmit={handleDigest} className="flex gap-2">
+            <input
+              type="email"
+              required
+              placeholder="you@email.com"
+              value={digestEmail}
+              onChange={e => setDigestEmail(e.target.value)}
+              className="flex-1 min-w-0 bg-[#1A1A1A] border border-[#333] rounded-lg px-3 py-2 font-body text-sm text-white placeholder:text-[#666] focus:outline-none focus:border-brand-violet"
+            />
+            <button
+              type="submit"
+              disabled={digestLoading || digestSubmitted}
+              className="bg-brand-violet text-white font-body font-medium text-sm rounded-lg px-4 py-2 hover:opacity-90 transition-opacity disabled:opacity-60 whitespace-nowrap"
+            >
+              {digestSubmitted ? '✓' : 'Sign up'}
+            </button>
+          </form>
+          {digestSubmitted && (
+            <p className="font-body text-xs text-brand-footer-text mt-2">
+              You're in! We'll email new opportunities twice a week.
+            </p>
+          )}
+          {digestError && (
+            <p className="font-body text-xs text-brand-footer-text mt-2">{digestError}</p>
+          )}
         </div>
       </div>
 

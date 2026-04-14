@@ -32,6 +32,24 @@ export type Database = {
         }
         Relationships: []
       }
+      digest_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       listing_reports: {
         Row: {
           created_at: string
@@ -71,6 +89,7 @@ export type Database = {
           source: string
           title: string
           user_id: string
+          view_count: number
         }
         Insert: {
           category: string
@@ -89,6 +108,7 @@ export type Database = {
           source?: string
           title: string
           user_id: string
+          view_count?: number
         }
         Update: {
           category?: string
@@ -107,6 +127,7 @@ export type Database = {
           source?: string
           title?: string
           user_id?: string
+          view_count?: number
         }
         Relationships: []
       }
@@ -261,6 +282,10 @@ export type Database = {
       }
     }
     Functions: {
+      increment_listing_views: {
+        Args: { listing_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       list_users: {
         Args: never

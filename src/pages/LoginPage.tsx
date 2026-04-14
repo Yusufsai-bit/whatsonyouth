@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
-      navigate('/submit');
+      navigate('/');
     }
   };
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
           <p className="font-body text-base text-[#555555] mb-6">
             Log in to submit and manage your listings.
           </p>
-          {error && <p className="font-body text-sm text-[#D85A30] mb-4">{error}</p>}
+          {error && <p className="font-body text-sm text-[#C04A22] mb-4">{error}</p>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="font-body font-medium text-sm text-[#0A0A0A] block mb-1.5">Email</label>

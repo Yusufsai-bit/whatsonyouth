@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const steps = [
-  'Fill in your listing details',
   'Create a free account or log in',
+  'Fill in your listing details',
   'Your listing goes live immediately and reaches young Victorians',
 ];
 

@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Calendar, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import ListingCardImage from '@/components/ListingCardImage';
+import useSavedListings from '@/hooks/useSavedListings';
 import useEmblaCarousel from 'embla-carousel-react';
 
 interface Listing {
@@ -26,62 +27,65 @@ function daysAgo(dateStr: string) {
   return `${days} days ago`;
 }
 
-/** Reorder listings so no two adjacent items share the same category */
 function alternateCategories(items: Listing[]): Listing[] {
   if (items.length <= 1) return items;
-
   const result: Listing[] = [];
   const remaining = [...items];
-
-  // Start with the first item
   result.push(remaining.shift()!);
-
   while (remaining.length > 0) {
     const lastCategory = result[result.length - 1].category;
-    // Find first item with a different category
     const diffIdx = remaining.findIndex(l => l.category !== lastCategory);
     if (diffIdx !== -1) {
       result.push(remaining.splice(diffIdx, 1)[0]);
     } else {
-      // No different category available, just take the next one
       result.push(remaining.shift()!);
     }
   }
-
   return result;
 }
 
-function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => void }) {
+function ListingCard({ listing, isSaved, onToggleSave }: { listing: Listing; isSaved: boolean; onToggleSave: () => void }) {
   return (
     <div
-      onClick={onClick}
-      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 cursor-pointer h-full"
+      role="article"
+      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 h-full"
     >
-      <div className="w-full h-40 relative">
-        <ListingCardImage
-          listingId={listing.id}
-          imageUrl={listing.image_url}
-          title={listing.title}
-          category={listing.category}
-          link={listing.link}
-          className="w-full h-40"
-        />
-        <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
-          {listing.category}
-        </span>
-        {listing.is_featured && (
-          <span className="absolute top-2.5 right-2.5 bg-[#FEF3C7] text-[#92400E] font-body text-[10px] rounded px-1.5 py-0.5">
-            ★
+      <Link to={`/listings/${listing.id}`} className="block">
+        <div className="w-full h-40 relative">
+          <ListingCardImage
+            listingId={listing.id}
+            imageUrl={listing.image_url}
+            title={listing.title}
+            category={listing.category}
+            link={listing.link}
+            className="w-full h-40"
+          />
+          <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
+            {listing.category}
           </span>
-        )}
-      </div>
+          {listing.is_featured && (
+            <span className="absolute top-2.5 left-2.5 bg-[#FEF3C7] text-[#92400E] font-body text-[10px] rounded px-1.5 py-0.5">
+              ★
+            </span>
+          )}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(); }}
+            className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+            aria-label={isSaved ? 'Unsave listing' : 'Save listing'}
+          >
+            <Heart size={18} className={isSaved ? 'fill-red-400 text-red-400' : 'text-white/60'} />
+          </button>
+        </div>
+      </Link>
       <div className="p-4 flex flex-col flex-1">
         <p className="font-body text-xs text-brand-text-muted uppercase tracking-[0.04em] mb-1.5">
           {listing.organisation}
         </p>
-        <h3 className="font-heading font-bold text-[16px] text-brand-text-primary leading-[1.3] mb-2 line-clamp-2">
-          {listing.title}
-        </h3>
+        <Link to={`/listings/${listing.id}`}>
+          <h3 className="font-heading font-bold text-[16px] text-brand-text-primary leading-[1.3] mb-2 line-clamp-2">
+            {listing.title}
+          </h3>
+        </Link>
         <div className="flex items-center gap-1.5 font-body text-[13px] text-brand-text-secondary mb-1">
           <MapPin size={13} className="flex-shrink-0" />
           <span>{listing.location}</span>
@@ -91,14 +95,13 @@ function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => vo
           <span>Posted {daysAgo(listing.created_at)}</span>
         </div>
         <div className="mt-auto flex items-center justify-between pt-2">
-          {listing.source === 'user' && (
+          {listing.source !== 'user' ? (
+            <span className="bg-[#E6F1FB] text-[#0C447C] font-body text-[10px] rounded-full px-2 py-0.5">
+              Curated by WOY
+            </span>
+          ) : (
             <span className="bg-[#F0EEFF] text-[#5847E0] font-body text-[10px] rounded-full px-2 py-0.5">
               Community
-            </span>
-          )}
-          {listing.source === 'admin' && (
-            <span className="bg-[#E6F1FB] text-[#0C447C] font-body text-[10px] rounded-full px-2 py-0.5">
-              Admin
             </span>
           )}
           <span className="font-body font-medium text-[13px] text-brand-violet ml-auto">
@@ -113,7 +116,7 @@ function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => vo
 export default function FeaturedOpportunities() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const navigate = useNavigate();
+  const { isSaved, toggleSave } = useSavedListings();
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
@@ -162,7 +165,6 @@ export default function FeaturedOpportunities() {
         if (recent) results = [...results, ...(recent as Listing[])];
       }
 
-      // Alternate categories so no two adjacent cards share the same type
       setListings(alternateCategories(results));
       setLoaded(true);
     })();
@@ -227,14 +229,17 @@ export default function FeaturedOpportunities() {
                       key={listing.id}
                       className="min-w-0 shrink-0 grow-0 basis-[85%] sm:basis-[45%] md:basis-[33.333%] pl-4"
                     >
-                      <ListingCard listing={listing} onClick={() => navigate(`/listings/${listing.id}`)} />
+                      <ListingCard
+                        listing={listing}
+                        isSaved={isSaved(listing.id)}
+                        onToggleSave={() => toggleSave({ id: listing.id, title: listing.title, category: listing.category, organisation: listing.organisation, location: listing.location })}
+                      />
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Mobile swipe dots */}
             {listings.length > 3 && (
               <div className="flex md:hidden justify-center gap-1.5 mt-4">
                 {listings.map((_, i) => (
@@ -250,7 +255,7 @@ export default function FeaturedOpportunities() {
             )}
 
             <div className="flex justify-center mt-10">
-              <Link to="/events" className="bg-brand-violet text-white font-heading font-bold text-base rounded-lg px-8 py-3.5 transition-colors duration-100 hover:opacity-90">
+              <Link to="/search" className="bg-brand-violet text-white font-heading font-bold text-base rounded-lg px-8 py-3.5 transition-colors duration-100 hover:opacity-90">
                 View all opportunities
               </Link>
             </div>

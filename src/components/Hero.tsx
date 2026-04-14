@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 
 const heroCards = [
-  { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&q=80' },
-  { label: 'Jobs', bg: '#1A2A4A', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&q=80' },
-  { label: 'Grants', bg: '#1A3A2A', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80' },
-  { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=80' },
-  { label: 'Wellbeing', bg: '#2A1A3A', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80' },
+  { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=400&q=75' },
+  { label: 'Jobs', bg: '#1A2A4A', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&q=75' },
+  { label: 'Grants', bg: '#1A3A2A', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&q=75' },
+  { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=400&q=75' },
+  { label: 'Wellbeing', bg: '#2A1A3A', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=75' },
 ];
 
 export default function Hero() {
@@ -24,7 +24,7 @@ export default function Hero() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              to="/events"
+              to="/search"
               className="bg-brand-coral text-white font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-coral-light min-h-[48px] flex items-center justify-center"
             >
               Explore opportunities
@@ -38,51 +38,89 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Desktop image grid — first 4 only */}
+        {/* Desktop image grid — all 5 */}
         <div className="hidden md:flex items-center justify-center flex-1">
-          <div className="w-[480px] h-[360px] grid grid-cols-2 gap-2">
-            {heroCards.slice(0, 4).map((card) => (
-              <div
-                key={card.label}
-                className="rounded-xl relative overflow-hidden"
-                style={{ backgroundColor: card.bg }}
-              >
-                <img
-                  src={card.image}
-                  alt={card.label}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="absolute inset-0 bg-black/20" />
-                <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
-                  {card.label}
-                </span>
-              </div>
-            ))}
+          <div className="w-[480px] flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2 h-[320px]">
+              {heroCards.slice(0, 4).map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-xl relative overflow-hidden h-full"
+                  style={{ backgroundColor: card.bg }}
+                >
+                  <img
+                    src={card.image}
+                    alt={card.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
+                    {card.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div
+              className="rounded-xl relative overflow-hidden h-[80px]"
+              style={{ backgroundColor: heroCards[4].bg }}
+            >
+              <img
+                src={heroCards[4].image}
+                alt={heroCards[4].label}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
+                {heroCards[4].label}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Mobile image grid — all 5 */}
         <div className="flex md:hidden mt-8">
-          <div className="w-full grid grid-cols-2 gap-2">
-            {heroCards.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-xl relative overflow-hidden h-[140px]"
-                style={{ backgroundColor: card.bg }}
-              >
-                <img
-                  src={card.image}
-                  alt={card.label}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="absolute inset-0 bg-black/20" />
-                <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
-                  {card.label}
-                </span>
-              </div>
-            ))}
+          <div className="w-full flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              {heroCards.slice(0, 4).map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-xl relative overflow-hidden h-[140px]"
+                  style={{ backgroundColor: card.bg }}
+                >
+                  <img
+                    src={card.image}
+                    alt={card.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
+                    {card.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div
+              className="rounded-xl relative overflow-hidden h-[80px]"
+              style={{ backgroundColor: heroCards[4].bg }}
+            >
+              <img
+                src={heroCards[4].image}
+                alt={heroCards[4].label}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
+                {heroCards[4].label}
+              </span>
+            </div>
           </div>
         </div>
       </div>

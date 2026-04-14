@@ -4,3 +4,4 @@ Disallow: /admin/
 Disallow: /account/
 
 Sitemap: https://www.whatsonyouth.org.au/sitemap.xml
+Sitemap: https://www.whatsonyouth.org.au/api/sitemap-listings

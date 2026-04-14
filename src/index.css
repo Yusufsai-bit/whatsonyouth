@@ -17,6 +17,14 @@
   min-height: 16px;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -71,5 +79,11 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading font-bold;
+  }
+
+  :focus-visible {
+    outline: 2px solid #5847E0;
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
