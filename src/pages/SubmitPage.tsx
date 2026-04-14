@@ -168,6 +168,16 @@ export default function SubmitPage() {
 
     if (hasImageError) return;
 
+    // Minimum content checks
+    if (result.data.title.length < 10) {
+      toast.error('Title must be at least 10 characters.');
+      return;
+    }
+    if (result.data.description.trim().length > 0 && result.data.description.trim().length < 30) {
+      toast.error('Description must be at least 30 characters if provided.');
+      return;
+    }
+
     setErrors({});
     setSubmitting(true);
 
