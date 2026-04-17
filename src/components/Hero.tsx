@@ -106,7 +106,7 @@ export default function Hero() {
               ))}
             </div>
             <div
-              className="rounded-xl relative overflow-hidden h-[90px]"
+              className="rounded-xl relative overflow-hidden h-[130px]"
               style={{ backgroundColor: heroCards[4].bg }}
             >
               <img
