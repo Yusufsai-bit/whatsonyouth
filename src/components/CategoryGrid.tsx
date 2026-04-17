@@ -8,7 +8,7 @@ const categories = [
   { name: 'Jobs', desc: 'Find work and internships', href: '/jobs' },
   { name: 'Grants', desc: 'Funding for your ideas', href: '/grants' },
   { name: 'Programs', desc: 'Youth programs and workshops', href: '/programs' },
-  { name: 'Wellbeing', desc: 'Mental health and wellbeing support', href: '/wellbeing' },
+  { name: 'Wellbeing', desc: 'Mental health and support', href: '/wellbeing' },
 ];
 
 export default function CategoryGrid() {
@@ -46,7 +46,7 @@ export default function CategoryGrid() {
         <p className="font-body text-sm text-brand-text-muted mb-6">
           Curated from 43 verified Victorian sources · Updated every Tuesday and Friday
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-stretch">
           {categories.map((cat) => {
             const count = counts[cat.name];
             return (
