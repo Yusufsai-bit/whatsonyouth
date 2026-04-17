@@ -62,21 +62,24 @@ export default function Hero() {
                 </div>
               ))}
             </div>
-            <div
-              className="rounded-xl relative overflow-hidden h-[150px]"
-              style={{ backgroundColor: heroCards[4].bg }}
-            >
-              <img
-                src={heroCards[4].image}
-                alt={heroCards[4].label}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-              <div className="absolute inset-0 bg-black/20" />
-              <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
-                {heroCards[4].label}
-              </span>
+            <div className="grid grid-cols-2 gap-2">
+              <div
+                className="rounded-xl relative overflow-hidden h-[160px]"
+                style={{ backgroundColor: heroCards[4].bg }}
+              >
+                <img
+                  src={heroCards[4].image}
+                  alt={heroCards[4].label}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
+                  {heroCards[4].label}
+                </span>
+              </div>
+              <div />
             </div>
           </div>
         </div>
@@ -105,21 +108,24 @@ export default function Hero() {
                 </div>
               ))}
             </div>
-            <div
-              className="rounded-xl relative overflow-hidden h-[130px]"
-              style={{ backgroundColor: heroCards[4].bg }}
-            >
-              <img
-                src={heroCards[4].image}
-                alt={heroCards[4].label}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-              <div className="absolute inset-0 bg-black/20" />
-              <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
-                {heroCards[4].label}
-              </span>
+            <div className="grid grid-cols-2 gap-2">
+              <div
+                className="rounded-xl relative overflow-hidden h-[140px]"
+                style={{ backgroundColor: heroCards[4].bg }}
+              >
+                <img
+                  src={heroCards[4].image}
+                  alt={heroCards[4].label}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
+                  {heroCards[4].label}
+                </span>
+              </div>
+              <div />
             </div>
           </div>
         </div>
