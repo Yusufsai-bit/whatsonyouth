@@ -38,53 +38,89 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Desktop image grid — all 5 equal tiles */}
+        {/* Desktop image grid — 2x2 + full-width Wellbeing */}
         <div className="hidden md:flex items-center justify-center flex-1">
-          <div className="w-[480px] grid grid-cols-6 gap-2">
-            {heroCards.map((card, i) => (
-              <div
-                key={card.label}
-                className={`rounded-xl relative overflow-hidden h-[150px] col-span-2 ${i === 3 ? 'col-start-2' : ''}`}
-                style={{ backgroundColor: card.bg }}
-              >
-                <img
-                  src={card.image}
-                  alt={card.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="absolute inset-0 bg-black/20" />
-                <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
-                  {card.label}
-                </span>
-              </div>
-            ))}
+          <div className="w-[480px] flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              {heroCards.slice(0, 4).map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-xl relative overflow-hidden h-[150px]"
+                  style={{ backgroundColor: card.bg }}
+                >
+                  <img
+                    src={card.image}
+                    alt={card.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
+                    {card.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div
+              className="rounded-xl relative overflow-hidden h-[100px]"
+              style={{ backgroundColor: heroCards[4].bg }}
+            >
+              <img
+                src={heroCards[4].image}
+                alt={heroCards[4].label}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute bottom-3 left-3 bg-white/90 text-brand-text-primary font-body font-medium text-xs rounded-full px-2.5 py-1">
+                {heroCards[4].label}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Mobile image grid — all 5 equal tiles */}
+        {/* Mobile image grid — 2x2 + full-width Wellbeing */}
         <div className="flex md:hidden mt-6">
-          <div className="w-full grid grid-cols-6 gap-2">
-            {heroCards.map((card, i) => (
-              <div
-                key={card.label}
-                className={`rounded-xl relative overflow-hidden h-[130px] col-span-2 ${i === 3 ? 'col-start-2' : ''}`}
-                style={{ backgroundColor: card.bg }}
-              >
-                <img
-                  src={card.image}
-                  alt={card.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="absolute inset-0 bg-black/20" />
-                <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
-                  {card.label}
-                </span>
-              </div>
-            ))}
+          <div className="w-full flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              {heroCards.slice(0, 4).map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-xl relative overflow-hidden h-[130px]"
+                  style={{ backgroundColor: card.bg }}
+                >
+                  <img
+                    src={card.image}
+                    alt={card.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                  <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
+                    {card.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div
+              className="rounded-xl relative overflow-hidden h-[90px]"
+              style={{ backgroundColor: heroCards[4].bg }}
+            >
+              <img
+                src={heroCards[4].image}
+                alt={heroCards[4].label}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-black/20" />
+              <span className="absolute bottom-2 left-2 bg-white/90 text-brand-text-primary font-body font-medium text-[11px] rounded-full px-2 py-0.5">
+                {heroCards[4].label}
+              </span>
+            </div>
           </div>
         </div>
       </div>
