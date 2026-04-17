@@ -8,7 +8,7 @@ const categories = [
   { name: 'Jobs', desc: 'Find work and internships', href: '/jobs' },
   { name: 'Grants', desc: 'Funding for your ideas', href: '/grants' },
   { name: 'Programs', desc: 'Youth programs and workshops', href: '/programs' },
-  { name: 'Wellbeing', desc: 'Mental health and wellbeing support', href: '/wellbeing' },
+  { name: 'Wellbeing', desc: 'Mental health and support', href: '/wellbeing' },
 ];
 
 export default function CategoryGrid() {
