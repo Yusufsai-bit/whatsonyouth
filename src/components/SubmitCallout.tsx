@@ -8,7 +8,7 @@ const steps = [
 
 export default function SubmitCallout() {
   return (
-    <section className="bg-brand-violet px-6 py-12 md:px-16 md:py-16">
+    <section className="bg-brand-violet px-6 py-8 md:px-16 md:py-16">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:gap-16">
         <div className="flex-1 mb-10 md:mb-0">
           <span className="inline-block bg-white/15 text-white/80 font-body font-medium text-xs rounded-full px-3 py-1 mb-4">

@@ -159,7 +159,7 @@ export default function SearchPage() {
               placeholder="Search for opportunities..."
               value={query}
               onChange={e => setQuery(e.target.value)}
-              className="w-full bg-white rounded-xl py-4 pl-[52px] pr-5 font-body text-base text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-violet"
+              className="w-full bg-white rounded-xl py-4 pl-[52px] pr-5 font-body text-[16px] md:text-base text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-brand-violet"
             />
           </div>
 
@@ -189,11 +189,11 @@ export default function SearchPage() {
                 ? `Showing ${filtered.length} results for '${debouncedQuery}'`
                 : `${filtered.length} opportunities available`}
             </p>
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <select
                 value={sort}
                 onChange={e => setSort(e.target.value as any)}
-                className="appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white"
+                className="w-full sm:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
               >
                 <option value="newest">Newest first</option>
                 <option value="az">A–Z</option>
@@ -236,7 +236,7 @@ export default function SearchPage() {
                     <div
                       key={listing.id}
                       role="article"
-                      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
+                      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:opacity-90"
                     >
                       <Link to={`/listings/${listing.id}`} className="block">
                         <div className="w-full h-40 relative">
