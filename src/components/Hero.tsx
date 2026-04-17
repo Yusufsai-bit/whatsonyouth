@@ -40,11 +40,11 @@ export default function Hero() {
 
         {/* Desktop image grid — all 5 equal tiles */}
         <div className="hidden md:flex items-center justify-center flex-1">
-          <div className="w-[480px] grid grid-cols-2 gap-2">
+          <div className="w-[480px] grid grid-cols-6 gap-2">
             {heroCards.map((card, i) => (
               <div
                 key={card.label}
-                className={`rounded-xl relative overflow-hidden h-[160px] ${i === 4 ? 'col-span-2' : ''}`}
+                className={`rounded-xl relative overflow-hidden h-[150px] col-span-2 ${i === 3 ? 'col-start-2' : ''}`}
                 style={{ backgroundColor: card.bg }}
               >
                 <img
@@ -65,11 +65,11 @@ export default function Hero() {
 
         {/* Mobile image grid — all 5 equal tiles */}
         <div className="flex md:hidden mt-6">
-          <div className="w-full grid grid-cols-2 gap-2">
+          <div className="w-full grid grid-cols-6 gap-2">
             {heroCards.map((card, i) => (
               <div
                 key={card.label}
-                className={`rounded-xl relative overflow-hidden h-[140px] ${i === 4 ? 'col-span-2' : ''}`}
+                className={`rounded-xl relative overflow-hidden h-[130px] col-span-2 ${i === 3 ? 'col-start-2' : ''}`}
                 style={{ backgroundColor: card.bg }}
               >
                 <img
