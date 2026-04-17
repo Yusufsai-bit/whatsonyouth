@@ -10,28 +10,28 @@ const heroCards = [
 
 export default function Hero() {
   return (
-    <section className="bg-white px-6 py-10 md:px-16 md:py-20">
+    <section className="bg-white px-6 py-8 md:px-16 md:py-20">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:gap-16">
         <div className="flex-1">
           <span className="inline-block bg-brand-violet-surface text-brand-violet font-body font-medium text-xs rounded-full px-3 py-1 mb-3.5">
             Victoria-wide · Free to use
           </span>
-          <h1 className="text-[40px] md:text-[72px] leading-[1.1] tracking-[-0.03em] text-brand-text-primary mb-4">
+          <h1 className="text-[32px] md:text-[72px] leading-[1.1] tracking-[-0.03em] text-brand-text-primary mb-4">
             Your next opportunity starts here
           </h1>
-          <p className="font-body text-lg text-brand-text-secondary leading-relaxed max-w-[480px] mb-8">
+          <p className="font-body text-lg text-brand-text-secondary leading-relaxed w-full max-w-[480px] mb-8">
             Discover events, jobs, grants, programs, and wellbeing support — all in one place, built for young Victorians.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/search"
-              className="bg-brand-coral text-white font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-coral-light min-h-[48px] flex items-center justify-center"
+              className="w-full sm:w-auto bg-brand-coral text-white font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-coral-light min-h-[48px] flex items-center justify-center"
             >
               Explore opportunities
             </Link>
             <Link
               to="/submit"
-              className="border-2 border-brand-dark text-brand-dark font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-section-alt min-h-[48px] flex items-center justify-center"
+              className="w-full sm:w-auto border-2 border-brand-dark text-brand-dark font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-section-alt min-h-[48px] flex items-center justify-center"
             >
               Submit a listing
             </Link>
@@ -82,7 +82,7 @@ export default function Hero() {
         </div>
 
         {/* Mobile image grid — all 5 */}
-        <div className="flex md:hidden mt-8">
+        <div className="flex md:hidden mt-6">
           <div className="w-full flex flex-col gap-2">
             <div className="grid grid-cols-2 gap-2">
               {heroCards.slice(0, 4).map((card) => (

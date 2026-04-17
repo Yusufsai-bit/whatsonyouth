@@ -13,7 +13,7 @@ export default function ContactPage() {
         {/* Hero */}
         <section className="bg-brand-dark px-6 py-16 md:px-16 md:py-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-[36px] md:text-[48px] leading-[1.1] tracking-[-0.03em] text-white mb-4">Get in touch</h1>
+            <h1 className="text-[28px] md:text-[48px] leading-[1.1] tracking-[-0.03em] text-white mb-4">Get in touch</h1>
             <p className="font-body text-lg text-brand-footer-link max-w-[520px] mx-auto">
               Have a question, want to partner with us, or need to report a listing? We'd love to hear from you.
             </p>

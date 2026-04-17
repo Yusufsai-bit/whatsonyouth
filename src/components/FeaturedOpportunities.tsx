@@ -48,7 +48,7 @@ function ListingCard({ listing, isSaved, onToggleSave }: { listing: Listing; isS
   return (
     <div
       role="article"
-      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 h-full"
+      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:opacity-90 h-full"
     >
       <Link to={`/listings/${listing.id}`} className="block">
         <div className="w-full h-40 relative">
@@ -194,7 +194,7 @@ export default function FeaturedOpportunities() {
           <>
             <div className="flex items-end justify-between mb-8">
               <div>
-                <h2 className="text-[28px] md:text-[32px] tracking-[-0.02em] text-brand-text-primary">Featured opportunities</h2>
+                <h2 className="text-[22px] md:text-[32px] tracking-[-0.02em] text-brand-text-primary">Featured opportunities</h2>
                 <p className="font-body text-base text-brand-text-secondary">
                   Handpicked opportunities for young Victorians.
                 </p>
@@ -241,15 +241,20 @@ export default function FeaturedOpportunities() {
             )}
 
             {listings.length > 3 && (
-              <div className="flex md:hidden justify-center gap-1.5 mt-4">
+              <div className="flex md:hidden justify-center mt-4">
                 {listings.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => emblaApi?.scrollTo(i)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      emblaApi?.selectedScrollSnap() === i ? 'bg-brand-violet' : 'bg-brand-card-border'
-                    }`}
-                  />
+                    aria-label={`Go to slide ${i + 1}`}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        emblaApi?.selectedScrollSnap() === i ? 'bg-brand-violet' : 'bg-brand-card-border'
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
             )}

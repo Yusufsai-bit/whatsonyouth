@@ -187,7 +187,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
       <Navbar />
 
       {/* Page header */}
-      <section className="bg-brand-section-alt px-6 py-8 md:px-16 md:py-12">
+      <section className="bg-brand-section-alt px-6 py-6 md:px-16 md:py-12">
         <div className="max-w-7xl mx-auto flex items-start justify-between">
           <div>
             <span className="inline-block bg-brand-violet-surface text-brand-violet font-body font-medium text-xs rounded-full px-3 py-1 mb-3">
@@ -227,7 +227,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                     navigate(`/search?q=${encodeURIComponent(search.trim())}&category=${category}`);
                   }
                 }}
-                className="w-full border border-brand-input-border rounded-lg py-2.5 pl-10 pr-3.5 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[44px]"
+                className="w-full border border-brand-input-border rounded-lg py-2.5 pl-10 pr-3.5 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet min-h-[44px]"
               />
             </div>
             <div className="flex gap-3 flex-1 md:flex-none">
@@ -235,7 +235,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 <select
                   value={locationFilter}
                   onChange={e => setLocationFilter(e.target.value)}
-                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
                 >
                   {locations.map(loc => (
                     <option key={loc} value={loc}>{loc}</option>
@@ -247,7 +247,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 <select
                   value={sort}
                   onChange={e => setSort(e.target.value as any)}
-                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
                 >
                   <option value="newest">Newest first</option>
                   <option value="oldest">Oldest first</option>
@@ -260,6 +260,9 @@ export default function CategoryListingPage({ category }: { category: string }) 
               Showing {visible.length} of {filtered.length} listings
             </p>
           </div>
+          <p className="font-body text-xs text-brand-text-muted md:hidden mt-2">
+            {filtered.length} listing{filtered.length !== 1 ? 's' : ''}
+          </p>
         </div>
       </div>
 
@@ -327,7 +330,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                     <div
                       key={listing.id}
                       role="article"
-                      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
+                      className="bg-white border border-brand-card-border rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:border-brand-violet hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:opacity-90"
                     >
                       <Link to={`/listings/${listing.id}`} className="block">
                         <div className="w-full h-40 relative">
@@ -402,7 +405,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
                   </p>
                   <button
                     onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
-                    className="bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-heading font-bold text-sm rounded-lg px-8 py-3 hover:bg-[#F7F7F7] transition-colors min-h-[48px]"
+                    className="w-full sm:w-auto bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-heading font-bold text-sm rounded-lg px-8 py-3 hover:bg-[#F7F7F7] transition-colors min-h-[48px]"
                   >
                     Load more {category.toLowerCase()}
                   </button>

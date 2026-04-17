@@ -4,7 +4,7 @@ const locations = ['Ballarat', 'Bendigo', 'Geelong', 'Gippsland', 'Shepparton'];
 
 export default function RegionalBanner() {
   return (
-    <section className="bg-brand-dark px-6 py-10 md:px-16 md:py-14">
+    <section className="bg-brand-dark px-6 py-8 md:px-16 md:py-14">
       <div className="max-w-3xl mx-auto text-center">
         <span className="inline-block bg-brand-violet text-white font-body font-medium text-xs rounded-full px-3 py-1 mb-4">
           Not just Melbourne

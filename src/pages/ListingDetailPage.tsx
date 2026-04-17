@@ -392,7 +392,7 @@ export default function ListingDetailPage() {
                     </div>
                     <div className="p-3">
                       <p className="font-body text-[11px] text-brand-text-muted uppercase tracking-[0.04em] mb-1">{r.organisation}</p>
-                      <h3 className="font-heading font-bold text-[14px] text-brand-text-primary leading-[1.3] line-clamp-1">{r.title}</h3>
+                      <h3 className="font-heading font-bold text-[14px] text-brand-text-primary leading-[1.3] line-clamp-2">{r.title}</h3>
                       <span className="font-body text-[12px] text-brand-violet mt-1 inline-block">View →</span>
                     </div>
                   </Link>
@@ -404,7 +404,7 @@ export default function ListingDetailPage() {
       </div>
 
       {/* Mobile floating CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-card-border p-4 z-30 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-card-border p-4 pb-6 z-30 lg:hidden" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
         <a
           href={listing.link}
           target="_blank"

@@ -127,7 +127,7 @@ export default function Navbar() {
       {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 bg-brand-dark z-40 flex flex-col px-6 pt-4 overflow-y-auto">
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2">
             <button
               onClick={() => setOpen(false)}
               aria-label="Close menu"

@@ -59,7 +59,7 @@ export default function Footer() {
         <div>
           <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Explore</p>
           {exploreLinks.map((link) => (
-            <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
+            <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-3 md:mb-2">
               {link.label}
             </Link>
           ))}
@@ -69,11 +69,11 @@ export default function Footer() {
           <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Platform</p>
           {platformLinks.map((link) => (
             'external' in link && link.external ? (
-              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-3 md:mb-2">
                 {link.label}
               </a>
             ) : (
-              <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-2">
+              <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-3 md:mb-2">
                 {link.label}
               </Link>
             )

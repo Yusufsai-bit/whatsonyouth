@@ -42,7 +42,7 @@ export default function AboutPage() {
           <span className="inline-block bg-brand-violet text-white font-body font-medium text-xs rounded-full px-3 py-1 mb-4">
             Our story
           </span>
-          <h1 className="text-[36px] md:text-[52px] leading-[1.15] tracking-[-0.02em] text-white max-w-[640px]">
+          <h1 className="text-[28px] md:text-[52px] leading-[1.15] tracking-[-0.02em] text-white max-w-[640px]">
             Built for young Victorians
           </h1>
           <p className="font-body text-lg text-brand-footer-link leading-[1.7] max-w-[560px] mt-5">

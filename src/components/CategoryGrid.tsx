@@ -53,7 +53,7 @@ export default function CategoryGrid() {
               <Link
                 key={cat.name}
                 to={cat.href}
-                className="bg-white border border-brand-card-border rounded-xl p-5 pt-5 pb-5 transition-all duration-150 hover:border-brand-violet hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 group"
+                className="bg-white border border-brand-card-border rounded-xl p-4 md:p-5 transition-all duration-150 hover:border-brand-violet hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:scale-[0.98] group"
               >
                 <div className="w-10 h-10 rounded-lg mb-2.5 flex items-center justify-center" style={{ backgroundColor: categoryColors[cat.name] || '#5847E0' }}>
                   {(() => {
