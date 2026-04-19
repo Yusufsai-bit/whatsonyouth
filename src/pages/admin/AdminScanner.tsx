@@ -187,8 +187,29 @@ export default function AdminScanner() {
     setScanning(true);
     setProgress(0);
     setProgressTotal(scanSources.length);
-    setLogLines([`▶ ${label}...`]);
     setSummary(null);
+
+    const BATCH_SIZE = 2; // ~120s per batch — safely under edge function ~150s limit
+    const batches: typeof scanSources[] = [];
+    for (let i = 0; i < scanSources.length; i += BATCH_SIZE) {
+      batches.push(scanSources.slice(i, i + BATCH_SIZE));
+    }
+
+    setLogLines([
+      `▶ ${label}`,
+      `   Split into ${batches.length} batch${batches.length === 1 ? '' : 'es'} of up to ${BATCH_SIZE} sources each.`,
+      '',
+    ]);
+
+    const totals = {
+      scanned: 0,
+      found: 0,
+      created: 0,
+      skipped: 0,
+      images_resolved: 0,
+      images_from_unsplash: 0,
+      images_pending: 0,
+    };
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -199,49 +220,64 @@ export default function AdminScanner() {
       }
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-listings`;
+      let completed = 0;
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ sources: scanSources }),
-      });
+      for (let b = 0; b < batches.length; b++) {
+        const batch = batches[b];
+        setLogLines(prev => [...prev, `── Batch ${b + 1} of ${batches.length} (${batch.length} source${batch.length === 1 ? '' : 's'}) ──`]);
 
-      const data = await res.json();
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ sources: batch }),
+          });
 
-      if (!data.success) {
-        setLogLines(prev => [...prev, `❌ Scan failed: ${data.error || 'Unknown error'}`]);
-        toast.error('Scan failed');
-        setScanning(false);
-        return;
+          const data = await res.json();
+
+          if (!data.success) {
+            setLogLines(prev => [...prev, `❌ Batch ${b + 1} failed: ${data.error || 'Unknown error'}`, '']);
+            completed += batch.length;
+            setProgress(completed);
+            continue;
+          }
+
+          const lines: string[] = [];
+          (data.results as ScanResult[]).forEach((r) => {
+            if (r.status === 'success') {
+              lines.push(`✅ ${r.source} — ${r.found} found, ${r.created} created, ${r.skipped} skipped`);
+            } else {
+              lines.push(`❌ ${r.source} — ${r.error}`);
+            }
+          });
+
+          totals.scanned += data.summary.sources_scanned || 0;
+          totals.found += data.summary.listings_found || 0;
+          totals.created += data.summary.listings_created || 0;
+          totals.skipped += data.summary.listings_skipped || 0;
+          totals.images_resolved += data.summary.images_resolved || 0;
+          totals.images_from_unsplash += data.summary.images_from_unsplash || 0;
+          totals.images_pending += data.summary.images_pending || 0;
+
+          completed += batch.length;
+          setProgress(completed);
+          setLogLines(prev => [...prev, ...lines, `   Running totals: ${totals.created} created, ${totals.skipped} skipped`, '']);
+          setSummary({ ...totals });
+        } catch (e: any) {
+          setLogLines(prev => [...prev, `❌ Batch ${b + 1} error: ${e.message}`, '']);
+          completed += batch.length;
+          setProgress(completed);
+        }
       }
 
-      const lines: string[] = [];
-      (data.results as ScanResult[]).forEach((r, i) => {
-        setProgress(i + 1);
-        if (r.status === 'success') {
-          lines.push(`✅ ${r.source} — ${r.found} found, ${r.created} created, ${r.skipped} skipped`);
-        } else {
-          lines.push(`❌ ${r.source} — ${r.error}`);
-        }
-      });
-
-      setLogLines(prev => [...prev, ...lines, '', `✔ Scan complete.`]);
-      setSummary({
-        scanned: data.summary.sources_scanned,
-        found: data.summary.listings_found,
-        created: data.summary.listings_created,
-        skipped: data.summary.listings_skipped,
-        images_resolved: data.summary.images_resolved || 0,
-        images_from_unsplash: data.summary.images_from_unsplash || 0,
-        images_pending: data.summary.images_pending || 0,
-      });
+      setLogLines(prev => [...prev, `✔ All batches complete — ${totals.created} new listings created.`]);
       setProgress(scanSources.length);
       fetchRecentLogs();
       fetchSourceHealth();
-      toast.success(`Scan complete — ${data.summary.listings_created} new listings created`);
+      toast.success(`Scan complete — ${totals.created} new listings created`);
     } catch (e: any) {
       setLogLines(prev => [...prev, `❌ Error: ${e.message}`]);
       toast.error('Scan failed');
