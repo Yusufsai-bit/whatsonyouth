@@ -2,3 +2,6 @@ project_id = "fmgkyrgsrsjiltubstry"
 
 [functions.scan-listings]
 verify_jwt = false
+
+[functions.scheduled-scan]
+verify_jwt = false

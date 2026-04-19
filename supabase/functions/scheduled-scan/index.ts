@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
+const CHUNK_SIZE = 3; // sources per scheduled run
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -32,22 +34,13 @@ serve(async (req) => {
       );
     }
 
-    // Check scan mode setting
-    const { data: modeSetting } = await supabase
-      .from("platform_settings")
-      .select("value")
-      .eq("key", "auto_scan_mode")
-      .maybeSingle();
-
-    const mode = modeSetting?.value === "draft" ? "draft" : "live";
-
     // Fetch active sources
-    const { data: sources } = await supabase
+    const { data: allSources } = await supabase
       .from("scan_sources")
-      .select("*")
+      .select("id, name, url, category")
       .eq("is_active", true);
 
-    if (!sources || sources.length === 0) {
+    if (!allSources || allSources.length === 0) {
       console.log("No active sources found");
       return new Response(
         JSON.stringify({ success: false, reason: "No active sources" }),
@@ -55,25 +48,54 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Starting scheduled scan with ${sources.length} sources in ${mode} mode`);
+    // Get last-scan time per source from scan_log
+    const { data: logs } = await supabase
+      .from("scan_log")
+      .select("source_url, scanned_at")
+      .neq("source_url", "__session_summary__")
+      .order("scanned_at", { ascending: false })
+      .limit(500);
 
-    // Call scan-listings function
-    const { data, error } = await supabase.functions.invoke("scan-listings", {
-      body: { sources, mode },
+    const lastScannedAt = new Map<string, string>();
+    (logs || []).forEach((l: any) => {
+      if (!lastScannedAt.has(l.source_url)) {
+        lastScannedAt.set(l.source_url, l.scanned_at);
+      }
     });
 
-    if (error) {
-      console.error("Scan function error:", error);
-      return new Response(
-        JSON.stringify({ success: false, error: error.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Pick CHUNK_SIZE least-recently-scanned (or never-scanned) sources
+    const sortedSources = [...allSources].sort((a: any, b: any) => {
+      const ta = lastScannedAt.get(a.url) || "";
+      const tb = lastScannedAt.get(b.url) || "";
+      return ta.localeCompare(tb); // empty (never scanned) sorts first
+    });
 
-    console.log("Scheduled scan complete:", data?.summary);
+    const chunk = sortedSources.slice(0, CHUNK_SIZE).map((s: any) => ({
+      name: s.name,
+      url: s.url,
+      category: s.category,
+    }));
+
+    console.log(`Scheduled scan: processing ${chunk.length} of ${allSources.length} sources`);
+    console.log("Sources:", chunk.map(c => c.name).join(", "));
+
+    // Call scan-listings with cron secret (bypasses admin auth check)
+    const cronSecret = Deno.env.get("SCAN_API_KEY") || "";
+    const res = await fetch(`${supabaseUrl}/functions/v1/scan-listings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceRoleKey}`,
+        "x-cron-secret": cronSecret,
+      },
+      body: JSON.stringify({ sources: chunk }),
+    });
+
+    const data = await res.json();
+    console.log("Scheduled chunk complete:", data?.summary);
 
     return new Response(
-      JSON.stringify({ success: true, summary: data?.summary }),
+      JSON.stringify({ success: true, processed: chunk.length, total: allSources.length, summary: data?.summary }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
