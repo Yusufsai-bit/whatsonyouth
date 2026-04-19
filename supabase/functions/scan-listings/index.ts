@@ -258,8 +258,8 @@ serve(async (req) => {
 
     // Time budgets
     const SCAN_START = Date.now();
-    const MAX_SCAN_MS = 120000; // 2 minute total budget
-    const MAX_SOURCE_MS = 25000; // 25s per source
+    const MAX_SCAN_MS = 140000; // ~2.3 min total budget (edge function hard limit ~150s)
+    const MAX_SOURCE_MS = 60000; // 60s per source fetch timeout
 
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
