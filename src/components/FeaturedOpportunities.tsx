@@ -29,16 +29,18 @@ function daysAgo(dateStr: string) {
 
 function alternateCategories(items: Listing[]): Listing[] {
   if (items.length <= 1) return items;
-  const result: Listing[] = [];
-  const remaining = [...items];
-  result.push(remaining.shift()!);
-  while (remaining.length > 0) {
+  // Always keep the first item (lowest featured_order = pinned slot) locked at index 0.
+  // Only shuffle the rest by category to avoid two adjacent cards of the same category.
+  const pinned = items[0];
+  const rest = items.slice(1);
+  const result: Listing[] = [pinned];
+  while (rest.length > 0) {
     const lastCategory = result[result.length - 1].category;
-    const diffIdx = remaining.findIndex(l => l.category !== lastCategory);
+    const diffIdx = rest.findIndex(l => l.category !== lastCategory);
     if (diffIdx !== -1) {
-      result.push(remaining.splice(diffIdx, 1)[0]);
+      result.push(rest.splice(diffIdx, 1)[0]);
     } else {
-      result.push(remaining.shift()!);
+      result.push(rest.shift()!);
     }
   }
   return result;
