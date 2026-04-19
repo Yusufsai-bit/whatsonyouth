@@ -200,7 +200,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
           </div>
           <div className="hidden md:block text-right">
             <p className="font-heading font-bold text-2xl text-brand-text-primary">
-              {totalCount}
+              {filtered.length}
               <span className="font-body font-normal text-sm text-brand-text-muted ml-1">
                 opportunities
               </span>
