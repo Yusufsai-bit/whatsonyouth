@@ -197,16 +197,14 @@ export default function CategoryListingPage({ category }: { category: string }) 
               {config.heading}
             </h1>
             <p className="font-body text-base text-brand-text-secondary mt-2">{config.subtext}</p>
-            <p className="font-body text-xs text-brand-text-muted mt-1.5">Curated from 43 verified Victorian sources</p>
           </div>
           <div className="hidden md:block text-right">
-            <p className="font-heading font-bold text-[32px] text-brand-text-primary">
-              {loading ? '–' : listings.length}
-              <span className="font-body font-normal text-base text-brand-text-secondary ml-2">
+            <p className="font-heading font-bold text-2xl text-brand-text-primary">
+              {totalCount}
+              <span className="font-body font-normal text-sm text-brand-text-muted ml-1">
                 opportunities
               </span>
             </p>
-            <p className="font-body text-[13px] text-brand-text-muted mt-0.5">Updated Tue & Fri</p>
           </div>
         </div>
       </section>
