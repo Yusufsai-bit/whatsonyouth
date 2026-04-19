@@ -178,39 +178,59 @@ serve(async (req) => {
   try {
     const { sources } = await req.json();
 
-    // Auth check
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const anonClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: userError } = await anonClient.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-    const { data: adminData } = await serviceClient.from("admins").select("id").eq("user_id", user.id).maybeSingle();
-    if (!adminData) {
-      return new Response(JSON.stringify({ success: false, error: "Unauthorised — admin only" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Auth check — accept either (a) cron secret header from scheduled-scan, or (b) admin user JWT
+    const cronSecretHeader = req.headers.get("x-cron-secret");
+    const expectedCronSecret = Deno.env.get("SCAN_API_KEY") || "";
+    const isCronCall = cronSecretHeader && expectedCronSecret && cronSecretHeader === expectedCronSecret;
+
+    let user: { id: string } | null = null;
+
+    if (isCronCall) {
+      // Cron path: use the first admin as the listing owner
+      const { data: firstAdmin } = await serviceClient.from("admins").select("user_id").limit(1).maybeSingle();
+      if (!firstAdmin) {
+        return new Response(JSON.stringify({ success: false, error: "No admin user available for cron scan" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      user = { id: (firstAdmin as any).user_id };
+    } else {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const anonClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const { data: { user: authUser }, error: userError } = await anonClient.auth.getUser();
+      if (userError || !authUser) {
+        return new Response(JSON.stringify({ success: false, error: "Unauthorised" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: adminData } = await serviceClient.from("admins").select("id").eq("user_id", authUser.id).maybeSingle();
+      if (!adminData) {
+        return new Response(JSON.stringify({ success: false, error: "Unauthorised — admin only" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      user = { id: authUser.id };
     }
 
     if (!sources || !Array.isArray(sources) || sources.length === 0) {
