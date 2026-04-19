@@ -43,9 +43,6 @@ export default function CategoryGrid() {
         <p className="font-body font-medium text-[13px] text-brand-violet uppercase tracking-[0.06em] mb-1">
           Browse by category
         </p>
-        <p className="font-body text-sm text-brand-text-muted mb-6">
-          Curated from 43 verified Victorian sources · Updated every Tuesday and Friday
-        </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-stretch">
           {categories.map((cat) => {
             const count = counts[cat.name];
