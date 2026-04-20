@@ -287,8 +287,8 @@ serve(async (req) => {
       let status = "success";
       let errorMessage: string | null = null;
 
-      // Skip if we've used more than 80% of budget
-      if (Date.now() - SCAN_START > MAX_SCAN_MS * 0.8) {
+      // Skip if we've used more than 90% of budget
+      if (Date.now() - SCAN_START > MAX_SCAN_MS * 0.9) {
         results.push({
           source: source.name,
           url: source.url,
