@@ -345,9 +345,11 @@ export default function ListingDetailPage() {
                 Share on WhatsApp
               </a>
 
-              <p className="font-body text-[13px] text-brand-text-muted">
-                Listed {daysAgo(listing.created_at)}
-              </p>
+              {listing.category !== 'Wellbeing' && (
+                <p className="font-body text-[13px] text-brand-text-muted">
+                  Listed {daysAgo(listing.created_at)}
+                </p>
+              )}
 
               {listing.view_count != null && listing.view_count > 0 && (
                 <p className="font-body text-[13px] text-brand-text-muted">
