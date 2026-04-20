@@ -360,7 +360,8 @@ serve(async (req) => {
               link: listing.link,
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
-              expiry_date: listing.expiry_date || null,
+              // Wellbeing listings never expire (ongoing services, not time-bound opportunities)
+              expiry_date: listing.category === 'Wellbeing' ? null : (listing.expiry_date || null),
               image_url: null,
               is_active: true,
               is_featured: false,
