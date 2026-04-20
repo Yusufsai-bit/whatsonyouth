@@ -279,7 +279,7 @@ serve(async (req) => {
     // Time budgets
     const SCAN_START = Date.now();
     const MAX_SCAN_MS = 140000; // ~2.3 min total budget (edge function hard limit ~150s)
-    const MAX_SOURCE_MS = 60000; // 60s per source fetch timeout
+    const MAX_SOURCE_MS = 25000; // 25s per source fetch timeout — fail fast on slow sites
 
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
@@ -287,8 +287,8 @@ serve(async (req) => {
       let status = "success";
       let errorMessage: string | null = null;
 
-      // Skip if we've used more than 80% of budget
-      if (Date.now() - SCAN_START > MAX_SCAN_MS * 0.8) {
+      // Skip if we've used more than 90% of budget
+      if (Date.now() - SCAN_START > MAX_SCAN_MS * 0.9) {
         results.push({
           source: source.name,
           url: source.url,
