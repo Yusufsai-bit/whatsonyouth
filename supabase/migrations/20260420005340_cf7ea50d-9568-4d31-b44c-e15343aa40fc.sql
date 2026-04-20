@@ -1,0 +1,1 @@
+SELECT cron.unschedule('scheduled-scan-twice-weekly');
