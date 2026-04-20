@@ -360,7 +360,8 @@ serve(async (req) => {
               link: listing.link,
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
-              expiry_date: listing.expiry_date || null,
+              // Wellbeing listings never expire (ongoing services, not time-bound opportunities)
+              expiry_date: listing.category === 'Wellbeing' ? null : (listing.expiry_date || null),
               image_url: null,
               is_active: true,
               is_featured: false,
@@ -486,13 +487,14 @@ serve(async (req) => {
       error_message: totalErrors > 0 ? `${totalErrors} source(s) failed` : null,
     });
 
-    // Auto-deactivate expired listings
+    // Auto-deactivate expired listings (Wellbeing listings are excluded — they never expire)
     const today = new Date().toISOString().split("T")[0];
     await supabase
       .from("listings")
       .update({ is_active: false })
       .lt("expiry_date", today)
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .neq("category", "Wellbeing");
 
     return new Response(
       JSON.stringify({
