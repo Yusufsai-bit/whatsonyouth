@@ -170,6 +170,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rejected_sources: {
+        Row: {
+          domain: string
+          id: string
+          reason: string
+          rejected_at: string
+          url: string
+        }
+        Insert: {
+          domain: string
+          id?: string
+          reason: string
+          rejected_at?: string
+          url: string
+        }
+        Update: {
+          domain?: string
+          id?: string
+          reason?: string
+          rejected_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       scan_log: {
         Row: {
           error_message: string | null
@@ -218,25 +242,37 @@ export type Database = {
       scan_sources: {
         Row: {
           category: string
+          consecutive_failures: number
           created_at: string
+          discovered_at: string | null
+          discovered_by_ai: boolean
           id: string
           is_active: boolean
+          last_success_at: string | null
           name: string
           url: string
         }
         Insert: {
           category: string
+          consecutive_failures?: number
           created_at?: string
+          discovered_at?: string | null
+          discovered_by_ai?: boolean
           id?: string
           is_active?: boolean
+          last_success_at?: string | null
           name: string
           url: string
         }
         Update: {
           category?: string
+          consecutive_failures?: number
           created_at?: string
+          discovered_at?: string | null
+          discovered_by_ai?: boolean
           id?: string
           is_active?: boolean
+          last_success_at?: string | null
           name?: string
           url?: string
         }
