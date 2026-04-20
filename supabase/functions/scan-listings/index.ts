@@ -487,13 +487,14 @@ serve(async (req) => {
       error_message: totalErrors > 0 ? `${totalErrors} source(s) failed` : null,
     });
 
-    // Auto-deactivate expired listings
+    // Auto-deactivate expired listings (Wellbeing listings are excluded — they never expire)
     const today = new Date().toISOString().split("T")[0];
     await supabase
       .from("listings")
       .update({ is_active: false })
       .lt("expiry_date", today)
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .neq("category", "Wellbeing");
 
     return new Response(
       JSON.stringify({
