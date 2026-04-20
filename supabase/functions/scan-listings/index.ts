@@ -413,26 +413,29 @@ serve(async (req) => {
         error_message: errorMessage,
       });
 
-      // Circuit breaker: auto-disable after 3 consecutive failures
+      // Update health metadata on scan_sources (consecutive_failures + last_success_at)
+      // Auto-deactivate is handled centrally by discover-sources at threshold 5
       if (status === 'error') {
-        const { data: recentLogs } = await supabase
-          .from('scan_log')
-          .select('status')
-          .eq('source_url', source.url)
-          .order('scanned_at', { ascending: false })
-          .limit(3);
-
-        const allFailed = recentLogs &&
-          recentLogs.length >= 3 &&
-          recentLogs.every((l: any) => l.status === 'error');
-
-        if (allFailed) {
-          await supabase
-            .from('scan_sources')
-            .update({ is_active: false } as any)
-            .eq('url', source.url);
-          console.log(`Auto-disabled source after 3 failures: ${source.url}`);
-        }
+        // increment consecutive_failures
+        const { data: srcRow } = await supabase
+          .from('scan_sources')
+          .select('consecutive_failures')
+          .eq('url', source.url)
+          .maybeSingle();
+        const newCount = ((srcRow as any)?.consecutive_failures || 0) + 1;
+        await supabase
+          .from('scan_sources')
+          .update({ consecutive_failures: newCount } as any)
+          .eq('url', source.url);
+      } else {
+        // success → reset counter, stamp last_success_at
+        await supabase
+          .from('scan_sources')
+          .update({
+            consecutive_failures: 0,
+            last_success_at: new Date().toISOString(),
+          } as any)
+          .eq('url', source.url);
       }
 
       totalFound += found;
