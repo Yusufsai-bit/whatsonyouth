@@ -82,7 +82,6 @@ export default function Footer() {
 
         <div>
           <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Stay updated</p>
-          <p className="font-body text-sm text-brand-footer-text mb-3"></p>
           <form onSubmit={handleDigest} className="flex gap-2">
             <input
               type="email"
