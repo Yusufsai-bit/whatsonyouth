@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const CHUNK_SIZE = 3; // sources per scheduled run
+const CHUNK_SIZE = 1; // 1 source per run — gives each source the full ~140s budget
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
