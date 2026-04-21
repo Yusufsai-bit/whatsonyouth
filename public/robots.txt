@@ -19,6 +19,7 @@ Disallow: /listings/*/edit
 # what is explicitly listed in the sitemap.
 Disallow: /search?q=
 
-# Sitemap index — points to static routes + dynamic listings sitemap
+# Sitemap index — points to sitemap-static.xml + dynamic listings sitemap.
+# Crawlers should only need the index; child sitemaps are listed for clarity.
 Sitemap: https://www.whatsonyouth.org.au/sitemap-index.xml
-Sitemap: https://www.whatsonyouth.org.au/sitemap.xml
+Sitemap: https://www.whatsonyouth.org.au/sitemap-static.xml
