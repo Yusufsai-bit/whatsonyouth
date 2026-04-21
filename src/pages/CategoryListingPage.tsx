@@ -498,6 +498,23 @@ export default function CategoryListingPage({ category }: { category: string }) 
         </div>
       </section>
 
+
+      {/* FAQ section */}
+      {config.faq && config.faq.length > 0 && (
+        <section className="bg-brand-section-alt px-6 py-12 md:px-16 md:py-16">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-heading font-bold text-[24px] md:text-[28px] text-brand-text-primary mb-6">
+              Frequently asked questions
+            </h2>
+            <div className="space-y-3">
+              {config.faq.map((item, i) => (
+                <FAQItem key={i} q={item.q} a={item.a} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <Footer />
     </>
   );
