@@ -331,6 +331,25 @@ export default function CategoryListingPage({ category }: { category: string }) 
               </span>
             ))}
           </div>
+
+          {/* Internal link block — keyword-rich category cross-links */}
+          <nav aria-label="Explore other categories" className="mt-6 pt-5 border-t border-brand-card-border">
+            <p className="font-body text-[13px] text-brand-text-muted mb-2">
+              Also explore for young Victorians:
+            </p>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+              {CROSS_LINKS[category].map(link => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="font-body text-[14px] text-brand-violet hover:underline"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </section>
 
