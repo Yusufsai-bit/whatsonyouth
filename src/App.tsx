@@ -36,6 +36,7 @@ const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminScanLog = lazy(() => import('./pages/admin/AdminScanLog'));
 const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'));
+const RegionalPage = lazy(() => import('./pages/RegionalPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +85,12 @@ const App = () => (
             <Route path="/grants" element={<CategoryListingPage category="Grants" />} />
             <Route path="/programs" element={<CategoryListingPage category="Programs" />} />
             <Route path="/wellbeing" element={<CategoryListingPage category="Wellbeing" />} />
+            <Route path="/melbourne" element={<RegionalPage region="melbourne" />} />
+            <Route path="/geelong" element={<RegionalPage region="geelong" />} />
+            <Route path="/ballarat" element={<RegionalPage region="ballarat" />} />
+            <Route path="/bendigo" element={<RegionalPage region="bendigo" />} />
+            <Route path="/gippsland" element={<RegionalPage region="gippsland" />} />
+            <Route path="/shepparton" element={<RegionalPage region="shepparton" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/about" element={<AboutPage />} />

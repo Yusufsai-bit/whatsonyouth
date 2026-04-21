@@ -218,8 +218,8 @@ export default function ListingDetailPage() {
   return (
     <>
       <SEO
-        title={`${listing.title} — What's On Youth`}
-        description={truncDesc}
+        title={`${listing.title} | ${listing.category} in ${listing.location} — What's On Youth`}
+        description={`${truncDesc} — Free ${listing.category.toLowerCase()} opportunity for young Victorians in ${listing.location}. Find more at What's On Youth.`}
         ogTitle={listing.title}
         ogDescription={truncDesc}
         ogUrl={`https://www.whatsonyouth.org.au/listings/${listing.id}`}

@@ -11,6 +11,15 @@ const exploreLinks = [
   { label: 'Wellbeing', href: '/wellbeing' },
 ];
 
+const regionLinks = [
+  { label: 'Melbourne', href: '/melbourne' },
+  { label: 'Geelong', href: '/geelong' },
+  { label: 'Ballarat', href: '/ballarat' },
+  { label: 'Bendigo', href: '/bendigo' },
+  { label: 'Gippsland', href: '/gippsland' },
+  { label: 'Shepparton', href: '/shepparton' },
+];
+
 const platformLinks = [
   { label: 'Submit a listing', href: '/submit' },
   { label: 'Sign up', href: '/signup' },
@@ -49,7 +58,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-brand-dark px-6 py-10 md:px-16 md:py-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
         <div>
           <img src={logo} alt="What's On Youth" className="h-[26px] mb-2" />
           <p className="font-body text-sm text-brand-footer-text mt-2">Your opportunities, all in one place.</p>
@@ -59,6 +68,15 @@ export default function Footer() {
         <div>
           <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Explore</p>
           {exploreLinks.map((link) => (
+            <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-3 md:mb-2">
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        <div>
+          <p className="font-body font-medium text-[13px] text-brand-footer-link uppercase tracking-[0.06em] mb-3">Regions</p>
+          {regionLinks.map((link) => (
             <Link key={link.label} to={link.href} className="block font-body text-sm text-brand-footer-link hover:text-white transition-colors duration-100 mb-3 md:mb-2">
               {link.label}
             </Link>
