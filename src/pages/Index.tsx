@@ -47,32 +47,7 @@ const Index = () => {
         ogUrl="https://www.whatsonyouth.org.au"
         canonical="https://www.whatsonyouth.org.au"
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "What's On Youth",
-          "url": "https://www.whatsonyouth.org.au",
-          "logo": "https://www.whatsonyouth.org.au/woy-favicon.svg",
-          "description": "Free platform connecting young Victorians aged 15-25 with events, jobs, grants, programs and wellbeing support.",
-          "areaServed": {
-            "@type": "State",
-            "name": "Victoria",
-            "containedInPlace": { "@type": "Country", "name": "Australia" }
-          },
-          "audience": {
-            "@type": "Audience",
-            "audienceType": "Young people aged 15-25",
-            "geographicArea": { "@type": "State", "name": "Victoria, Australia" }
-          },
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "info@whatsonyouth.org.au",
-            "contactType": "Customer Support"
-          },
-          "sameAs": ["https://www.instagram.com/whatsonyouth"]
-        })}</script>
-      </Helmet>
+      {/* Organization + WebSite JSON-LD live in index.html so they're visible to crawlers without JS */}
       <Navbar />
       {showBanner && (
         <div className="bg-brand-violet-surface border-b border-brand-violet-border px-6 py-3">
