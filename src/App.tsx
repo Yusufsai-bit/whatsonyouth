@@ -108,6 +108,7 @@ const App = () => (
             <Route path="/admin/settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
             <Route path="/admin/scanner" element={<AdminGuard><AdminScanner /></AdminGuard>} />
             <Route path="/admin/scan-log" element={<AdminGuard><AdminScanLog /></AdminGuard>} />
+            <Route path="/admin/seo" element={<AdminGuard><AdminSEO /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
