@@ -40,6 +40,17 @@ interface Listing {
 
 const ITEMS_PER_PAGE = 12;
 
+interface IntroContent {
+  body: string;
+  tags: string[];
+  crisis?: string;
+}
+
+interface FAQItemData {
+  q: string;
+  a: string;
+}
+
 const categoryConfig: Record<string, {
   label: string;
   heading: string;
@@ -48,6 +59,8 @@ const categoryConfig: Record<string, {
   seoTitle: string;
   seoDescription: string;
   slug: string;
+  introContent: IntroContent;
+  faq: FAQItemData[];
 }> = {
   Events: {
     label: 'Events',
@@ -57,6 +70,16 @@ const categoryConfig: Record<string, {
     seoTitle: "Free Events for Young People in Victoria — What's On Youth",
     seoDescription: "Find free and low-cost events for young people aged 15–25 across Victoria. Concerts, festivals, workshops, art exhibitions, sports events and more in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria. Updated weekly.",
     slug: 'events',
+    introContent: {
+      body: "What's On Youth scans Victorian event listings every week to find free and low-cost events worth your time — concerts, festivals, exhibitions, workshops, sports events, cultural celebrations and more. Every listing links directly to the organiser so you can book, register or get in touch instantly.",
+      tags: ["Free events", "Melbourne events", "Regional Victoria", "Festivals", "Workshops", "Youth events", "Things to do Victoria"],
+    },
+    faq: [
+      { q: "Are these events free for young people?", a: "Many events listed on What's On Youth are free or low cost. Each listing links directly to the organiser where you can check pricing and book." },
+      { q: "Do you list events outside Melbourne?", a: "Yes — we specifically source events from across Victoria including Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura and Warrnambool, not just the CBD." },
+      { q: "How often are new events added?", a: "New events are scanned and added every Tuesday and Friday automatically from verified Victorian event sources." },
+      { q: "Can I submit my own event?", a: "Yes — organisations and community groups can submit events for free. Create a free account and submit your listing at whatsonyouth.org.au/submit." },
+    ],
   },
   Jobs: {
     label: 'Jobs',
@@ -66,6 +89,16 @@ const categoryConfig: Record<string, {
     seoTitle: "Entry Level Jobs & Internships for Young People in Victoria — What's On Youth",
     seoDescription: "Find part-time jobs, casual work, internships, apprenticeships and traineeships for young people aged 15–25 in Victoria. No experience required. Melbourne, regional Victoria and online opportunities.",
     slug: 'jobs',
+    introContent: {
+      body: "Finding your first job or internship is hard. We make it easier by collecting entry-level jobs, part-time work, casual roles, apprenticeships, traineeships and graduate programs across Victoria — all in one place. No account needed to browse. New listings added every week.",
+      tags: ["Entry level jobs", "Part time work", "Apprenticeships", "Internships", "Casual jobs", "Graduate programs", "Youth employment Victoria"],
+    },
+    faq: [
+      { q: "What kinds of jobs are listed here?", a: "We focus on entry-level jobs, part-time and casual roles, apprenticeships, traineeships, internships and graduate programs suitable for young people aged 15–25 in Victoria." },
+      { q: "Do I need experience to apply for these jobs?", a: "Most listings are entry-level or beginner-friendly. Each listing links directly to the employer or job board where you can check requirements." },
+      { q: "Are there jobs outside Melbourne?", a: "Yes — we include jobs from across Victoria including regional areas. Use the location filter to narrow results to your area." },
+      { q: "Can employers post jobs for free?", a: "Yes — organisations can submit job listings for free at whatsonyouth.org.au/submit." },
+    ],
   },
   Grants: {
     label: 'Grants',
@@ -75,6 +108,16 @@ const categoryConfig: Record<string, {
     seoTitle: "Grants & Scholarships for Young Victorians — What's On Youth",
     seoDescription: "Find grants, scholarships, bursaries and funding opportunities for young people aged 15–25 in Victoria. Arts grants, community grants, education funding, youth leadership awards and more. Free to apply.",
     slug: 'grants',
+    introContent: {
+      body: "Grants and scholarships for young Victorians are more accessible than most people think. We surface funding opportunities from state and local government, foundations, arts bodies and community organisations — covering arts, education, community projects, leadership, sport and more.",
+      tags: ["Youth grants Victoria", "Scholarships", "Arts funding", "Community grants", "Education bursaries", "Free money for young people", "Grant opportunities"],
+    },
+    faq: [
+      { q: "Can individuals apply for these grants or are they for organisations only?", a: "Both. Some grants are for individual young people (arts, leadership, education), while others are for community organisations. Each listing specifies who can apply." },
+      { q: "Are these grants only for Victorians?", a: "Most grants listed are specific to Victoria or Australian residents. Some national grants are included where they are open to young Victorians." },
+      { q: "Do I need to be studying to apply for grants?", a: "Not necessarily. Many grants are open to young people in work, running community projects, pursuing arts or sport, or starting businesses." },
+      { q: "How do I apply for a grant?", a: "Each listing links directly to the grant provider's website where you can find eligibility criteria and application instructions." },
+    ],
   },
   Programs: {
     label: 'Programs',
@@ -84,6 +127,16 @@ const categoryConfig: Record<string, {
     seoTitle: "Youth Programs & Courses in Victoria — What's On Youth",
     seoDescription: "Discover free and low-cost youth programs, leadership courses, volunteering opportunities, skill development workshops and community programs for young people aged 15–25 across Victoria.",
     slug: 'programs',
+    introContent: {
+      body: "From leadership programs and outdoor challenges to skill-building workshops and volunteering — Victoria has hundreds of programs designed specifically for young people. Browse free and low-cost opportunities that build your skills, expand your network, and look great on a resume.",
+      tags: ["Youth programs Victoria", "Leadership programs", "Volunteering", "Skill development", "Free workshops", "Duke of Edinburgh", "Community programs"],
+    },
+    faq: [
+      { q: "Are these programs free?", a: "Many programs are free or subsidised for young people. Some have a fee — check each listing for details." },
+      { q: "What kinds of programs are listed?", a: "Leadership programs, volunteering opportunities, outdoor challenges, workshops, mentoring programs, sports programs, arts courses and community development programs for young Victorians aged 15–25." },
+      { q: "Do I need to be from Melbourne to participate?", a: "No — many programs are available Victoria-wide or online. Use the location filter to find programs in your area." },
+      { q: "Can organisations list their programs for free?", a: "Yes — submit your program at whatsonyouth.org.au/submit. It's free and your listing goes live immediately." },
+    ],
   },
   Wellbeing: {
     label: 'Wellbeing',
@@ -93,8 +146,39 @@ const categoryConfig: Record<string, {
     seoTitle: "Mental Health & Wellbeing Support for Young People in Victoria — What's On Youth",
     seoDescription: "Find free mental health support, counselling services, youth wellbeing programs and crisis resources for young Victorians aged 15–25. Includes services in Melbourne, Geelong, Ballarat, Bendigo and online.",
     slug: 'wellbeing',
+    introContent: {
+      body: "Finding the right support can be the hardest step. This page lists free and low-cost mental health services, counselling resources, crisis support lines, wellbeing programs and community organisations for young Victorians aged 15–25. You don't have to figure it out alone.",
+      crisis: "If you need to talk to someone right now, call Lifeline on 13 11 14 or text 0477 13 11 14 (24/7, free).",
+      tags: ["Mental health support young people", "Free counselling Victoria", "Youth wellbeing", "Crisis support", "Headspace", "Beyond Blue", "ReachOut"],
+    },
+    faq: [
+      { q: "Are these services free?", a: "Most services listed are free or Medicare-funded for young people. headspace, Beyond Blue and ReachOut are free. Each listing links to the provider for full details." },
+      { q: "What if I need help right now?", a: "If you're in crisis, call Lifeline on 13 11 14 (24/7, free) or text 0477 13 11 14. You can also call Beyond Blue on 1300 22 4636 or Kids Helpline on 1800 55 1800." },
+      { q: "Are there in-person services outside Melbourne?", a: "Yes — headspace has centres across Victoria including Geelong, Ballarat, Bendigo, Shepparton and more. Use the location filter to find services near you." },
+      { q: "I'm worried about a friend. What can I do?", a: "ReachOut and Beyond Blue both have specific resources for supporting a friend. Links are in the listings above. You can also call any of the crisis lines on behalf of someone else." },
+    ],
   },
 };
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-brand-card-border rounded-xl overflow-hidden bg-white">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 min-h-[56px]"
+      >
+        <span className="font-heading font-bold text-[15px] text-brand-text-primary">{q}</span>
+        <span className="font-heading text-xl text-brand-text-muted flex-shrink-0">{open ? '−' : '+'}</span>
+      </button>
+      {open && (
+        <div className="px-5 pb-4">
+          <p className="font-body text-[14px] text-brand-text-secondary leading-[1.7]">{a}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function daysAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -205,6 +289,30 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 opportunities
               </span>
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SEO intro content block */}
+      <section className="bg-white px-6 py-8 md:px-16 md:py-10">
+        <div className="max-w-7xl mx-auto">
+          {config.introContent.crisis && (
+            <div className="bg-brand-violet-surface border border-brand-violet-border rounded-xl p-4 mb-5 flex items-start gap-3">
+              <span aria-hidden="true" className="text-xl leading-none">💜</span>
+              <p className="font-body text-sm text-brand-text-primary leading-[1.6]">
+                {config.introContent.crisis}
+              </p>
+            </div>
+          )}
+          <p className="font-body text-[15px] md:text-base text-brand-text-secondary leading-[1.7] max-w-[800px]">
+            {config.introContent.body}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-5">
+            {config.introContent.tags.map(tag => (
+              <span key={tag} className="font-body text-[12px] text-brand-text-muted bg-brand-section-alt rounded-full px-3 py-1">
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -413,6 +521,23 @@ export default function CategoryListingPage({ category }: { category: string }) 
           )}
         </div>
       </section>
+
+
+      {/* FAQ section */}
+      {config.faq && config.faq.length > 0 && (
+        <section className="bg-brand-section-alt px-6 py-12 md:px-16 md:py-16">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-heading font-bold text-[24px] md:text-[28px] text-brand-text-primary mb-6">
+              Frequently asked questions
+            </h2>
+            <div className="space-y-3">
+              {config.faq.map((item, i) => (
+                <FAQItem key={i} q={item.q} a={item.a} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </>

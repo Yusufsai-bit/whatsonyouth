@@ -192,17 +192,18 @@ export default function ListingDetailPage() {
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${listing.title} — ${window.location.href}`)}`;
 
-  const jsonLd = {
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": listing.category === 'Events' ? "Event" : "JobPosting",
+    "@type": listing.category === 'Events' ? "Event" : listing.category === 'Jobs' ? "JobPosting" : "Course",
     "name": listing.title,
     "description": cleanDesc,
     "url": listing.link,
-    "organizer": {
+    "datePosted": listing.created_at,
+    "hiringOrganization": {
       "@type": "Organization",
       "name": listing.organisation,
     },
-    "location": {
+    "jobLocation": {
       "@type": "Place",
       "name": listing.location,
       "address": {
@@ -211,7 +212,15 @@ export default function ListingDetailPage() {
         "addressCountry": "AU",
       },
     },
+    "isAccessibleForFree": true,
+    "inLanguage": "en-AU",
+    "audience": {
+      "@type": "EducationalAudience",
+      "educationalRole": "student",
+      "audienceType": "Young people aged 15-25",
+    },
     ...(listing.expiry_date && { "validThrough": listing.expiry_date }),
+    ...(listing.category === 'Jobs' && { "employmentType": "PART_TIME" }),
     ...(listing.image_url && { "image": listing.image_url }),
   };
 

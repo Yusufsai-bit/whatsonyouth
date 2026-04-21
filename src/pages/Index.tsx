@@ -98,6 +98,19 @@ const Index = () => {
       <RecentlyViewed />
       <SubmitCallout />
       <RegionalBanner />
+      <section className="bg-brand-section-alt px-6 py-12 md:px-16 md:py-20">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading font-bold text-[28px] md:text-[36px] text-brand-text-primary leading-[1.2] mb-5">
+            Victoria's free platform for young people
+          </h2>
+          <p className="font-body text-base md:text-lg text-brand-text-secondary leading-[1.7] mb-4">
+            What's On Youth brings together free events, entry-level jobs, grants, youth programs and mental health support from across Victoria — all in one place. Built specifically for young people aged 15–25. Free to use, free to browse, free to submit.
+          </p>
+          <p className="font-body text-[15px] text-brand-text-muted leading-[1.7]">
+            We cover all of Victoria — not just Melbourne. From Geelong, Ballarat and Bendigo to Shepparton, Gippsland, Mildura, Warrnambool and everywhere in between. New listings every Tuesday and Friday.
+          </p>
+        </div>
+      </section>
       <HowItWorks />
       <Footer />
     </>
