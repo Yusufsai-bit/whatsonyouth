@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    sitemapGeneratePlugin(),
     seoCheckPlugin(),
   ].filter(Boolean),
   resolve: {
