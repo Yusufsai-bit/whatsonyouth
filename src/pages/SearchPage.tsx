@@ -130,13 +130,42 @@ export default function SearchPage() {
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
+  // Build a normalized canonical URL for /search to prevent duplicate
+  // indexing across param order, casing, or filter combinations.
+  // Rules:
+  //  - Empty/All filters  → canonical to /search
+  //  - Only a category    → canonical to that category's dedicated page (/events, /jobs, …)
+  //  - Free-text query    → noindex (search result pages with arbitrary text shouldn't be indexed)
+  //  - Otherwise          → /search?<allow-listed params, sorted, lowercased>
+  const { canonicalUrl, shouldNoindex } = useMemo(() => {
+    const base = 'https://www.whatsonyouth.org.au';
+    const q = debouncedQuery.trim().toLowerCase();
+    const cat = selectedCategory !== 'All' ? selectedCategory : '';
+
+    if (q) {
+      return { canonicalUrl: `${base}/search`, shouldNoindex: true };
+    }
+    if (cat && categoryRoutes[cat]) {
+      return { canonicalUrl: `${base}${categoryRoutes[cat]}`, shouldNoindex: false };
+    }
+    const allowed: Array<[string, string]> = [];
+    if (cat) allowed.push(['category', cat.toLowerCase()]);
+    allowed.sort(([a], [b]) => a.localeCompare(b));
+    const qs = allowed.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+    return {
+      canonicalUrl: qs ? `${base}/search?${qs}` : `${base}/search`,
+      shouldNoindex: false,
+    };
+  }, [debouncedQuery, selectedCategory]);
+
   return (
     <>
       <SEO
         title="Search Events, Jobs, Grants & Youth Opportunities in Victoria — What's On Youth"
         description="Search thousands of free events, entry-level jobs, grants, youth programs and wellbeing resources across Victoria. Find opportunities in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria for young people aged 15–25."
-        ogUrl="https://www.whatsonyouth.org.au/search"
-        canonical="https://www.whatsonyouth.org.au/search"
+        ogUrl={canonicalUrl}
+        canonical={canonicalUrl}
+        noindex={shouldNoindex}
       />
       <Navbar />
 
