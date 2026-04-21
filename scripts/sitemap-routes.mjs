@@ -29,37 +29,12 @@ export const STATIC_ROUTES = [
   { route: '/gippsland', file: 'pages/RegionalPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.7 },
   { route: '/shepparton', file: 'pages/RegionalPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.7 },
 
-  // Search + filtered combos (high-value Google discovery URLs)
-  { route: '/search', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.8 },
-  { route: '/search?category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.6, sitemapOnly: true },
-  { route: '/search?category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.6, sitemapOnly: true },
-  { route: '/search?category=Grants', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.6, sitemapOnly: true },
-  { route: '/search?category=Programs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.6, sitemapOnly: true },
-  { route: '/search?category=Wellbeing', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.6, sitemapOnly: true },
-  { route: '/search?location=Melbourne', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.6, sitemapOnly: true },
-  { route: '/search?location=Geelong', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Ballarat', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Bendigo', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Gippsland', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Shepparton', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Melbourne&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Melbourne&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Melbourne&category=Grants', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Melbourne&category=Programs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Melbourne&category=Wellbeing', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5, sitemapOnly: true },
-  { route: '/search?location=Geelong&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Geelong&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Geelong&category=Programs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Ballarat&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Ballarat&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Ballarat&category=Programs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Bendigo&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Bendigo&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Bendigo&category=Programs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Gippsland&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Gippsland&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Shepparton&category=Events', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
-  { route: '/search?location=Shepparton&category=Jobs', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.4, sitemapOnly: true },
+  // Bare /search is included so the entry-point is discoverable, but at low
+  // priority — category and regional landing pages are the canonical surfaces
+  // for filter combinations (filtered /search URLs canonicalize back to them).
+  // Filtered /search permutations are deliberately excluded until Search Console
+  // popularity data tells us which combinations are worth advertising.
+  { route: '/search', file: 'pages/SearchPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.5 },
 
   // Listing detail pattern — covered by the dynamic listings sitemap (edge function)
   { route: '/listings/:id', file: 'pages/ListingDetailPage.tsx', shouldIndex: true, sitemapOnly: false, excludeFromStaticSitemap: true },
