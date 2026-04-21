@@ -6,6 +6,8 @@ const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 const DEFAULT_TITLE = "What's On Youth \u2014 Opportunities for Young Victorians";
 const DEFAULT_DESCRIPTION = "Discover events, jobs, grants, programs, and wellbeing support for young Victorians aged 15\u201325. Victoria-wide, free to use.";
 
+type JsonLdObject = Record<string, unknown>;
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -16,6 +18,7 @@ interface SEOProps {
   ogType?: string;
   canonical?: string;
   noindex?: boolean;
+  jsonLd?: JsonLdObject | JsonLdObject[];
 }
 
 export default function SEO({
@@ -28,9 +31,11 @@ export default function SEO({
   ogType = 'website',
   canonical,
   noindex = false,
+  jsonLd,
 }: SEOProps) {
   const resolvedOgTitle = ogTitle || title;
   const resolvedOgDescription = ogDescription || description;
+  const jsonLdArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
   return (
     <Helmet>
@@ -50,6 +55,10 @@ export default function SEO({
       <meta name="twitter:title" content={resolvedOgTitle} />
       <meta name="twitter:description" content={resolvedOgDescription} />
       <meta name="twitter:image" content={ogImage} />
+
+      {jsonLdArray.map((obj, i) => (
+        <script key={i} type="application/ld+json">{JSON.stringify(obj)}</script>
+      ))}
     </Helmet>
   );
 }
