@@ -18,6 +18,42 @@ const categoryColors: Record<string, string> = {
   Wellbeing: '#2A1A3A',
 };
 
+// Keyword-rich internal cross-links for SEO. Each category links to the OTHER 4
+// categories plus 3 top regions, so Google sees a strong internal link graph
+// without duplicating the current category's own link.
+type LinkItem = { label: string; href: string };
+const ALL_CATEGORY_LINKS: Record<string, LinkItem> = {
+  Events: { label: 'Free events for young people', href: '/events' },
+  Jobs: { label: 'Entry-level jobs and internships', href: '/jobs' },
+  Grants: { label: 'Grants and scholarships', href: '/grants' },
+  Programs: { label: 'Youth programs and courses', href: '/programs' },
+  Wellbeing: { label: 'Mental health and wellbeing support', href: '/wellbeing' },
+};
+const TOP_REGION_LINKS: LinkItem[] = [
+  { label: 'Opportunities in Melbourne', href: '/melbourne' },
+  { label: 'Opportunities in Geelong', href: '/geelong' },
+  { label: 'Opportunities in Ballarat', href: '/ballarat' },
+];
+function buildCrossLinks(current: string): LinkItem[] {
+  return Object.entries(ALL_CATEGORY_LINKS)
+    .filter(([key]) => key !== current)
+    .map(([, link]) => link);
+}
+const CROSS_LINKS: Record<string, LinkItem[]> = {
+  Events: buildCrossLinks('Events'),
+  Jobs: buildCrossLinks('Jobs'),
+  Grants: buildCrossLinks('Grants'),
+  Programs: buildCrossLinks('Programs'),
+  Wellbeing: buildCrossLinks('Wellbeing'),
+};
+const RELATED_LINKS: Record<string, LinkItem[]> = {
+  Events: [...buildCrossLinks('Events').slice(0, 2), ...TOP_REGION_LINKS],
+  Jobs: [...buildCrossLinks('Jobs').slice(0, 2), ...TOP_REGION_LINKS],
+  Grants: [...buildCrossLinks('Grants').slice(0, 2), ...TOP_REGION_LINKS],
+  Programs: [...buildCrossLinks('Programs').slice(0, 2), ...TOP_REGION_LINKS],
+  Wellbeing: [...buildCrossLinks('Wellbeing').slice(0, 2), ...TOP_REGION_LINKS],
+};
+
 const locations = [
   'All Victoria', 'Melbourne CBD', 'Inner Melbourne', 'Northern Melbourne',
   'Western Melbourne', 'Eastern Melbourne', 'South-East Melbourne', 'Geelong',
@@ -331,6 +367,25 @@ export default function CategoryListingPage({ category }: { category: string }) 
               </span>
             ))}
           </div>
+
+          {/* Internal link block — keyword-rich category cross-links */}
+          <nav aria-label="Explore other categories" className="mt-6 pt-5 border-t border-brand-card-border">
+            <p className="font-body text-[13px] text-brand-text-muted mb-2">
+              Also explore for young Victorians:
+            </p>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+              {CROSS_LINKS[category].map(link => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="font-body text-[14px] text-brand-violet hover:underline"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </section>
 
@@ -552,6 +607,25 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 <FAQItem key={i} q={item.q} a={item.a} />
               ))}
             </div>
+
+            {/* Internal link block — keyword-rich related pages */}
+            <nav aria-label="Related pages" className="mt-10 pt-6 border-t border-brand-card-border">
+              <h3 className="font-heading font-bold text-[16px] text-brand-text-primary mb-3">
+                Related pages
+              </h3>
+              <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                {RELATED_LINKS[category].map(link => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="font-body text-[14px] text-brand-violet hover:underline"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
         </section>
       )}
