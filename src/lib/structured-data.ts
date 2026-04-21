@@ -86,6 +86,17 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
   const description = listing.description.replace(/^\[Link needs review\]\s*/i, '').trim();
   const image = listing.image_url || undefined;
 
+  // Used to mark Events / Offers as expired when the deadline has passed,
+  // so we don't claim availability we can't deliver on.
+  const isExpired =
+    !!listing.expiry_date && new Date(listing.expiry_date).getTime() < Date.now();
+
+  const youthAudience = {
+    '@type': 'PeopleAudience',
+    suggestedMinAge: 15,
+    suggestedMaxAge: 25,
+  };
+
   switch (listing.category) {
     case 'Events':
       return {
@@ -94,6 +105,7 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
         name: listing.title,
         description,
         url,
+        // expiry_date for events is the event date itself.
         ...(listing.expiry_date && { startDate: listing.expiry_date, endDate: listing.expiry_date }),
         eventStatus: 'https://schema.org/EventScheduled',
         eventAttendanceMode:
@@ -106,14 +118,21 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
           '@type': 'Offer',
           price: '0',
           priceCurrency: 'AUD',
-          availability: 'https://schema.org/InStock',
+          availability: isExpired
+            ? 'https://schema.org/SoldOut'
+            : 'https://schema.org/InStock',
           url: listing.link,
+          ...(listing.expiry_date && { validThrough: listing.expiry_date }),
         },
+        audience: youthAudience,
         ...(image && { image }),
         inLanguage: 'en-AU',
       };
 
     case 'Jobs':
+      // Note: we deliberately omit `employmentType` and `directApply` because
+      // the source data doesn't reliably specify either. Google's JobPosting
+      // spec treats both as optional — guessing them risks misclassification.
       return {
         '@context': 'https://schema.org',
         '@type': 'JobPosting',
@@ -122,10 +141,8 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
         url,
         datePosted: listing.created_at,
         ...(listing.expiry_date && { validThrough: listing.expiry_date }),
-        employmentType: 'PART_TIME',
         hiringOrganization: baseOrg(listing.organisation),
         jobLocation: basePlace(listing.location),
-        directApply: false,
         applicantLocationRequirements: {
           '@type': 'Country',
           name: 'AU',
@@ -166,7 +183,8 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
           url: listing.link,
         },
         inLanguage: 'en-AU',
-        educationalLevel: 'Youth (15–25)',
+        // Use schema.org-recognised audience instead of free-form educationalLevel.
+        audience: youthAudience,
         ...(image && { image }),
       };
 
@@ -183,11 +201,7 @@ export function buildListingJsonLd(listing: ListingForJsonLd) {
           '@type': 'AdministrativeArea',
           name: listing.location,
         },
-        audience: {
-          '@type': 'PeopleAudience',
-          suggestedMinAge: 15,
-          suggestedMaxAge: 25,
-        },
+        audience: youthAudience,
         ...(image && { image }),
       };
 
