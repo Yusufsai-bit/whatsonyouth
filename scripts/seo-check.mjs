@@ -14,36 +14,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
-// shouldIndex: true  → page MUST be indexable (no `noindex` allowed on <SEO>)
-// shouldIndex: false → page MUST be `noindex` (private/auth/utility routes)
-const ROUTES = [
-  { route: '/', file: 'pages/Index.tsx', shouldIndex: true },
-  { route: '/events', file: 'pages/CategoryListingPage.tsx', shouldIndex: true },
-  { route: '/jobs', file: 'pages/CategoryListingPage.tsx', shouldIndex: true },
-  { route: '/grants', file: 'pages/CategoryListingPage.tsx', shouldIndex: true },
-  { route: '/programs', file: 'pages/CategoryListingPage.tsx', shouldIndex: true },
-  { route: '/wellbeing', file: 'pages/CategoryListingPage.tsx', shouldIndex: true },
-  { route: '/melbourne', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/geelong', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/ballarat', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/bendigo', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/gippsland', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/shepparton', file: 'pages/RegionalPage.tsx', shouldIndex: true },
-  { route: '/listings/:id', file: 'pages/ListingDetailPage.tsx', shouldIndex: true },
-  { route: '/search', file: 'pages/SearchPage.tsx', shouldIndex: true },
-  { route: '/about', file: 'pages/AboutPage.tsx', shouldIndex: true },
-  { route: '/contact', file: 'pages/ContactPage.tsx', shouldIndex: true },
-  { route: '/privacy', file: 'pages/PrivacyPage.tsx', shouldIndex: true },
-  // Private / utility routes — must be noindex
-  { route: '/submit', file: 'pages/SubmitPage.tsx', shouldIndex: false },
-  { route: '/login', file: 'pages/LoginPage.tsx', shouldIndex: false },
-  { route: '/signup', file: 'pages/SignupPage.tsx', shouldIndex: false },
-  { route: '/forgot-password', file: 'pages/ForgotPasswordPage.tsx', shouldIndex: false },
-  { route: '/reset-password', file: 'pages/ResetPasswordPage.tsx', shouldIndex: false },
-  { route: '/account', file: 'pages/AccountPage.tsx', shouldIndex: false },
-  { route: '/saved', file: 'pages/SavedListingsPage.tsx', shouldIndex: false },
-  { route: '/edit-listing/:id', file: 'pages/EditListingPage.tsx', shouldIndex: false },
-];
+// Single source of truth — same routes drive sitemap generation.
+import { STATIC_ROUTES } from './sitemap-routes.mjs';
+
+// Convert the shared manifest into the route list this checker validates.
+// We collapse `:id` etc. so we still validate the page file once.
+const ROUTES = STATIC_ROUTES.filter((r) => !r.sitemapOnly).map((r) => ({
+  route: r.route,
+  file: r.file,
+  shouldIndex: r.shouldIndex,
+}));
 
 const REQUIRED_PROPS = ['title', 'description', 'canonical'];
 
