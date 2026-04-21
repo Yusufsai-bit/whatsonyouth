@@ -40,6 +40,17 @@ interface Listing {
 
 const ITEMS_PER_PAGE = 12;
 
+interface IntroContent {
+  body: string;
+  tags: string[];
+  crisis?: string;
+}
+
+interface FAQItemData {
+  q: string;
+  a: string;
+}
+
 const categoryConfig: Record<string, {
   label: string;
   heading: string;
@@ -48,6 +59,8 @@ const categoryConfig: Record<string, {
   seoTitle: string;
   seoDescription: string;
   slug: string;
+  introContent: IntroContent;
+  faq: FAQItemData[];
 }> = {
   Events: {
     label: 'Events',
