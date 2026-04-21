@@ -13,6 +13,42 @@
   <url><loc>https://www.whatsonyouth.org.au/gippsland</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.whatsonyouth.org.au/shepparton</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.whatsonyouth.org.au/search</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+
+  <!-- Filtered search: by category -->
+  <url><loc>https://www.whatsonyouth.org.au/search?category=Events</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?category=Jobs</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?category=Grants</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?category=Programs</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?category=Wellbeing</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Filtered search: by location -->
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Geelong</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Ballarat</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Bendigo</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Gippsland</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Shepparton</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+
+  <!-- Filtered search: region × category combos -->
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne&amp;category=Events</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne&amp;category=Jobs</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne&amp;category=Grants</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne&amp;category=Programs</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Melbourne&amp;category=Wellbeing</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Geelong&amp;category=Events</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Geelong&amp;category=Jobs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Geelong&amp;category=Programs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Ballarat&amp;category=Events</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Ballarat&amp;category=Jobs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Ballarat&amp;category=Programs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Bendigo&amp;category=Events</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Bendigo&amp;category=Jobs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Bendigo&amp;category=Programs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Gippsland&amp;category=Events</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Gippsland&amp;category=Jobs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Shepparton&amp;category=Events</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.whatsonyouth.org.au/search?location=Shepparton&amp;category=Jobs</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+
   <url><loc>https://www.whatsonyouth.org.au/submit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.whatsonyouth.org.au/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.whatsonyouth.org.au/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
