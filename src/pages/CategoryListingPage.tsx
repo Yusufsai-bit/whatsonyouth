@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
+import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
@@ -310,17 +311,27 @@ export default function CategoryListingPage({ category }: { category: string }) 
     })),
   };
 
+  const categoryUrl = `https://www.whatsonyouth.org.au/${config.slug}`;
+  const collectionJsonLd = buildCollectionPageJsonLd({
+    name: config.heading,
+    description: config.seoDescription,
+    url: categoryUrl,
+    numberOfItems: filtered.length,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: 'Home', url: 'https://www.whatsonyouth.org.au/' },
+    { name: config.label, url: categoryUrl },
+  ]);
+
   return (
     <>
       <SEO
         title={config.seoTitle}
         description={config.seoDescription}
-        ogUrl={`https://www.whatsonyouth.org.au/${config.slug}`}
-        canonical={`https://www.whatsonyouth.org.au/${config.slug}`}
+        ogUrl={categoryUrl}
+        canonical={categoryUrl}
+        jsonLd={[collectionJsonLd, breadcrumbJsonLd, faqJsonLd]}
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
-      </Helmet>
       <Navbar />
 
       {/* Page header */}
