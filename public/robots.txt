@@ -15,8 +15,10 @@ Disallow: /reset-password
 Disallow: /submit
 Disallow: /listings/*/edit
 
-# Avoid wasted crawl budget on filtered/search query strings
-Disallow: /search?
+# Avoid wasted crawl budget on filtered/search query strings beyond
+# what is explicitly listed in the sitemap.
+Disallow: /search?q=
 
-# Sitemaps actually served in production (verified 200 + valid XML)
+# Sitemap index — points to static routes + dynamic listings sitemap
+Sitemap: https://www.whatsonyouth.org.au/sitemap-index.xml
 Sitemap: https://www.whatsonyouth.org.au/sitemap.xml
