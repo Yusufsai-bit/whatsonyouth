@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { MapPin, Calendar, Copy, Check, Flag, X, ExternalLink, ChevronRight, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -9,6 +8,7 @@ import SEO from '@/components/SEO';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import useRecentlyViewed from '@/hooks/useRecentlyViewed';
+import { buildListingJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
@@ -192,37 +192,24 @@ export default function ListingDetailPage() {
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${listing.title} — ${window.location.href}`)}`;
 
-  const jsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": listing.category === 'Events' ? "Event" : listing.category === 'Jobs' ? "JobPosting" : "Course",
-    "name": listing.title,
-    "description": cleanDesc,
-    "url": listing.link,
-    "datePosted": listing.created_at,
-    "hiringOrganization": {
-      "@type": "Organization",
-      "name": listing.organisation,
-    },
-    "jobLocation": {
-      "@type": "Place",
-      "name": listing.location,
-      "address": {
-        "@type": "PostalAddress",
-        "addressRegion": "Victoria",
-        "addressCountry": "AU",
-      },
-    },
-    "isAccessibleForFree": true,
-    "inLanguage": "en-AU",
-    "audience": {
-      "@type": "EducationalAudience",
-      "educationalRole": "student",
-      "audienceType": "Young people aged 15-25",
-    },
-    ...(listing.expiry_date && { "validThrough": listing.expiry_date }),
-    ...(listing.category === 'Jobs' && { "employmentType": "PART_TIME" }),
-    ...(listing.image_url && { "image": listing.image_url }),
-  };
+  const listingUrl = `https://www.whatsonyouth.org.au/listings/${listing.id}`;
+  const listingJsonLd = buildListingJsonLd({
+    id: listing.id,
+    title: listing.title,
+    organisation: listing.organisation,
+    location: listing.location,
+    description: cleanDesc,
+    link: listing.link,
+    image_url: listing.image_url,
+    created_at: listing.created_at,
+    expiry_date: listing.expiry_date,
+    category: listing.category,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: 'Home', url: 'https://www.whatsonyouth.org.au/' },
+    { name: listing.category, url: `https://www.whatsonyouth.org.au${categoryRoutes[listing.category] || '/'}` },
+    { name: listing.title, url: listingUrl },
+  ]);
 
   return (
     <>
@@ -231,14 +218,12 @@ export default function ListingDetailPage() {
         description={`${truncDesc} — Free ${listing.category.toLowerCase()} opportunity for young Victorians in ${listing.location}. Find more at What's On Youth.`}
         ogTitle={listing.title}
         ogDescription={truncDesc}
-        ogUrl={`https://www.whatsonyouth.org.au/listings/${listing.id}`}
+        ogUrl={listingUrl}
         ogImage={listing.image_url || undefined}
         ogType="article"
-        canonical={`https://www.whatsonyouth.org.au/listings/${listing.id}`}
+        canonical={listingUrl}
+        jsonLd={[listingJsonLd, breadcrumbJsonLd]}
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
       <Navbar />
 
       <div className="bg-white min-h-screen overflow-x-hidden">
