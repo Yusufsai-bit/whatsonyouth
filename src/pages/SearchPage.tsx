@@ -133,8 +133,8 @@ export default function SearchPage() {
   return (
     <>
       <SEO
-        title="Search Opportunities — What's On Youth"
-        description="Search across events, jobs, grants, programs, and wellbeing support for young Victorians."
+        title="Search Events, Jobs, Grants & Youth Opportunities in Victoria — What's On Youth"
+        description="Search thousands of free events, entry-level jobs, grants, youth programs and wellbeing resources across Victoria. Find opportunities in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria for young people aged 15–25."
         ogUrl="https://www.whatsonyouth.org.au/search"
         canonical="https://www.whatsonyouth.org.au/search"
       />

@@ -9,6 +9,7 @@ import HowItWorks from '@/components/HowItWorks';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -41,11 +42,37 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="What's On Youth — Events, Jobs, Grants & More for Young Victorians"
-        description="Victoria's free platform for young people aged 15–25. Discover events, jobs, grants, programs, and wellbeing support all in one place."
+        title="What's On Youth — Free Events, Jobs, Grants & Support for Young Victorians"
+        description="Victoria's free platform for young people aged 15–25. Find free events, entry-level jobs, grants, youth programs and mental health support across Melbourne, Geelong, Ballarat, Bendigo and all of Victoria."
         ogUrl="https://www.whatsonyouth.org.au"
         canonical="https://www.whatsonyouth.org.au"
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "What's On Youth",
+          "url": "https://www.whatsonyouth.org.au",
+          "logo": "https://www.whatsonyouth.org.au/woy-favicon.svg",
+          "description": "Free platform connecting young Victorians aged 15-25 with events, jobs, grants, programs and wellbeing support.",
+          "areaServed": {
+            "@type": "State",
+            "name": "Victoria",
+            "containedInPlace": { "@type": "Country", "name": "Australia" }
+          },
+          "audience": {
+            "@type": "Audience",
+            "audienceType": "Young people aged 15-25",
+            "geographicArea": { "@type": "State", "name": "Victoria, Australia" }
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "info@whatsonyouth.org.au",
+            "contactType": "Customer Support"
+          },
+          "sameAs": ["https://www.instagram.com/whatsonyouth"]
+        })}</script>
+      </Helmet>
       <Navbar />
       {showBanner && (
         <div className="bg-brand-violet-surface border-b border-brand-violet-border px-6 py-3">
@@ -63,6 +90,9 @@ const Index = () => {
         </div>
       )}
       <Hero />
+      <p className="sr-only">
+        What's On Youth is Victoria's free platform for young people aged 15 to 25. Find free events near you, entry level jobs and internships, grants and scholarships, youth programs and courses, and mental health and wellbeing support — all in one place. Serving Melbourne, Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura, Warrnambool, Frankston and all of regional Victoria. Updated every Tuesday and Friday.
+      </p>
       <CategoryGrid />
       <FeaturedOpportunities />
       <RecentlyViewed />
