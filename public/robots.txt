@@ -1,7 +1,22 @@
+# Robots policy for What's On Youth
+# Verified against production routes on 2026-04-21.
+
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /account/
 
+# Private / authenticated areas — block crawling
+Disallow: /admin/
+Disallow: /account
+Disallow: /saved
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /submit
+Disallow: /listings/*/edit
+
+# Avoid wasted crawl budget on filtered/search query strings
+Disallow: /search?
+
+# Sitemaps actually served in production (verified 200 + valid XML)
 Sitemap: https://www.whatsonyouth.org.au/sitemap.xml
-Sitemap: https://www.whatsonyouth.org.au/api/sitemap-listings
