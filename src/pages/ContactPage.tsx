@@ -7,7 +7,7 @@ import SEO from '@/components/SEO';
 export default function ContactPage() {
   return (
     <>
-      <SEO title="Contact — What's On Youth" description="Get in touch with the What's On Youth team. General enquiries, partnerships, or report a listing." />
+      <SEO title="Contact — What's On Youth" description="Get in touch with the What's On Youth team. General enquiries, partnerships, or report a listing." canonical="https://www.whatsonyouth.org.au/contact" />
       <Navbar />
       <div className="min-h-screen">
         {/* Hero */}
