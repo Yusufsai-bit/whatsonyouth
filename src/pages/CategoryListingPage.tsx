@@ -571,6 +571,25 @@ export default function CategoryListingPage({ category }: { category: string }) 
                 <FAQItem key={i} q={item.q} a={item.a} />
               ))}
             </div>
+
+            {/* Internal link block — keyword-rich related pages */}
+            <nav aria-label="Related pages" className="mt-10 pt-6 border-t border-brand-card-border">
+              <h3 className="font-heading font-bold text-[16px] text-brand-text-primary mb-3">
+                Related pages
+              </h3>
+              <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                {RELATED_LINKS[category].map(link => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="font-body text-[14px] text-brand-violet hover:underline"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
         </section>
       )}
