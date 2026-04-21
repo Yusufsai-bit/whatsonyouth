@@ -9,7 +9,7 @@ import HowItWorks from '@/components/HowItWorks';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
-import { Helmet } from 'react-helmet-async';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
