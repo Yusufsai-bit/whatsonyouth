@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
+import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',

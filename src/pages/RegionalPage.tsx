@@ -8,6 +8,7 @@ import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
+import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 
 interface Listing {
   id: string;
@@ -128,13 +129,26 @@ export default function RegionalPage({ region }: { region: string }) {
 
   if (!config) return null;
 
+  const regionUrl = `https://www.whatsonyouth.org.au/${config.slug}`;
+  const collectionJsonLd = buildCollectionPageJsonLd({
+    name: config.heading,
+    description: config.seoDescription,
+    url: regionUrl,
+    numberOfItems: filtered.length,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: 'Home', url: 'https://www.whatsonyouth.org.au/' },
+    { name: config.name, url: regionUrl },
+  ]);
+
   return (
     <>
       <SEO
         title={config.seoTitle}
         description={config.seoDescription}
-        ogUrl={`https://www.whatsonyouth.org.au/${config.slug}`}
-        canonical={`https://www.whatsonyouth.org.au/${config.slug}`}
+        ogUrl={regionUrl}
+        canonical={regionUrl}
+        jsonLd={[collectionJsonLd, breadcrumbJsonLd]}
       />
       <Navbar />
 
