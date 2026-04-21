@@ -32,7 +32,7 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <>
-      <SEO title="Privacy Policy — What's On Youth" description="How What's On Youth collects, uses, and stores your personal information." />
+      <SEO title="Privacy Policy — What's On Youth" description="How What's On Youth collects, uses, and stores your personal information." canonical="https://www.whatsonyouth.org.au/privacy" />
       <Navbar />
       <div className="bg-white min-h-screen px-6 py-12 md:px-16 md:py-16">
         <div className="max-w-3xl mx-auto">
