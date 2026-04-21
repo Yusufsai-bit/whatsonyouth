@@ -67,9 +67,10 @@ export default function SearchPage() {
   const initialCat = searchParams.get('category') || 'All';
   const initialLocation = searchParams.get('location') || '';
 
-  const [query, setQuery] = useState(initialLocation || initialQ);
-  const [debouncedQuery, setDebouncedQuery] = useState(initialLocation || initialQ);
+  const [query, setQuery] = useState(initialQ);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQ);
   const [selectedCategory, setSelectedCategory] = useState(initialCat);
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
   const [sort, setSort] = useState<'newest' | 'az'>('newest');
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,17 +101,22 @@ export default function SearchPage() {
     const params: Record<string, string> = {};
     if (debouncedQuery) params.q = debouncedQuery;
     if (selectedCategory !== 'All') params.category = selectedCategory;
+    if (selectedLocation) params.location = selectedLocation;
     setSearchParams(params, { replace: true });
-  }, [debouncedQuery, selectedCategory, setSearchParams]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, setSearchParams]);
 
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-  }, [debouncedQuery, selectedCategory, sort]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, sort]);
 
   const filtered = useMemo(() => {
     let result = listings;
     if (selectedCategory !== 'All') {
       result = result.filter(l => l.category === selectedCategory);
+    }
+    if (selectedLocation) {
+      const loc = selectedLocation.toLowerCase();
+      result = result.filter(l => l.location.toLowerCase().includes(loc));
     }
     if (debouncedQuery.trim()) {
       const q = debouncedQuery.toLowerCase();
@@ -125,7 +131,7 @@ export default function SearchPage() {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
     return result;
-  }, [listings, debouncedQuery, selectedCategory, sort]);
+  }, [listings, debouncedQuery, selectedCategory, selectedLocation, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -133,49 +139,83 @@ export default function SearchPage() {
   // Build a normalized canonical URL for /search to prevent duplicate
   // indexing across param order, casing, or filter combinations.
   // Rules:
-  //  - Empty/All filters  → canonical to /search
-  //  - Only a category    → canonical to that category's dedicated page (/events, /jobs, …)
-  //  - Free-text query    → noindex (search result pages with arbitrary text shouldn't be indexed)
-  //  - Otherwise          → /search?<allow-listed params, sorted, lowercased>
-  const { canonicalUrl, shouldNoindex } = useMemo(() => {
+  //  - Empty/All filters    → canonical to /search
+  //  - Only a category      → canonical to that category's dedicated page (/events, /jobs, …)
+  //  - Otherwise            → /search?<allow-listed params, sorted, lowercased>
+  // Note: `q` (free-text) is intentionally excluded from the canonical so
+  // arbitrary text queries collapse to the same canonical surface.
+  const canonicalUrl = useMemo(() => {
     const base = 'https://www.whatsonyouth.org.au';
-    const q = debouncedQuery.trim().toLowerCase();
     const cat = selectedCategory !== 'All' ? selectedCategory : '';
-
-    if (q) {
-      return { canonicalUrl: `${base}/search`, shouldNoindex: true };
-    }
-    if (cat && categoryRoutes[cat]) {
-      return { canonicalUrl: `${base}${categoryRoutes[cat]}`, shouldNoindex: false };
+    const loc = selectedLocation.trim();
+    if (cat && !loc && categoryRoutes[cat]) {
+      return `${base}${categoryRoutes[cat]}`;
     }
     const allowed: Array<[string, string]> = [];
     if (cat) allowed.push(['category', cat.toLowerCase()]);
+    if (loc) allowed.push(['location', loc.toLowerCase()]);
     allowed.sort(([a], [b]) => a.localeCompare(b));
     const qs = allowed.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+    return qs ? `${base}/search?${qs}` : `${base}/search`;
+  }, [selectedCategory, selectedLocation]);
+
+  // Dynamic title / description / H1 driven by the active category + location filters.
+  // This gives Google a clear, distinct page context for filter combinations like
+  // "Jobs in Geelong" or "Grants in Melbourne" without indexing arbitrary `q` text.
+  const { pageTitle, metaDescription, h1, h1Subtext } = useMemo(() => {
+    const cat = selectedCategory !== 'All' ? selectedCategory : '';
+    const loc = selectedLocation.trim();
+    const catLower = cat ? cat.toLowerCase() : 'opportunities';
+
+    if (cat && loc) {
+      return {
+        pageTitle: `${cat} in ${loc} for Young People — What's On Youth`,
+        metaDescription: `Browse free ${catLower} in ${loc} for young Victorians aged 15–25. Updated regularly on What's On Youth.`,
+        h1: `${cat} in ${loc}`,
+        h1Subtext: `Free ${catLower} for young people in ${loc}.`,
+      };
+    }
+    if (cat) {
+      return {
+        pageTitle: `${cat} for Young People in Victoria — What's On Youth`,
+        metaDescription: `Browse free ${catLower} for young Victorians aged 15–25 across Melbourne, Geelong, Ballarat, Bendigo and regional Victoria.`,
+        h1: `${cat} for young Victorians`,
+        h1Subtext: `Free ${catLower} across Victoria, all in one place.`,
+      };
+    }
+    if (loc) {
+      return {
+        pageTitle: `Youth Opportunities in ${loc} — What's On Youth`,
+        metaDescription: `Free events, jobs, grants, programs and wellbeing support for young people aged 15–25 in ${loc}.`,
+        h1: `Opportunities in ${loc}`,
+        h1Subtext: `Events, jobs, grants and support for young people in ${loc}.`,
+      };
+    }
     return {
-      canonicalUrl: qs ? `${base}/search?${qs}` : `${base}/search`,
-      shouldNoindex: false,
+      pageTitle: "Search Events, Jobs, Grants & Youth Opportunities in Victoria — What's On Youth",
+      metaDescription: "Search thousands of free events, entry-level jobs, grants, youth programs and wellbeing resources across Victoria. Find opportunities in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria for young people aged 15–25.",
+      h1: 'Find your opportunity',
+      h1Subtext: 'Search across events, jobs, grants, programs, and wellbeing support — all in one place.',
     };
-  }, [debouncedQuery, selectedCategory]);
+  }, [selectedCategory, selectedLocation]);
 
   return (
     <>
       <SEO
-        title="Search Events, Jobs, Grants & Youth Opportunities in Victoria — What's On Youth"
-        description="Search thousands of free events, entry-level jobs, grants, youth programs and wellbeing resources across Victoria. Find opportunities in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria for young people aged 15–25."
+        title={pageTitle}
+        description={metaDescription}
         ogUrl={canonicalUrl}
         canonical={canonicalUrl}
-        noindex={shouldNoindex}
       />
       <Navbar />
 
       <section className="bg-brand-dark px-6 py-10 md:px-16 md:py-14">
         <div className="max-w-[680px] mx-auto text-center">
           <h1 className="font-heading font-bold text-[36px] md:text-[44px] text-white leading-[1.15] mb-2">
-            Find your opportunity
+            {h1}
           </h1>
           <p className="font-body text-base text-brand-footer-link mb-8">
-            Search across events, jobs, grants, programs, and wellbeing support — all in one place.
+            {h1Subtext}
           </p>
 
           <div className="relative w-full max-w-[680px] mx-auto">
