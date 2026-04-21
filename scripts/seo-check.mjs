@@ -85,7 +85,11 @@ for (const { route, file } of ROUTES) {
     continue;
   }
 
-  for (const prop of REQUIRED_PROPS) {
+  // Pages explicitly marked noindex don't need a canonical (they shouldn't be indexed at all).
+  const isNoindex = /\bnoindex\b/.test(block);
+  const requiredForBlock = isNoindex ? REQUIRED_PROPS.filter((p) => p !== 'canonical') : REQUIRED_PROPS;
+
+  for (const prop of requiredForBlock) {
     if (!hasProp(block, prop)) {
       issues.push({ route, file, problem: `missing prop: ${prop}` });
     }
