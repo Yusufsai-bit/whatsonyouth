@@ -261,6 +261,19 @@ export default function CategoryListingPage({ category }: { category: string }) 
     return null;
   }
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": config.faq.map((item) => ({
+      "@type": "Question",
+      "name": item.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.a,
+      },
+    })),
+  };
+
   return (
     <>
       <SEO
@@ -269,6 +282,9 @@ export default function CategoryListingPage({ category }: { category: string }) 
         ogUrl={`https://www.whatsonyouth.org.au/${config.slug}`}
         canonical={`https://www.whatsonyouth.org.au/${config.slug}`}
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      </Helmet>
       <Navbar />
 
       {/* Page header */}
