@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Search, MapPin, Calendar, ChevronDown, Heart, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -260,6 +261,19 @@ export default function CategoryListingPage({ category }: { category: string }) 
     return null;
   }
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": config.faq.map((item) => ({
+      "@type": "Question",
+      "name": item.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.a,
+      },
+    })),
+  };
+
   return (
     <>
       <SEO
@@ -268,6 +282,9 @@ export default function CategoryListingPage({ category }: { category: string }) 
         ogUrl={`https://www.whatsonyouth.org.au/${config.slug}`}
         canonical={`https://www.whatsonyouth.org.au/${config.slug}`}
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      </Helmet>
       <Navbar />
 
       {/* Page header */}
