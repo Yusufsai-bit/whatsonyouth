@@ -36,6 +36,7 @@ const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminScanLog = lazy(() => import('./pages/admin/AdminScanLog'));
 const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'));
+const AdminSEO = lazy(() => import('./pages/admin/AdminSEO'));
 const RegionalPage = lazy(() => import('./pages/RegionalPage'));
 
 const queryClient = new QueryClient({
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/admin/settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
             <Route path="/admin/scanner" element={<AdminGuard><AdminScanner /></AdminGuard>} />
             <Route path="/admin/scan-log" element={<AdminGuard><AdminScanLog /></AdminGuard>} />
+            <Route path="/admin/seo" element={<AdminGuard><AdminSEO /></AdminGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
