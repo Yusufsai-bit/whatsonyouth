@@ -42,19 +42,23 @@ ${urlBlocks}
 </urlset>
 `;
 
-const outPath = path.join(projectRoot, 'public', 'sitemap.xml');
-fs.writeFileSync(outPath, xml, 'utf8');
-console.log(`✓ sitemap.xml regenerated — ${entries.length} static URLs (lastmod ${today}).`);
+// Static URLs sitemap — written to its own file so the index can list it
+// alongside the dynamic listings sitemap (and any future sitemaps) cleanly.
+const staticOutPath = path.join(projectRoot, 'public', 'sitemap-static.xml');
+fs.writeFileSync(staticOutPath, xml, 'utf8');
+console.log(`✓ sitemap-static.xml regenerated — ${entries.length} static URLs (lastmod ${today}).`);
 
-// Also regenerate the sitemap-index so both static + dynamic listings sitemaps
-// are advertised under one canonical entry-point.
+// Also regenerate the sitemap-index so each child sitemap (static + dynamic
+// listings) is advertised under one canonical entry-point. Splitting them
+// keeps each child sitemap well within Google's 50k URLs / 50MB limits and
+// lets crawlers fetch only what changed.
 const SUPABASE_PROJECT_REF = 'fmgkyrgsrsjiltubstry';
 const listingsSitemapUrl = `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/sitemap-listings`;
 
 const indexXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${ORIGIN}/sitemap.xml</loc>
+    <loc>${ORIGIN}/sitemap-static.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
@@ -66,4 +70,19 @@ const indexXml = `<?xml version="1.0" encoding="UTF-8"?>
 
 const indexOutPath = path.join(projectRoot, 'public', 'sitemap-index.xml');
 fs.writeFileSync(indexOutPath, indexXml, 'utf8');
-console.log(`✓ sitemap-index.xml regenerated — points to static + dynamic listings sitemap.`);
+console.log(`✓ sitemap-index.xml regenerated — points to sitemap-static.xml + dynamic listings sitemap.`);
+
+// Backwards compatibility: keep /sitemap.xml as a tiny pointer-style sitemap
+// index so anything (old Search Console submissions, external links) that still
+// requests /sitemap.xml is redirected to the canonical index. Plain XML, no
+// server-side redirect needed.
+const legacyXml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${ORIGIN}/sitemap-index.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+</sitemapindex>
+`;
+fs.writeFileSync(path.join(projectRoot, 'public', 'sitemap.xml'), legacyXml, 'utf8');
+console.log(`✓ sitemap.xml updated as legacy pointer to sitemap-index.xml.`);
