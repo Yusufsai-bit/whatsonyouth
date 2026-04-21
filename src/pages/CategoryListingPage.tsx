@@ -293,6 +293,30 @@ export default function CategoryListingPage({ category }: { category: string }) 
         </div>
       </section>
 
+      {/* SEO intro content block */}
+      <section className="bg-white px-6 py-8 md:px-16 md:py-10">
+        <div className="max-w-7xl mx-auto">
+          {config.introContent.crisis && (
+            <div className="bg-brand-violet-surface border border-brand-violet-border rounded-xl p-4 mb-5 flex items-start gap-3">
+              <span aria-hidden="true" className="text-xl leading-none">💜</span>
+              <p className="font-body text-sm text-brand-text-primary leading-[1.6]">
+                {config.introContent.crisis}
+              </p>
+            </div>
+          )}
+          <p className="font-body text-[15px] md:text-base text-brand-text-secondary leading-[1.7] max-w-[800px]">
+            {config.introContent.body}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-5">
+            {config.introContent.tags.map(tag => (
+              <span key={tag} className="font-body text-[12px] text-brand-text-muted bg-brand-section-alt rounded-full px-3 py-1">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Filter bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-brand-card-border px-6 py-4 md:px-16">
         <div className="max-w-7xl mx-auto">
