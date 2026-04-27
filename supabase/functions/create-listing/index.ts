@@ -82,17 +82,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse body
-    const body = await req.json();
-
-    // Validate
-    const validation = validateBody(body);
-    if (!validation.valid) {
+    const parsed = ListingBodySchema.safeParse(await req.json());
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ success: false, error: "Validation failed", details: validation.details }),
+        JSON.stringify({ success: false, error: "Validation failed", details: parsed.error.flatten().fieldErrors }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    const body = parsed.data;
 
     // Create Supabase client with service role
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -120,13 +117,13 @@ Deno.serve(async (req) => {
 
     // Insert listing
     const insertData = {
-      title: (body.title as string).trim(),
-      category: body.category as string,
-      organisation: (body.organisation as string).trim(),
-      location: (body.location as string).trim(),
-      link: (body.link as string).trim(),
-      description: (body.description as string).trim(),
-      contact_email: body.contact_email ? (body.contact_email as string).trim() : "",
+      title: body.title,
+      category: body.category,
+      organisation: body.organisation,
+      location: body.location,
+      link: body.link,
+      description: body.description,
+      contact_email: body.contact_email ? body.contact_email.toLowerCase() : "",
       expiry_date: body.expiry_date || null,
       is_active: body.is_active !== undefined ? Boolean(body.is_active) : true,
       is_featured: false,
