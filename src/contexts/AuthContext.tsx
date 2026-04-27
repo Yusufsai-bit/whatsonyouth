@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { emailSchema, nameSchema, passwordSchema } from '@/lib/validation';
 
 interface AuthContextType {
   session: Session | null;
@@ -35,11 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, firstName: string) => {
+    const cleanEmail = emailSchema.parse(email);
+    const cleanFirstName = nameSchema.parse(firstName);
+    const cleanPassword = passwordSchema.parse(password);
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: cleanEmail,
+      password: cleanPassword,
       options: {
-        data: { first_name: firstName },
+        data: { first_name: cleanFirstName },
         emailRedirectTo: `${window.location.origin}/login`,
       },
     });
@@ -47,7 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const cleanEmail = emailSchema.parse(email);
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
     return { error };
   };
 
