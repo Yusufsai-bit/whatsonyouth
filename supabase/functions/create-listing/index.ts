@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,55 +25,30 @@ function isRateLimited(ip: string): boolean {
 
 const VALID_CATEGORIES = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
 
-function validateBody(body: Record<string, unknown>): { valid: boolean; details?: string } {
-  const { title, category, organisation, location, link, description, contact_email, expiry_date } = body;
+const sanitizeText = (value: string) =>
+  value.normalize("NFKC").replace(/[\u0000-\u001F\u007F-\u009F]/g, "").replace(/\s+/g, " ").trim();
 
-  if (!title || typeof title !== "string" || title.trim().length === 0)
-    return { valid: false, details: "title is required" };
-  if ((title as string).length > 200)
-    return { valid: false, details: "title must be 200 chars or less" };
-
-  if (!category || !VALID_CATEGORIES.includes(category as string))
-    return { valid: false, details: `category must be one of: ${VALID_CATEGORIES.join(", ")}` };
-
-  if (!organisation || typeof organisation !== "string" || (organisation as string).trim().length === 0)
-    return { valid: false, details: "organisation is required" };
-  if ((organisation as string).length > 200)
-    return { valid: false, details: "organisation must be 200 chars or less" };
-
-  if (!location || typeof location !== "string" || (location as string).trim().length === 0)
-    return { valid: false, details: "location is required" };
-  if ((location as string).length > 200)
-    return { valid: false, details: "location must be 200 chars or less" };
-
-  if (!link || typeof link !== "string")
-    return { valid: false, details: "link is required" };
-  if (!(link as string).startsWith("http://") && !(link as string).startsWith("https://"))
-    return { valid: false, details: "link must start with http:// or https://" };
-
-  if (!description || typeof description !== "string" || (description as string).trim().length === 0)
-    return { valid: false, details: "description is required" };
-  if ((description as string).length > 500)
-    return { valid: false, details: "description must be 500 chars or less" };
-
-  if (contact_email !== undefined && contact_email !== null && contact_email !== "") {
-    const email = contact_email as string;
-    if (!email.includes("@") || !email.includes("."))
-      return { valid: false, details: "contact_email must be a valid email" };
+const ListingBodySchema = z.object({
+  title: z.string().transform(sanitizeText).pipe(z.string().min(1).max(200)),
+  category: z.enum(VALID_CATEGORIES as [string, ...string[]]),
+  organisation: z.string().transform(sanitizeText).pipe(z.string().min(1).max(200)),
+  location: z.string().transform(sanitizeText).pipe(z.string().min(1).max(200)),
+  link: z.string().transform(sanitizeText).pipe(z.string().url().max(2000)).refine((url) => url.startsWith("https://"), "link must start with https://"),
+  description: z.string().transform(sanitizeText).pipe(z.string().min(1).max(500)),
+  contact_email: z.string().transform(sanitizeText).pipe(z.string().email().max(255)).optional().or(z.literal("")),
+  expiry_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
+  is_active: z.boolean().optional(),
+  source: z.string().transform(sanitizeText).pipe(z.string().max(80)).optional(),
+  scan_log_id: z.string().uuid().optional(),
+}).strict().superRefine((body, ctx) => {
+  if (!body.expiry_date) return;
+  const d = new Date(`${body.expiry_date}T00:00:00Z`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (Number.isNaN(d.getTime()) || d < today) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expiry_date"], message: "expiry_date must not be in the past" });
   }
-
-  if (expiry_date !== undefined && expiry_date !== null && expiry_date !== "") {
-    const d = new Date(expiry_date as string);
-    if (isNaN(d.getTime()))
-      return { valid: false, details: "expiry_date must be a valid ISO date (YYYY-MM-DD)" };
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (d < today)
-      return { valid: false, details: "expiry_date must not be in the past" };
-  }
-
-  return { valid: true };
-}
+});
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
