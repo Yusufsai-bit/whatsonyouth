@@ -32,6 +32,48 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_usage_log: {
+        Row: {
+          actor_user_id: string | null
+          amount: number | null
+          credit_type: Database["public"]["Enums"]["credit_usage_type"]
+          id: string
+          metadata: Json
+          notes: string | null
+          related_id: string | null
+          related_table: string | null
+          run_url: string | null
+          scan_session_id: string | null
+          spent_at: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          amount?: number | null
+          credit_type: Database["public"]["Enums"]["credit_usage_type"]
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          related_id?: string | null
+          related_table?: string | null
+          run_url?: string | null
+          scan_session_id?: string | null
+          spent_at?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          amount?: number | null
+          credit_type?: Database["public"]["Enums"]["credit_usage_type"]
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          related_id?: string | null
+          related_table?: string | null
+          run_url?: string | null
+          scan_session_id?: string | null
+          spent_at?: string
+        }
+        Relationships: []
+      }
       digest_subscribers: {
         Row: {
           created_at: string
@@ -335,7 +377,12 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      credit_usage_type:
+        | "chat_message"
+        | "build_action"
+        | "scanner_run"
+        | "cloud_ai"
+        | "cloud_runtime"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -462,6 +509,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      credit_usage_type: [
+        "chat_message",
+        "build_action",
+        "scanner_run",
+        "cloud_ai",
+        "cloud_runtime",
+      ],
+    },
   },
 } as const
