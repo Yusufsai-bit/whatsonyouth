@@ -9,6 +9,7 @@ import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import useRecentlyViewed from '@/hooks/useRecentlyViewed';
 import { buildListingJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
+import { sanitizeText } from '@/lib/validation';
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
@@ -125,11 +126,12 @@ export default function ListingDetailPage() {
   };
 
   const handleReport = async () => {
-    if (!reportReason.trim() || !id) return;
+    const reason = sanitizeText(reportReason);
+    if (!reason || reason.length > 500 || !id) return;
     setReportSubmitting(true);
     await supabase.from('listing_reports').insert({
       listing_id: id,
-      reason: reportReason.trim(),
+      reason,
     });
     setReportSubmitting(false);
     setReportSent(true);
