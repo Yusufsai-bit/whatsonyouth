@@ -36,10 +36,10 @@ export default function SignupPage() {
     setAttemptCount(c => c + 1);
 
     setLoading(true);
-    const { error } = await signUp(email, password, firstName);
+    const { error } = await signUp(email, password, firstName).catch((err) => ({ error: err }));
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(error.issues?.[0]?.message || error.message || 'Please check your details and try again.');
     } else {
       setEmailSent(true);
     }
