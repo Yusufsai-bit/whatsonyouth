@@ -17,10 +17,10 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password).catch((err) => ({ error: err }));
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(error.issues?.[0]?.message || error.message || 'Please check your details and try again.');
     } else {
       navigate('/');
     }
