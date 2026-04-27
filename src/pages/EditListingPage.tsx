@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import { emailSchema, sanitizeText, strictHttpsUrlSchema } from '@/lib/validation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,14 +24,14 @@ import {
 const categories = ['Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'] as const;
 
 const listingSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(150),
+  title: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Title is required').max(150)),
   category: z.enum(categories, { errorMap: () => ({ message: 'Please select a category' }) }),
-  organisation: z.string().trim().min(1, 'Organisation is required').max(200),
-  location: z.string().trim().min(1, 'Location is required').max(200),
-  link: z.string().trim().url('Please enter a valid URL').max(2000),
-  description: z.string().trim().min(1, 'Description is required').max(300),
-  contact_email: z.string().trim().email('Please enter a valid email address').max(255),
-});
+  organisation: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Organisation is required').max(200)),
+  location: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Location is required').max(200)),
+  link: strictHttpsUrlSchema,
+  description: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Description is required').max(300)),
+  contact_email: emailSchema,
+}).strict();
 
 type FieldErrors = Partial<Record<keyof z.infer<typeof listingSchema>, string>>;
 
@@ -119,7 +120,7 @@ export default function EditListingPage() {
 
     let imageUrl = existingImageUrl;
     if (imageFile) {
-      const ext = imageFile.name.split('.').pop();
+      const ext = imageFile.type === 'image/png' ? 'png' : 'jpg';
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('listing-images')
