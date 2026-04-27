@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/woy-logo-reversed.svg';
+import { emailSchema } from '@/lib/validation';
 
 const exploreLinks = [
   { label: 'Events', href: '/events' },
@@ -38,11 +39,15 @@ export default function Footer() {
 
   const handleDigest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!digestEmail.trim()) return;
+    const parsed = emailSchema.safeParse(digestEmail);
+    if (!parsed.success) {
+      setDigestError(parsed.error.issues[0]?.message || 'Please enter a valid email address.');
+      return;
+    }
     setDigestLoading(true);
     setDigestError('');
 
-    const { error } = await supabase.from('digest_subscribers').insert({ email: digestEmail.trim().toLowerCase() });
+    const { error } = await supabase.from('digest_subscribers').insert({ email: parsed.data });
 
     setDigestLoading(false);
     if (error) {
