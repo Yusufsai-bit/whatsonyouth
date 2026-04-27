@@ -27,7 +27,7 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
     setResolving(true);
     try {
       const { data } = await supabase.functions.invoke('resolve-listing-image', {
-        body: { listing_id: listingId, listing_url: link, listing_title: title, category },
+        body: { listing_id: listingId },
       });
       if (data?.image_url) {
         setSrc(data.image_url);
@@ -39,7 +39,7 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
     } finally {
       setResolving(false);
     }
-  }, [listingId, link, title, category]);
+  }, [listingId]);
 
   useEffect(() => {
     if (!imageUrl) {
