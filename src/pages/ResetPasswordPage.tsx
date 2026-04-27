@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { CheckCircle } from 'lucide-react';
 import PasswordStrengthBar from '@/components/PasswordStrengthBar';
+import { passwordSchema } from '@/lib/validation';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -34,11 +35,12 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    const parsedPassword = passwordSchema.safeParse(password);
+    if (!parsedPassword.success) { setError(parsedPassword.error.issues[0]?.message || 'Please enter a stronger password'); return; }
     if (password !== confirm) { setError('Passwords do not match'); return; }
     
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await supabase.auth.updateUser({ password: parsedPassword.data });
     setLoading(false);
     if (error) {
       setError(error.message);

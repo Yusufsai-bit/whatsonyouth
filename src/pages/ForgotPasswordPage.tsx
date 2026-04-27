@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { Mail } from 'lucide-react';
+import { emailSchema } from '@/lib/validation';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -13,8 +14,10 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) return;
     setLoading(true);
-    await supabase.auth.resetPasswordForEmail(email, {
+    await supabase.auth.resetPasswordForEmail(parsed.data, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setLoading(false);
