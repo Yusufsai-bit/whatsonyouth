@@ -477,7 +477,9 @@ serve(async (req) => {
     totalImagesPending = pendingImageIds.length;
 
     // Session summary log entry
-    await supabase.from('scan_log').insert({
+    const sessionStatus = totalErrors === 0 ? 'success' : totalErrors === sources.length ? 'error' : 'partial';
+    const sessionError = totalErrors > 0 ? `${totalErrors} source(s) failed` : null;
+    const { data: sessionLog } = await supabase.from('scan_log').insert({
       scan_session_id: scanSessionId,
       source_url: '__session_summary__',
       listings_found: totalFound,
@@ -486,9 +488,35 @@ serve(async (req) => {
       images_resolved: 0,
       images_from_unsplash: 0,
       images_pending: totalImagesPending,
-      status: totalErrors === 0 ? 'success' : totalErrors === sources.length ? 'error' : 'partial',
-      error_message: totalErrors > 0 ? `${totalErrors} source(s) failed` : null,
-    });
+      status: sessionStatus,
+      error_message: sessionError,
+    }).select('id').maybeSingle();
+
+    // Credit usage audit entry for the scanner run. Amount is intentionally null because
+    // the platform does not expose exact AI credit cost per run to app code.
+    try {
+      await supabase.from('credit_usage_log').insert({
+        credit_type: 'scanner_run',
+        amount: null,
+        actor_user_id: adminUserId,
+        related_table: 'scan_log',
+        related_id: sessionLog?.id || null,
+        run_url: `/admin/scan-log?session=${scanSessionId}`,
+        scan_session_id: scanSessionId,
+        notes: sessionError || 'Scanner run completed',
+        metadata: {
+          sources_scanned: sources.length,
+          listings_found: totalFound,
+          listings_created: totalCreated,
+          listings_skipped: totalSkipped,
+          errors: totalErrors,
+          images_pending: totalImagesPending,
+          status: sessionStatus,
+        },
+      });
+    } catch (creditLogError) {
+      console.warn('Credit usage log insert failed:', creditLogError);
+    }
 
     // Auto-deactivate expired listings (Wellbeing listings are excluded — they never expire)
     const today = new Date().toISOString().split("T")[0];
