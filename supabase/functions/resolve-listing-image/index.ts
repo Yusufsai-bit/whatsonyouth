@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { resolveImage } from "../_shared/resolve-image.ts";
 
 const corsHeaders = {
@@ -8,17 +9,21 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const BodySchema = z.object({
+  listing_id: z.string().uuid(),
+}).strict();
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    const { listing_id, listing_url, listing_title, category } = await req.json();
+    const parsed = BodySchema.safeParse(await req.json());
 
-    if (!listing_id || !listing_url) {
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ error: "listing_id and listing_url required" }),
+        JSON.stringify({ success: false, error: "Invalid request" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -28,11 +33,25 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const { data: listing, error: listingError } = await supabase
+      .from("listings")
+      .select("id, link, title, category")
+      .eq("id", parsed.data.listing_id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (listingError || !listing) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Listing not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const result = await resolveImage(
-      listing_id,
-      listing_url,
-      listing_title || "",
-      category || "Events",
+      listing.id,
+      listing.link,
+      listing.title || "",
+      listing.category || "Events",
       supabase
     );
 
