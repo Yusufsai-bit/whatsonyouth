@@ -8,6 +8,7 @@ import { z } from 'zod';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import { emailSchema, sanitizeText, strictHttpsUrlSchema } from '@/lib/validation';
 
 const categories = ['Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'] as const;
 
@@ -20,14 +21,14 @@ const categoryColors: Record<string, string> = {
 };
 
 const listingSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(150, 'Title must be under 150 characters'),
+  title: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Title is required').max(150, 'Title must be under 150 characters')),
   category: z.enum(categories, { errorMap: () => ({ message: 'Please select a category' }) }),
-  organisation: z.string().trim().min(1, 'Organisation is required').max(200, 'Organisation must be under 200 characters'),
-  location: z.string().trim().min(1, 'Location is required').max(200, 'Location must be under 200 characters'),
-  link: z.string().trim().url('Please enter a valid URL').refine(v => v.startsWith('https://'), 'Link must start with https://').pipe(z.string().max(2000, 'URL is too long')),
-  description: z.string().trim().min(1, 'Description is required').max(300, 'Description must be under 300 characters'),
-  contact_email: z.string().trim().email('Please enter a valid email address').max(255, 'Email is too long'),
-});
+  organisation: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Organisation is required').max(200, 'Organisation must be under 200 characters')),
+  location: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Location is required').max(200, 'Location must be under 200 characters')),
+  link: strictHttpsUrlSchema,
+  description: z.string().transform(sanitizeText).pipe(z.string().min(1, 'Description is required').max(300, 'Description must be under 300 characters')),
+  contact_email: emailSchema,
+}).strict();
 
 type FieldErrors = Partial<Record<keyof z.infer<typeof listingSchema>, string>>;
 
@@ -220,7 +221,7 @@ export default function SubmitPage() {
 
     // Upload image if selected
     if (imageFile) {
-      const ext = imageFile.name.split('.').pop();
+      const ext = imageFile.type === 'image/png' ? 'png' : 'jpg';
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('listing-images')
