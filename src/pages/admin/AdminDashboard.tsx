@@ -32,6 +32,19 @@ interface RecentListing {
   created_at: string;
 }
 
+interface ReportStats {
+  open: number;
+  reviewing: number;
+  resolved: number;
+}
+
+interface RecentAudit {
+  id: string;
+  action: string;
+  entity_table: string;
+  created_at: string;
+}
+
 interface CategoryCount {
   category: string;
   count: number;
@@ -53,6 +66,8 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState<CategoryCount[]>([]);
   const [lastScan, setLastScan] = useState<LastScan | null>(null);
   const [ops, setOps] = useState<OpsStats>({ expiredActive: 0, needsReview: 0, duplicateGroups: 0, weakSources: 0 });
+  const [reports, setReports] = useState<ReportStats>({ open: 0, reviewing: 0, resolved: 0 });
+  const [audit, setAudit] = useState<RecentAudit[]>([]);
 
   function getNextScanDate(): string {
     const now = new Date();
@@ -110,9 +125,11 @@ export default function AdminDashboard() {
       .limit(1);
     if (scanData && scanData.length > 0) setLastScan(scanData[0]);
 
-    const [{ data: qualityData }, { data: sourceHealth }] = await Promise.all([
+    const [{ data: qualityData }, { data: sourceHealth }, { data: reportData }, { data: auditData }] = await Promise.all([
       supabase.from('admin_listing_quality' as any).select('quality_label, duplicate_fingerprint'),
       supabase.from('admin_scan_source_health' as any).select('health_label'),
+      supabase.from('listing_reports' as any).select('status'),
+      supabase.from('admin_audit_log' as any).select('id, action, entity_table, created_at').order('created_at', { ascending: false }).limit(5),
     ]);
 
     const duplicateFingerprints = new Set<string>();
@@ -125,6 +142,13 @@ export default function AdminDashboard() {
       duplicateGroups: duplicateFingerprints.size,
       weakSources: (sourceHealth || []).filter((row: any) => row.health_label === 'weak' || row.health_label === 'poor').length,
     });
+
+    setReports({
+      open: (reportData || []).filter((row: any) => row.status === 'open').length,
+      reviewing: (reportData || []).filter((row: any) => row.status === 'reviewing').length,
+      resolved: (reportData || []).filter((row: any) => row.status === 'resolved' || row.status === 'dismissed').length,
+    });
+    setAudit((auditData as unknown as RecentAudit[]) || []);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -166,6 +190,24 @@ export default function AdminDashboard() {
               <p className={`font-heading font-bold text-[32px] mt-1 leading-tight ${card.value > 0 ? 'text-[#D85A30]' : 'text-[#1D9E75]'}`}>{card.value}</p>
             </Link>
           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+          <Link to="/admin/audit-log" className="bg-[#0A0A0A] text-white rounded-xl p-5 hover:bg-[#1A1A1A] transition-colors">
+            <p className="font-body text-[13px] text-[#AAAAAA]">Open reports</p>
+            <p className="font-heading font-bold text-[36px] mt-1 leading-tight">{reports.open}</p>
+            <p className="font-body text-xs text-[#CCCCCC] mt-1">{reports.reviewing} under review · {reports.resolved} closed</p>
+          </Link>
+          <Link to="/admin/scanner" className="bg-white border border-[#EBEBEB] rounded-xl p-5 hover:border-[#5847E0] transition-colors">
+            <p className="font-body text-[13px] text-[#888888]">Scanner health</p>
+            <p className={`font-heading font-bold text-[36px] mt-1 leading-tight ${ops.weakSources > 0 ? 'text-[#D85A30]' : 'text-[#1D9E75]'}`}>{ops.weakSources}</p>
+            <p className="font-body text-xs text-[#888888] mt-1">weak or poor sources</p>
+          </Link>
+          <Link to="/admin/listings" className="bg-white border border-[#EBEBEB] rounded-xl p-5 hover:border-[#5847E0] transition-colors">
+            <p className="font-body text-[13px] text-[#888888]">Listing quality queue</p>
+            <p className={`font-heading font-bold text-[36px] mt-1 leading-tight ${ops.needsReview + ops.expiredActive > 0 ? 'text-[#D85A30]' : 'text-[#1D9E75]'}`}>{ops.needsReview + ops.expiredActive}</p>
+            <p className="font-body text-xs text-[#888888] mt-1">review or expiry issues</p>
+          </Link>
         </div>
 
         {/* Last auto-scan card */}
@@ -211,6 +253,27 @@ export default function AdminDashboard() {
               ))}
               {recent.length === 0 && (
                 <p className="px-5 py-8 text-center font-body text-sm text-[#888888]">No listings yet.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-[#EBEBEB] rounded-xl">
+            <div className="px-5 py-4 border-b border-[#EBEBEB] flex items-center justify-between">
+              <h2 className="font-heading font-bold text-base text-[#0A0A0A]">Recent admin activity</h2>
+              <Link to="/admin/audit-log" className="font-body text-[13px] text-[#5847E0] hover:underline">View log</Link>
+            </div>
+            <div className="divide-y divide-[#F0F0F0]">
+              {audit.map((entry) => (
+                <div key={entry.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-body text-sm text-[#0A0A0A] truncate">{entry.action.replaceAll('_', ' ')}</p>
+                    <p className="font-body text-xs text-[#888888] mt-0.5">{entry.entity_table}</p>
+                  </div>
+                  <span className="font-body text-xs text-[#888888] whitespace-nowrap">{timeAgo(entry.created_at)}</span>
+                </div>
+              ))}
+              {audit.length === 0 && (
+                <p className="px-5 py-8 text-center font-body text-sm text-[#888888]">No admin activity yet.</p>
               )}
             </div>
           </div>
