@@ -99,7 +99,17 @@ export default function ListingDetailPage() {
               if (rel) setRelated(rel as RelatedListing[]);
             });
         } else {
-          setNotFound(true);
+          supabase
+            .from('listings')
+            .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category, contact_email, view_count')
+            .eq('id', id)
+            .maybeSingle()
+            .then(({ data: inactive }) => {
+              if (inactive) setListing(inactive as Listing);
+              else setNotFound(true);
+              setLoading(false);
+            });
+          return;
         }
         setLoading(false);
       });
@@ -180,6 +190,7 @@ export default function ListingDetailPage() {
   const isClosingSoon = listing.expiry_date &&
     (new Date(listing.expiry_date).getTime() - Date.now()) < 7 * 86400000 &&
     new Date(listing.expiry_date).getTime() > Date.now();
+  const isExpired = listing.expiry_date && new Date(listing.expiry_date).getTime() < Date.now();
 
   const ctaLabel = listing.category === 'Events' ? 'Register' :
     listing.category === 'Jobs' ? 'Apply now' :
@@ -230,6 +241,7 @@ export default function ListingDetailPage() {
         ogImage={listing.image_url || undefined}
         ogType="article"
         canonical={listingUrl}
+        noindex={Boolean(isExpired)}
         jsonLd={[listingJsonLd, breadcrumbJsonLd]}
       />
       <Navbar />
@@ -249,6 +261,13 @@ export default function ListingDetailPage() {
         <div className="px-6 md:px-16 pb-24 lg:pb-16 max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
           {/* Left column */}
           <div className="flex-1 min-w-0">
+            {isExpired && (
+              <div className="bg-[#FFF8F0] border border-[#F5C68A] rounded-xl px-5 py-4 mb-5">
+                <p className="font-heading font-bold text-[16px] text-brand-text-primary">This opportunity may have closed</p>
+                <p className="font-body text-sm text-brand-text-secondary mt-1">Browse current {listing.category.toLowerCase()} opportunities instead.</p>
+                <Link to={backRoute} className="inline-flex mt-3 text-brand-violet font-body font-medium text-sm hover:underline">See current {listing.category.toLowerCase()} →</Link>
+              </div>
+            )}
             <span className="inline-block bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px] mb-2">
               {listing.category}
             </span>
