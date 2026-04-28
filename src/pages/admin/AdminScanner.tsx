@@ -123,12 +123,19 @@ export default function AdminScanner() {
 
   const toggleSource = async (id: string, isActive: boolean) => {
     await supabase.from('scan_sources').update({ is_active: isActive } as any).eq('id', id);
+    await supabase.from('admin_audit_log' as any).insert({
+      action: isActive ? 'scan_source_enabled' : 'scan_source_disabled',
+      entity_table: 'scan_sources',
+      entity_id: id,
+      metadata: { is_active: isActive },
+    });
     setSources(prev => prev.map(s => s.id === id ? { ...s, is_active: isActive } : s));
   };
 
   const removeSource = async (id: string) => {
     if (!confirm('Remove this source?')) return;
     await supabase.from('scan_sources').delete().eq('id', id);
+    await supabase.from('admin_audit_log' as any).insert({ action: 'scan_source_deleted', entity_table: 'scan_sources', entity_id: id });
     setSources(prev => prev.filter(s => s.id !== id));
     toast.success('Source removed');
   };
@@ -185,6 +192,14 @@ export default function AdminScanner() {
       return;
     }
     if (data) setSources(prev => [...prev, data[0] as unknown as ScanSource]);
+    if (data?.[0]?.id) {
+      await supabase.from('admin_audit_log' as any).insert({
+        action: 'scan_source_added',
+        entity_table: 'scan_sources',
+        entity_id: data[0].id,
+        metadata: { url: newUrl, name: newName, category: newCategory },
+      });
+    }
     setNewUrl('');
     setNewName('');
     setNewCategory('');

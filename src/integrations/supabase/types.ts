@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_table: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_table: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_table?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: []
+      }
       admins: {
         Row: {
           created_at: string
@@ -94,22 +124,37 @@ export type Database = {
       }
       listing_reports: {
         Row: {
+          admin_notes: string | null
           created_at: string
           id: string
           listing_id: string
           reason: string
+          reason_category: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           listing_id: string
           reason: string
+          reason_category?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           listing_id?: string
           reason?: string
+          reason_category?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
         }
         Relationships: []
       }

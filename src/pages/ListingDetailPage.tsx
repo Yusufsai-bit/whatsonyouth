@@ -66,6 +66,7 @@ export default function ListingDetailPage() {
   const [copied, setCopied] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [reportCategory, setReportCategory] = useState('broken_link');
   const [reportSent, setReportSent] = useState(false);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [related, setRelated] = useState<RelatedListing[]>([]);
@@ -137,18 +138,21 @@ export default function ListingDetailPage() {
 
   const handleReport = async () => {
     const reason = sanitizeText(reportReason);
-    if (!reason || reason.length > 500 || !id) return;
+    const allowedCategories = ['broken_link', 'expired', 'incorrect_info', 'unsafe_or_spam', 'other'];
+    if (!reason || reason.length > 500 || !id || !allowedCategories.includes(reportCategory)) return;
     setReportSubmitting(true);
     await supabase.from('listing_reports').insert({
       listing_id: id,
+      reason_category: reportCategory,
       reason,
-    });
+    } as any);
     setReportSubmitting(false);
     setReportSent(true);
     setTimeout(() => {
       setShowReport(false);
       setReportSent(false);
       setReportReason('');
+      setReportCategory('broken_link');
     }, 2000);
   };
 
@@ -464,7 +468,7 @@ export default function ListingDetailPage() {
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
           <div className="bg-white rounded-xl p-6 w-full max-w-md relative">
-            <button onClick={() => { setShowReport(false); setReportSent(false); setReportReason(''); }} className="absolute top-4 right-4 text-brand-text-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
+            <button onClick={() => { setShowReport(false); setReportSent(false); setReportReason(''); setReportCategory('broken_link'); }} className="absolute top-4 right-4 text-brand-text-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
               <X size={18} />
             </button>
             {reportSent ? (
@@ -476,10 +480,25 @@ export default function ListingDetailPage() {
                 <h3 className="font-heading font-bold text-lg text-brand-text-primary mb-3">
                   Report this listing
                 </h3>
+                <label className="block font-body text-sm text-brand-text-secondary mb-1" htmlFor="report-category">What’s wrong?</label>
+                <select
+                  id="report-category"
+                  value={reportCategory}
+                  onChange={e => setReportCategory(e.target.value)}
+                  className="w-full border border-brand-input-border rounded-lg p-3 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet mb-3 bg-white"
+                >
+                  <option value="broken_link">Broken link</option>
+                  <option value="expired">Expired opportunity</option>
+                  <option value="incorrect_info">Incorrect information</option>
+                  <option value="unsafe_or_spam">Unsafe or spam</option>
+                  <option value="other">Other</option>
+                </select>
+                <label className="block font-body text-sm text-brand-text-secondary mb-1" htmlFor="report-reason">Details</label>
                 <textarea
+                  id="report-reason"
                   placeholder="Why are you reporting this?"
                   value={reportReason}
-                  onChange={e => setReportReason(e.target.value)}
+                  onChange={e => setReportReason(e.target.value.slice(0, 500))}
                   rows={4}
                   className="w-full border border-brand-input-border rounded-lg p-3 font-body text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet resize-none"
                 />

@@ -99,14 +99,25 @@ export default function AdminListings() {
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
+  const logAudit = async (action: string, entityId: string | null, metadata: Record<string, unknown> = {}) => {
+    await supabase.from('admin_audit_log' as any).insert({
+      action,
+      entity_table: 'listings',
+      entity_id: entityId,
+      metadata,
+    });
+  };
+
   const toggleActive = async (id: string, current: boolean) => {
     await supabase.from('listings').update({ is_active: !current }).eq('id', id);
+    await logAudit(current ? 'listing_deactivated' : 'listing_activated', id, { previous_active: current, new_active: !current });
     toast(current ? 'Listing deactivated' : 'Listing activated');
     fetchListings();
   };
 
   const toggleFeatured = async (id: string, current: boolean) => {
     await supabase.from('listings').update({ is_featured: !current }).eq('id', id);
+    await logAudit(current ? 'listing_unfeatured' : 'listing_featured', id, { previous_featured: current, new_featured: !current });
     toast(current ? 'Removed from featured' : 'Added to featured');
     fetchListings();
   };
@@ -114,6 +125,7 @@ export default function AdminListings() {
   const deleteListing = async () => {
     if (!deleteId) return;
     await supabase.from('listings').delete().eq('id', deleteId);
+    await logAudit('listing_deleted', deleteId);
     toast('Listing deleted');
     setDeleteId(null);
     setSelected(prev => { const n = new Set(prev); n.delete(deleteId); return n; });
@@ -137,10 +149,12 @@ export default function AdminListings() {
     const ids = Array.from(selected);
     if (action === 'delete') {
       for (const id of ids) await supabase.from('listings').delete().eq('id', id);
+      await logAudit('listing_bulk_deleted', null, { count: ids.length, ids });
       toast('Selected listings deleted');
     } else {
       const val = action === 'activate';
       for (const id of ids) await supabase.from('listings').update({ is_active: val }).eq('id', id);
+      await logAudit(val ? 'listing_bulk_activated' : 'listing_bulk_deactivated', null, { count: ids.length, ids });
       toast(val ? 'Selected listings activated' : 'Selected listings deactivated');
     }
     setSelected(new Set());
