@@ -119,15 +119,19 @@ export type Database = {
           contact_email: string
           created_at: string
           description: string
+          duplicate_fingerprint: string | null
+          expired_at: string | null
           expiry_date: string | null
           featured_order: number | null
           id: string
           image_url: string | null
           is_active: boolean
           is_featured: boolean
+          last_quality_checked_at: string | null
           link: string
           location: string
           organisation: string
+          quality_score: number
           source: string
           title: string
           user_id: string
@@ -138,15 +142,19 @@ export type Database = {
           contact_email: string
           created_at?: string
           description: string
+          duplicate_fingerprint?: string | null
+          expired_at?: string | null
           expiry_date?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
+          last_quality_checked_at?: string | null
           link: string
           location: string
           organisation: string
+          quality_score?: number
           source?: string
           title: string
           user_id: string
@@ -157,15 +165,19 @@ export type Database = {
           contact_email?: string
           created_at?: string
           description?: string
+          duplicate_fingerprint?: string | null
+          expired_at?: string | null
           expiry_date?: string | null
           featured_order?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
+          last_quality_checked_at?: string | null
           link?: string
           location?: string
           organisation?: string
+          quality_score?: number
           source?: string
           title?: string
           user_id?: string
@@ -288,10 +300,20 @@ export type Database = {
           created_at: string
           discovered_at: string | null
           discovered_by_ai: boolean
+          failed_scans: number
           id: string
           is_active: boolean
+          last_scan_at: string | null
+          last_scan_error: string | null
+          last_scan_status: string | null
           last_success_at: string | null
           name: string
+          quality_score: number
+          successful_scans: number
+          total_listings_created: number
+          total_listings_found: number
+          total_listings_skipped: number
+          total_scans: number
           url: string
         }
         Insert: {
@@ -300,10 +322,20 @@ export type Database = {
           created_at?: string
           discovered_at?: string | null
           discovered_by_ai?: boolean
+          failed_scans?: number
           id?: string
           is_active?: boolean
+          last_scan_at?: string | null
+          last_scan_error?: string | null
+          last_scan_status?: string | null
           last_success_at?: string | null
           name: string
+          quality_score?: number
+          successful_scans?: number
+          total_listings_created?: number
+          total_listings_found?: number
+          total_listings_skipped?: number
+          total_scans?: number
           url: string
         }
         Update: {
@@ -312,16 +344,107 @@ export type Database = {
           created_at?: string
           discovered_at?: string | null
           discovered_by_ai?: boolean
+          failed_scans?: number
           id?: string
           is_active?: boolean
+          last_scan_at?: string | null
+          last_scan_error?: string | null
+          last_scan_status?: string | null
           last_success_at?: string | null
           name?: string
+          quality_score?: number
+          successful_scans?: number
+          total_listings_created?: number
+          total_listings_found?: number
+          total_listings_skipped?: number
+          total_scans?: number
           url?: string
         }
         Relationships: []
       }
     }
     Views: {
+      admin_listing_quality: {
+        Row: {
+          category: string | null
+          duplicate_count: number | null
+          duplicate_fingerprint: string | null
+          expiry_date: string | null
+          id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          last_quality_checked_at: string | null
+          organisation: string | null
+          quality_label: string | null
+          quality_score: number | null
+          source: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      admin_scan_source_health: {
+        Row: {
+          category: string | null
+          consecutive_failures: number | null
+          failed_scans: number | null
+          health_label: string | null
+          id: string | null
+          is_active: boolean | null
+          last_scan_at: string | null
+          last_scan_error: string | null
+          last_scan_status: string | null
+          last_success_at: string | null
+          name: string | null
+          quality_score: number | null
+          successful_scans: number | null
+          total_listings_created: number | null
+          total_listings_found: number | null
+          total_listings_skipped: number | null
+          total_scans: number | null
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          consecutive_failures?: number | null
+          failed_scans?: number | null
+          health_label?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_scan_at?: string | null
+          last_scan_error?: string | null
+          last_scan_status?: string | null
+          last_success_at?: string | null
+          name?: string | null
+          quality_score?: number | null
+          successful_scans?: number | null
+          total_listings_created?: number | null
+          total_listings_found?: number | null
+          total_listings_skipped?: number | null
+          total_scans?: number | null
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          consecutive_failures?: number | null
+          failed_scans?: number | null
+          health_label?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_scan_at?: string | null
+          last_scan_error?: string | null
+          last_scan_status?: string | null
+          last_success_at?: string | null
+          name?: string | null
+          quality_score?: number | null
+          successful_scans?: number | null
+          total_listings_created?: number | null
+          total_listings_found?: number | null
+          total_listings_skipped?: number | null
+          total_scans?: number | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       listings_public: {
         Row: {
           category: string | null
@@ -360,6 +483,20 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_listing_quality_score: {
+        Args: {
+          _category: string
+          _description: string
+          _expiry_date: string
+          _image_url: string
+          _link: string
+          _location: string
+          _organisation: string
+          _title: string
+        }
+        Returns: number
+      }
+      deactivate_expired_listings: { Args: never; Returns: number }
       increment_listing_views: {
         Args: { listing_id: string }
         Returns: undefined
@@ -374,6 +511,10 @@ export type Database = {
           last_sign_in_at: string
           raw_user_meta_data: Json
         }[]
+      }
+      listing_duplicate_fingerprint: {
+        Args: { _link: string; _organisation: string; _title: string }
+        Returns: string
       }
     }
     Enums: {
