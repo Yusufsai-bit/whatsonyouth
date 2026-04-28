@@ -16,6 +16,14 @@ interface ScanSource {
   url: string;
   category: string;
   is_active: boolean;
+  total_scans?: number;
+  successful_scans?: number;
+  failed_scans?: number;
+  total_listings_created?: number;
+  consecutive_failures?: number;
+  last_scan_status?: string | null;
+  quality_score?: number;
+  health_label?: string;
 }
 
 interface ScanResult {
@@ -58,7 +66,7 @@ export default function AdminScanner() {
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
   const [logLines, setLogLines] = useState<string[]>([]);
-  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number; images_resolved: number; images_from_unsplash: number; images_pending: number } | null>(null);
+  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number; images_resolved: number; images_from_unsplash: number; images_pending: number; expired_deactivated?: number; paused_low_balance?: boolean } | null>(null);
 
   // Add source form
   const [newUrl, setNewUrl] = useState('');
@@ -84,7 +92,7 @@ export default function AdminScanner() {
   }, [logLines]);
 
   const fetchSources = async () => {
-    const { data } = await supabase.from('scan_sources').select('*').order('category').order('name');
+    const { data } = await supabase.from('admin_scan_source_health' as any).select('*').order('category').order('quality_score', { ascending: false });
     if (data) setSources(data as unknown as ScanSource[]);
     setLoading(false);
   };
@@ -209,6 +217,8 @@ export default function AdminScanner() {
       images_resolved: 0,
       images_from_unsplash: 0,
       images_pending: 0,
+      expired_deactivated: 0,
+      paused_low_balance: false,
     };
 
     try {
@@ -261,6 +271,8 @@ export default function AdminScanner() {
           totals.images_resolved += data.summary.images_resolved || 0;
           totals.images_from_unsplash += data.summary.images_from_unsplash || 0;
           totals.images_pending += data.summary.images_pending || 0;
+          totals.expired_deactivated += data.summary.expired_deactivated || 0;
+          totals.paused_low_balance = totals.paused_low_balance || Boolean(data.summary.paused_low_balance);
 
           completed += batch.length;
           setProgress(completed);
@@ -277,7 +289,9 @@ export default function AdminScanner() {
       setProgress(scanSources.length);
       fetchRecentLogs();
       fetchSourceHealth();
-      toast.success(`Scan complete — ${totals.created} new listings created`);
+      totals.paused_low_balance
+        ? toast.warning('Scanner paused because AI balance appears low')
+        : toast.success(`Scan complete — ${totals.created} new listings created`);
     } catch (e: any) {
       setLogLines(prev => [...prev, `❌ Error: ${e.message}`]);
       toast.error('Scan failed');
@@ -369,7 +383,7 @@ export default function AdminScanner() {
               />
 
               {summary && (
-                <div className="grid grid-cols-4 lg:grid-cols-7 gap-3">
+                <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
                   {[
                     { label: 'Sources', value: summary.scanned },
                     { label: 'Found', value: summary.found },
@@ -378,12 +392,19 @@ export default function AdminScanner() {
                     { label: 'OG Images', value: summary.images_resolved },
                     { label: 'Unsplash', value: summary.images_from_unsplash },
                     { label: 'Pending', value: summary.images_pending },
+                    { label: 'Expired off', value: summary.expired_deactivated || 0 },
                   ].map(s => (
                     <div key={s.label} className="bg-[#F7F7F7] rounded-lg p-3 text-center">
                       <div className="font-heading font-bold text-xl text-[#0A0A0A]">{s.value}</div>
                       <div className="font-body text-xs text-[#888888] mt-0.5">{s.label}</div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {summary?.paused_low_balance && (
+                <div className="bg-[#FFF8F0] border border-[#F5C68A] rounded-lg px-4 py-3 font-body text-sm text-[#633806]">
+                  Automatic scanning has been paused because the AI balance appears low.
                 </div>
               )}
 
@@ -457,6 +478,8 @@ export default function AdminScanner() {
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Name</th>
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">URL</th>
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Category</th>
+                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Health</th>
+                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Created</th>
                   <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Last scan</th>
                   <th className="px-3 py-2.5 w-16"></th>
                 </tr>
@@ -477,9 +500,19 @@ export default function AdminScanner() {
                       </span>
                     </td>
                     <td className="px-3">
-                      {sourceHealth[s.url] === 'success' ? (
+                      <span className={`inline-block font-body text-xs font-medium px-2 py-0.5 rounded-full ${
+                        s.health_label === 'strong' ? 'bg-[#E1F5EE] text-[#085041]' :
+                        s.health_label === 'poor' || s.health_label === 'weak' ? 'bg-[#FCEBEB] text-[#A32D2D]' :
+                        'bg-[#FFF3D0] text-[#633806]'
+                      }`}>
+                        {s.quality_score ?? 50}/100
+                      </span>
+                    </td>
+                    <td className="px-3 font-body text-sm text-[#0A0A0A]">{s.total_listings_created || 0}</td>
+                    <td className="px-3">
+                      {(s.last_scan_status || sourceHealth[s.url]) === 'success' ? (
                         <span className="inline-block w-2 h-2 rounded-full bg-[#1D9E75]" title="Last scan succeeded" />
-                      ) : sourceHealth[s.url] === 'error' ? (
+                      ) : ['error', 'paused_low_balance'].includes(s.last_scan_status || sourceHealth[s.url]) ? (
                         <span className="inline-block w-2 h-2 rounded-full bg-[#E24B4A]" title="Last scan failed — 3 failures will auto-disable this source" />
                       ) : (
                         <span className="inline-block w-2 h-2 rounded-full bg-[#DDDDDD]" title="Not yet scanned" />
