@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.write_admin_audit_log(text, text, text, jsonb);

@@ -561,15 +561,6 @@ export type Database = {
         Args: { _link: string; _organisation: string; _title: string }
         Returns: string
       }
-      write_admin_audit_log: {
-        Args: {
-          _action: string
-          _entity_id?: string
-          _entity_table: string
-          _metadata?: Json
-        }
-        Returns: string
-      }
     }
     Enums: {
       credit_usage_type:
