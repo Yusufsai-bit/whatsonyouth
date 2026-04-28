@@ -63,6 +63,7 @@ export default function AdminScanner() {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [scanCategory, setScanCategory] = useState<string>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
   const [logLines, setLogLines] = useState<string[]>([]);
@@ -315,6 +316,21 @@ export default function AdminScanner() {
     }
   };
 
+  const sourceCounts = {
+    total: sources.length,
+    active: sources.filter(s => s.is_active).length,
+    weak: sources.filter(s => s.health_label === 'weak' || s.health_label === 'poor').length,
+    failing: sources.filter(s => (s.consecutive_failures || 0) > 0 || ['error', 'paused_low_balance'].includes(s.last_scan_status || sourceHealth[s.url])).length,
+  };
+
+  const filteredSources = sources.filter((s) => {
+    if (sourceFilter === 'active') return s.is_active;
+    if (sourceFilter === 'paused') return !s.is_active;
+    if (sourceFilter === 'weak') return s.health_label === 'weak' || s.health_label === 'poor';
+    if (sourceFilter === 'failing') return (s.consecutive_failures || 0) > 0 || ['error', 'paused_low_balance'].includes(s.last_scan_status || sourceHealth[s.url]);
+    return true;
+  });
+
   const runScan = async () => {
     const activeSources = sources.filter(s => s.is_active && (scanCategory === 'all' || s.category === scanCategory));
     if (activeSources.length === 0) {
@@ -447,9 +463,46 @@ export default function AdminScanner() {
           )}
         </div>
 
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: 'Sources', value: sourceCounts.total },
+            { label: 'Active', value: sourceCounts.active },
+            { label: 'Weak', value: sourceCounts.weak },
+            { label: 'Failing', value: sourceCounts.failing },
+          ].map(card => (
+            <div key={card.label} className="bg-white border border-[#EBEBEB] rounded-xl p-4">
+              <p className="font-body text-[13px] text-[#888888]">{card.label}</p>
+              <p className={`font-heading font-bold text-[28px] leading-tight mt-1 ${['Weak', 'Failing'].includes(card.label) && card.value > 0 ? 'text-[#D85A30]' : 'text-[#0A0A0A]'}`}>{card.value}</p>
+            </div>
+          ))}
+        </div>
+
         {/* SECTION B — Manage Sources */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl p-6">
-          <h2 className="font-heading font-bold text-[18px] text-[#0A0A0A] mb-4">Manage sources</h2>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <h2 className="font-heading font-bold text-[18px] text-[#0A0A0A]">Manage sources</h2>
+            <div className="flex flex-wrap gap-2">
+              {[
+                ['all', 'All'],
+                ['active', 'Active'],
+                ['paused', 'Paused'],
+                ['weak', 'Weak'],
+                ['failing', 'Failing'],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setSourceFilter(value)}
+                  className={`font-body text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    sourceFilter === value
+                      ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
+                      : 'bg-white text-[#555555] border-[#EBEBEB] hover:border-[#0A0A0A]'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Add source form */}
           <div className="flex gap-2 mb-4 flex-wrap">
@@ -500,7 +553,7 @@ export default function AdminScanner() {
                 </tr>
               </thead>
               <tbody>
-                {sources.map((s, i) => (
+                {filteredSources.map((s, i) => (
                   <tr key={s.id} className={`h-12 ${i % 2 === 1 ? 'bg-[#FAFAFA]' : ''}`}>
                     <td className="px-3">
                       <Switch checked={s.is_active} onCheckedChange={v => toggleSource(s.id, v)} />
@@ -548,6 +601,13 @@ export default function AdminScanner() {
                     </td>
                   </tr>
                 ))}
+                {filteredSources.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-3 py-8 text-center font-body text-sm text-[#888888]">
+                      No sources match this filter.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
