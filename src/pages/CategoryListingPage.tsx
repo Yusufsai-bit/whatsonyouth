@@ -458,12 +458,26 @@ export default function CategoryListingPage({ category }: { category: string }) 
               </div>
               <div className="relative flex-1 md:flex-none">
                 <select
+                  value={dateFilter}
+                  onChange={e => setDateFilter(e.target.value)}
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                >
+                  <option value="any">Any date</option>
+                  <option value="week">Closing this week</option>
+                  <option value="month">Closing this month</option>
+                  <option value="quarter">Next 90 days</option>
+                  <option value="ongoing">Ongoing only</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+              </div>
+              <div className="relative flex-1 md:flex-none">
+                <select
                   value={sort}
                   onChange={e => setSort(e.target.value as any)}
                   className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
                 >
                   <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
+                  <option value="closing">Closing soon</option>
                   <option value="az">A–Z</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
