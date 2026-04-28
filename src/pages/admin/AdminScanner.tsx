@@ -601,6 +601,13 @@ export default function AdminScanner() {
                     </td>
                   </tr>
                 ))}
+                {filteredSources.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-3 py-8 text-center font-body text-sm text-[#888888]">
+                      No sources match this filter.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -640,33 +647,6 @@ export default function AdminScanner() {
                     </td>
                   </tr>
                 ))}
-                {filteredSources.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-3 py-8 text-center font-body text-sm text-[#888888]">
-                      No sources match this filter.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* SECTION C — Scan History */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6">
-          <h2 className="font-heading font-bold text-[18px] text-[#0A0A0A] mb-4">Recent scans</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-[#F7F7F7]">
-                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Date</th>
-                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Source</th>
-                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Found</th>
-                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Created</th>
-                  <th className="px-3 py-2.5 font-body font-medium text-[13px] text-[#888888] text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody>
                 {recentLogs.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-3 py-8 text-center font-body text-sm text-[#888888]">
