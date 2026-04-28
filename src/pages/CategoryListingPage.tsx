@@ -553,6 +553,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visible.map(listing => {
                   const dateDisplay = getDateDisplay(listing);
+                  const urgencyLabel = getUrgencyLabel(listing);
                   return (
                     <div
                       key={listing.id}
@@ -572,6 +573,11 @@ export default function CategoryListingPage({ category }: { category: string }) 
                           <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                             {listing.category}
                           </span>
+                          {urgencyLabel && (
+                            <span className="absolute top-2.5 left-2.5 bg-brand-coral text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
+                              {urgencyLabel}
+                            </span>
+                          )}
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave({ id: listing.id, title: listing.title, category: listing.category, organisation: listing.organisation, location: listing.location }); }}
                             className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors"
@@ -600,6 +606,14 @@ export default function CategoryListingPage({ category }: { category: string }) 
                             <span>{dateDisplay}</span>
                           </div>
                         )}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">{listing.location}</span>
+                          {listing.expiry_date ? (
+                            <span className="bg-brand-violet-surface text-brand-violet font-body text-[10px] rounded-full px-2 py-0.5">Has deadline</span>
+                          ) : (
+                            <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">Ongoing</span>
+                          )}
+                        </div>
                         {listing.description && (
                           <p className="font-body text-[13px] text-brand-text-muted line-clamp-2 mb-3">
                             {listing.description.replace(/^\[Link needs review\]\s*/i, '')}
