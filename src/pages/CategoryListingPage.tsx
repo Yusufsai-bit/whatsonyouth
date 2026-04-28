@@ -652,6 +652,21 @@ export default function CategoryListingPage({ category }: { category: string }) 
                   </button>
                 </div>
               )}
+
+              <div className="mt-12 border-t border-brand-card-border pt-8">
+                <p className="font-heading font-bold text-[18px] text-brand-text-primary mb-3">Browse nearby opportunities</p>
+                <div className="flex flex-wrap gap-2">
+                  {TOP_REGION_LINKS.map(link => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className="font-body font-medium text-[13px] rounded-full px-4 py-2 border border-brand-card-border text-brand-text-secondary hover:border-brand-violet hover:text-brand-violet transition-colors min-h-[44px] flex items-center"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </>
           )}
         </div>
