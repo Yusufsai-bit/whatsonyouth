@@ -12,6 +12,7 @@ import useSavedListings from '@/hooks/useSavedListings';
 const ITEMS_PER_PAGE = 12;
 
 const categoryOptions = ['All', 'Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'];
+const locationOptions = ['All Victoria', 'Melbourne', 'Geelong', 'Ballarat', 'Bendigo', 'Gippsland', 'Shepparton', 'Online', 'Regional Victoria'];
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
@@ -57,6 +58,15 @@ function getDateDisplay(listing: Listing) {
   return null;
 }
 
+function getUrgencyLabel(listing: Listing) {
+  if (!listing.expiry_date || listing.category === 'Wellbeing') return null;
+  const days = Math.ceil((new Date(listing.expiry_date).getTime() - Date.now()) / 86400000);
+  if (days < 0) return null;
+  if (days <= 7) return 'Closing soon';
+  if (days <= 30) return 'Closes this month';
+  return null;
+}
+
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -66,12 +76,14 @@ export default function SearchPage() {
   const initialQ = searchParams.get('q') || '';
   const initialCat = searchParams.get('category') || 'All';
   const initialLocation = searchParams.get('location') || '';
+  const initialDate = searchParams.get('date') || 'any';
 
   const [query, setQuery] = useState(initialQ);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQ);
   const [selectedCategory, setSelectedCategory] = useState(initialCat);
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
-  const [sort, setSort] = useState<'newest' | 'az'>('newest');
+  const [dateFilter, setDateFilter] = useState(initialDate);
+  const [sort, setSort] = useState<'newest' | 'closing' | 'az'>('newest');
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -102,12 +114,13 @@ export default function SearchPage() {
     if (debouncedQuery) params.q = debouncedQuery;
     if (selectedCategory !== 'All') params.category = selectedCategory;
     if (selectedLocation) params.location = selectedLocation;
+    if (dateFilter !== 'any') params.date = dateFilter;
     setSearchParams(params, { replace: true });
-  }, [debouncedQuery, selectedCategory, selectedLocation, setSearchParams]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, setSearchParams]);
 
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-  }, [debouncedQuery, selectedCategory, selectedLocation, sort]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, sort]);
 
   const filtered = useMemo(() => {
     let result = listings;
@@ -118,6 +131,15 @@ export default function SearchPage() {
       const loc = selectedLocation.toLowerCase();
       result = result.filter(l => l.location.toLowerCase().includes(loc));
     }
+    if (dateFilter !== 'any') {
+      const now = Date.now();
+      const limitDays = dateFilter === 'week' ? 7 : dateFilter === 'month' ? 30 : 90;
+      result = result.filter(l => {
+        if (!l.expiry_date) return dateFilter === 'ongoing';
+        const diffDays = Math.ceil((new Date(l.expiry_date).getTime() - now) / 86400000);
+        return diffDays >= 0 && diffDays <= limitDays;
+      });
+    }
     if (debouncedQuery.trim()) {
       const q = debouncedQuery.toLowerCase();
       result = result.filter(l =>
@@ -127,11 +149,17 @@ export default function SearchPage() {
         l.location.toLowerCase().includes(q)
       );
     }
-    if (sort === 'az') {
+    if (sort === 'closing') {
+      result = [...result].sort((a, b) => {
+        const aTime = a.expiry_date ? new Date(a.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        const bTime = b.expiry_date ? new Date(b.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
+      });
+    } else if (sort === 'az') {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
     return result;
-  }, [listings, debouncedQuery, selectedCategory, selectedLocation, sort]);
+  }, [listings, debouncedQuery, selectedCategory, selectedLocation, dateFilter, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
