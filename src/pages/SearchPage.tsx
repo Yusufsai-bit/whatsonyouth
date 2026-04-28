@@ -163,6 +163,9 @@ export default function SearchPage() {
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
+  const relatedBrowseLinks = selectedCategory !== 'All'
+    ? Object.entries(categoryRoutes).filter(([cat]) => cat !== selectedCategory).slice(0, 3)
+    : Object.entries(categoryRoutes).slice(0, 4);
 
   // Build a normalized canonical URL for /search to prevent duplicate
   // indexing across param order, casing, or filter combinations.
@@ -457,6 +460,21 @@ export default function SearchPage() {
                   </button>
                 </div>
               )}
+
+              <div className="mt-12 border-t border-brand-card-border pt-8">
+                <p className="font-heading font-bold text-[18px] text-brand-text-primary mb-3">Keep exploring</p>
+                <div className="flex flex-wrap gap-2">
+                  {relatedBrowseLinks.map(([cat, route]) => (
+                    <Link
+                      key={cat}
+                      to={route}
+                      className="font-body font-medium text-[13px] rounded-full px-4 py-2 border border-brand-card-border text-brand-text-secondary hover:border-brand-violet hover:text-brand-violet transition-colors min-h-[44px] flex items-center"
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </>
           )}
         </div>
