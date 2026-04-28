@@ -75,6 +75,19 @@ function passesQualityCheck(listing: any): {
   return { passes: true, reason: '' };
 }
 
+function isLowAiBalanceError(message: string): boolean {
+  const m = message.toLowerCase();
+  return m.includes('402') || m.includes('balance') || m.includes('credit') || m.includes('quota') || m.includes('insufficient');
+}
+
+function calculateSourceQuality(totalScans: number, successfulScans: number, created: number, skipped: number, failures: number): number {
+  if (totalScans <= 0) return 50;
+  const successRate = successfulScans / totalScans;
+  const usefulness = created / Math.max(created + skipped, 1);
+  const failurePenalty = Math.min(failures * 10, 40);
+  return Math.max(0, Math.min(100, Math.round((successRate * 65) + (usefulness * 35) - failurePenalty)));
+}
+
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
@@ -256,6 +269,7 @@ serve(async (req) => {
     const results: any[] = [];
     let totalFound = 0, totalCreated = 0, totalSkipped = 0, totalErrors = 0;
     let totalImagesResolved = 0, totalImagesUnsplash = 0, totalImagesPending = 0;
+    let pausedLowBalance = false;
 
     // Pre-load ALL existing links from DB into memory
     const { data: existingListings } = await supabase
@@ -365,7 +379,7 @@ serve(async (req) => {
               image_url: null,
               is_active: true,
               is_featured: false,
-              source: "ai_scan",
+              source: "admin",
               user_id: adminUserId,
             }).select("id").maybeSingle();
 
@@ -395,6 +409,14 @@ serve(async (req) => {
       } catch (e: any) {
         status = "error";
         errorMessage = e.message || "Unknown error";
+        if (isLowAiBalanceError(errorMessage)) {
+          status = "paused_low_balance";
+          pausedLowBalance = true;
+          await supabase
+            .from("platform_settings")
+            .update({ value: "false", updated_at: new Date().toISOString() })
+            .eq("key", "auto_scan_enabled");
+        }
         totalErrors++;
         console.error(`Error scanning ${source.name}:`, e);
       }
