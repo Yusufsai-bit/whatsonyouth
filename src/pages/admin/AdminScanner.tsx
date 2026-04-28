@@ -16,6 +16,14 @@ interface ScanSource {
   url: string;
   category: string;
   is_active: boolean;
+  total_scans?: number;
+  successful_scans?: number;
+  failed_scans?: number;
+  total_listings_created?: number;
+  consecutive_failures?: number;
+  last_scan_status?: string | null;
+  quality_score?: number;
+  health_label?: string;
 }
 
 interface ScanResult {
@@ -58,7 +66,7 @@ export default function AdminScanner() {
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
   const [logLines, setLogLines] = useState<string[]>([]);
-  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number; images_resolved: number; images_from_unsplash: number; images_pending: number } | null>(null);
+  const [summary, setSummary] = useState<{ found: number; created: number; skipped: number; scanned: number; images_resolved: number; images_from_unsplash: number; images_pending: number; expired_deactivated?: number; paused_low_balance?: boolean } | null>(null);
 
   // Add source form
   const [newUrl, setNewUrl] = useState('');
@@ -84,7 +92,7 @@ export default function AdminScanner() {
   }, [logLines]);
 
   const fetchSources = async () => {
-    const { data } = await supabase.from('scan_sources').select('*').order('category').order('name');
+    const { data } = await supabase.from('admin_scan_source_health' as any).select('*').order('category').order('quality_score', { ascending: false });
     if (data) setSources(data as unknown as ScanSource[]);
     setLoading(false);
   };
@@ -209,6 +217,8 @@ export default function AdminScanner() {
       images_resolved: 0,
       images_from_unsplash: 0,
       images_pending: 0,
+          expired_deactivated: 0,
+          paused_low_balance: false,
     };
 
     try {
@@ -261,6 +271,8 @@ export default function AdminScanner() {
           totals.images_resolved += data.summary.images_resolved || 0;
           totals.images_from_unsplash += data.summary.images_from_unsplash || 0;
           totals.images_pending += data.summary.images_pending || 0;
+          totals.expired_deactivated += data.summary.expired_deactivated || 0;
+          totals.paused_low_balance = totals.paused_low_balance || Boolean(data.summary.paused_low_balance);
 
           completed += batch.length;
           setProgress(completed);
@@ -277,7 +289,9 @@ export default function AdminScanner() {
       setProgress(scanSources.length);
       fetchRecentLogs();
       fetchSourceHealth();
-      toast.success(`Scan complete — ${totals.created} new listings created`);
+      totals.paused_low_balance
+        ? toast.warning('Scanner paused because AI balance appears low')
+        : toast.success(`Scan complete — ${totals.created} new listings created`);
     } catch (e: any) {
       setLogLines(prev => [...prev, `❌ Error: ${e.message}`]);
       toast.error('Scan failed');
