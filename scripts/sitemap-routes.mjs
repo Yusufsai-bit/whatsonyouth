@@ -29,6 +29,14 @@ export const STATIC_ROUTES = [
   { route: '/gippsland', file: 'pages/RegionalPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.7 },
   { route: '/shepparton', file: 'pages/RegionalPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.7 },
 
+  // High-intent SEO landing pages
+  { route: '/youth-events-melbourne', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.8 },
+  { route: '/youth-jobs-victoria', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'daily', priority: 0.8 },
+  { route: '/grants-for-young-people-victoria', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.8 },
+  { route: '/youth-programs-victoria', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.8 },
+  { route: '/volunteering-for-young-people-victoria', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.7 },
+  { route: '/mental-health-support-young-people-victoria', file: 'pages/SeoLandingPage.tsx', shouldIndex: true, changefreq: 'weekly', priority: 0.8 },
+
   // Bare /search is included so the entry-point is discoverable, but at low
   // priority — category and regional landing pages are the canonical surfaces
   // for filter combinations (filtered /search URLs canonicalize back to them).
