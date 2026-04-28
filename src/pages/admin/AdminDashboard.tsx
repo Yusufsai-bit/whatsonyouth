@@ -266,7 +266,7 @@ export default function AdminDashboard() {
               {audit.map((entry) => (
                 <div key={entry.id} className="px-5 py-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-body text-sm text-[#0A0A0A] truncate">{entry.action.replaceAll('_', ' ')}</p>
+                    <p className="font-body text-sm text-[#0A0A0A] truncate">{entry.action.replace(/_/g, ' ')}</p>
                     <p className="font-body text-xs text-[#888888] mt-0.5">{entry.entity_table}</p>
                   </div>
                   <span className="font-body text-xs text-[#888888] whitespace-nowrap">{timeAgo(entry.created_at)}</span>
