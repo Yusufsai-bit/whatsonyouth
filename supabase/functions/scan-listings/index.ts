@@ -437,7 +437,7 @@ serve(async (req) => {
 
       const { data: srcRow } = await supabase
         .from('scan_sources')
-        .select('total_scans, successful_scans, failed_scans, total_listings_found, total_listings_created, total_listings_skipped, consecutive_failures')
+        .select('total_scans, successful_scans, failed_scans, total_listings_found, total_listings_created, total_listings_skipped, consecutive_failures, last_success_at')
         .eq('url', source.url)
         .maybeSingle();
       const previous = (srcRow || {}) as any;
