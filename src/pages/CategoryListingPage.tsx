@@ -239,13 +239,15 @@ export default function CategoryListingPage({ category }: { category: string }) 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [locationFilter, setLocationFilter] = useState('All Victoria');
-  const [sort, setSort] = useState<'newest' | 'oldest' | 'az'>('newest');
+  const [dateFilter, setDateFilter] = useState('any');
+  const [sort, setSort] = useState<'newest' | 'closing' | 'az'>('newest');
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const { isSaved, toggleSave } = useSavedListings();
 
   useEffect(() => {
     setSearch('');
     setLocationFilter('All Victoria');
+    setDateFilter('any');
     setSort('newest');
     setVisibleCount(ITEMS_PER_PAGE);
     setLoading(true);
@@ -278,23 +280,45 @@ export default function CategoryListingPage({ category }: { category: string }) 
         l.location.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
-    if (sort === 'oldest') {
-      result = [...result].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    if (dateFilter !== 'any') {
+      const now = Date.now();
+      const limitDays = dateFilter === 'week' ? 7 : dateFilter === 'month' ? 30 : 90;
+      result = result.filter(l => {
+        if (!l.expiry_date) return dateFilter === 'ongoing';
+        const diffDays = Math.ceil((new Date(l.expiry_date).getTime() - now) / 86400000);
+        return diffDays >= 0 && diffDays <= limitDays;
+      });
+    }
+    if (sort === 'closing') {
+      result = [...result].sort((a, b) => {
+        const aTime = a.expiry_date ? new Date(a.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        const bTime = b.expiry_date ? new Date(b.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
+      });
     } else if (sort === 'az') {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
     return result;
-  }, [listings, search, locationFilter, sort]);
+  }, [listings, search, locationFilter, dateFilter, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
-  const hasFilters = search.trim() !== '' || locationFilter !== 'All Victoria';
+  const hasFilters = search.trim() !== '' || locationFilter !== 'All Victoria' || dateFilter !== 'any';
 
   function getDateDisplay(listing: Listing) {
     if (category === 'Events' && listing.expiry_date) return formatDate(listing.expiry_date);
     if (category === 'Jobs') return `Posted ${daysAgo(listing.created_at)}`;
     if (category === 'Grants' && listing.expiry_date) return `Closes ${formatDate(listing.expiry_date)}`;
     if (listing.expiry_date) return formatDate(listing.expiry_date);
+    return null;
+  }
+
+  function getUrgencyLabel(listing: Listing) {
+    if (!listing.expiry_date || listing.category === 'Wellbeing') return null;
+    const days = Math.ceil((new Date(listing.expiry_date).getTime() - Date.now()) / 86400000);
+    if (days < 0) return null;
+    if (days <= 7) return 'Closing soon';
+    if (days <= 30) return 'Closes this month';
     return null;
   }
 
@@ -434,12 +458,26 @@ export default function CategoryListingPage({ category }: { category: string }) 
               </div>
               <div className="relative flex-1 md:flex-none">
                 <select
+                  value={dateFilter}
+                  onChange={e => setDateFilter(e.target.value)}
+                  className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+                >
+                  <option value="any">Any date</option>
+                  <option value="week">Closing this week</option>
+                  <option value="month">Closing this month</option>
+                  <option value="quarter">Next 90 days</option>
+                  <option value="ongoing">Ongoing only</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+              </div>
+              <div className="relative flex-1 md:flex-none">
+                <select
                   value={sort}
                   onChange={e => setSort(e.target.value as any)}
                   className="w-full md:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
                 >
                   <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
+                  <option value="closing">Closing soon</option>
                   <option value="az">A–Z</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
@@ -515,6 +553,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visible.map(listing => {
                   const dateDisplay = getDateDisplay(listing);
+                  const urgencyLabel = getUrgencyLabel(listing);
                   return (
                     <div
                       key={listing.id}
@@ -534,6 +573,11 @@ export default function CategoryListingPage({ category }: { category: string }) 
                           <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                             {listing.category}
                           </span>
+                          {urgencyLabel && (
+                            <span className="absolute top-2.5 left-2.5 bg-brand-coral text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
+                              {urgencyLabel}
+                            </span>
+                          )}
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave({ id: listing.id, title: listing.title, category: listing.category, organisation: listing.organisation, location: listing.location }); }}
                             className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors"
@@ -562,6 +606,14 @@ export default function CategoryListingPage({ category }: { category: string }) 
                             <span>{dateDisplay}</span>
                           </div>
                         )}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">{listing.location}</span>
+                          {listing.expiry_date ? (
+                            <span className="bg-brand-violet-surface text-brand-violet font-body text-[10px] rounded-full px-2 py-0.5">Has deadline</span>
+                          ) : (
+                            <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">Ongoing</span>
+                          )}
+                        </div>
                         {listing.description && (
                           <p className="font-body text-[13px] text-brand-text-muted line-clamp-2 mb-3">
                             {listing.description.replace(/^\[Link needs review\]\s*/i, '')}

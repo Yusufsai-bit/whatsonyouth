@@ -182,7 +182,13 @@ export default function ListingDetailPage() {
     new Date(listing.expiry_date).getTime() > Date.now();
 
   const ctaLabel = listing.category === 'Events' ? 'Register' :
-    listing.category === 'Jobs' ? 'Apply now' : 'Visit website';
+    listing.category === 'Jobs' ? 'Apply now' :
+    listing.category === 'Grants' ? 'Apply / learn more' :
+    listing.category === 'Programs' ? 'Register interest' : 'Visit website';
+
+  const sourceLabel = listing.source === 'user' ? 'Submitted by community' : 'Curated by What’s On Youth';
+  const dateLabel = listing.category === 'Events' ? 'Date' : listing.category === 'Jobs' ? 'Posted' : listing.category === 'Grants' ? 'Closes' : listing.expiry_date ? 'Deadline' : 'Availability';
+  const dateValue = listing.expiry_date ? formatDate(listing.expiry_date) : listing.category === 'Wellbeing' ? 'Ongoing support' : `Listed ${daysAgo(listing.created_at)}`;
 
   const cleanDescription = (desc: string | null) => {
     if (!desc) return '';
@@ -253,6 +259,19 @@ export default function ListingDetailPage() {
               {listing.organisation}
             </p>
 
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+              {[
+                { label: 'Location', value: listing.location },
+                { label: dateLabel, value: dateValue },
+                { label: 'Source', value: sourceLabel },
+              ].map(item => (
+                <div key={item.label} className="bg-brand-section-alt border border-brand-card-border rounded-xl px-4 py-3">
+                  <p className="font-body text-[12px] text-brand-text-muted mb-1">{item.label}</p>
+                  <p className="font-heading font-bold text-[15px] text-brand-text-primary leading-snug">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-6 rounded-xl overflow-hidden max-h-[360px]">
               <ListingCardImage
                 listingId={listing.id}
@@ -268,6 +287,14 @@ export default function ListingDetailPage() {
               <p className="font-body text-base text-brand-text-secondary leading-[1.7] whitespace-pre-line">
                 {cleanDesc}
               </p>
+            </div>
+
+            <div className="mt-6 bg-brand-violet-surface border border-brand-violet-border rounded-xl p-4">
+              <p className="font-heading font-bold text-[15px] text-brand-text-primary mb-2">Before you apply</p>
+              <ul className="font-body text-[14px] text-brand-text-secondary leading-[1.7] list-disc pl-5 space-y-1">
+                <li>Check eligibility, age requirements, costs and key dates on the organiser’s website.</li>
+                <li>Use the report button if the link is broken, expired, or doesn’t match this listing.</li>
+              </ul>
             </div>
 
             <div className="flex items-center gap-2 mt-6 font-body text-[15px] text-brand-text-secondary">

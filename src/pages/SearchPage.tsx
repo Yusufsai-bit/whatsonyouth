@@ -12,6 +12,7 @@ import useSavedListings from '@/hooks/useSavedListings';
 const ITEMS_PER_PAGE = 12;
 
 const categoryOptions = ['All', 'Events', 'Jobs', 'Grants', 'Programs', 'Wellbeing'];
+const locationOptions = ['All Victoria', 'Melbourne', 'Geelong', 'Ballarat', 'Bendigo', 'Gippsland', 'Shepparton', 'Online', 'Regional Victoria'];
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
@@ -57,6 +58,15 @@ function getDateDisplay(listing: Listing) {
   return null;
 }
 
+function getUrgencyLabel(listing: Listing) {
+  if (!listing.expiry_date || listing.category === 'Wellbeing') return null;
+  const days = Math.ceil((new Date(listing.expiry_date).getTime() - Date.now()) / 86400000);
+  if (days < 0) return null;
+  if (days <= 7) return 'Closing soon';
+  if (days <= 30) return 'Closes this month';
+  return null;
+}
+
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -66,12 +76,14 @@ export default function SearchPage() {
   const initialQ = searchParams.get('q') || '';
   const initialCat = searchParams.get('category') || 'All';
   const initialLocation = searchParams.get('location') || '';
+  const initialDate = searchParams.get('date') || 'any';
 
   const [query, setQuery] = useState(initialQ);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQ);
   const [selectedCategory, setSelectedCategory] = useState(initialCat);
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
-  const [sort, setSort] = useState<'newest' | 'az'>('newest');
+  const [dateFilter, setDateFilter] = useState(initialDate);
+  const [sort, setSort] = useState<'newest' | 'closing' | 'az'>('newest');
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -102,12 +114,13 @@ export default function SearchPage() {
     if (debouncedQuery) params.q = debouncedQuery;
     if (selectedCategory !== 'All') params.category = selectedCategory;
     if (selectedLocation) params.location = selectedLocation;
+    if (dateFilter !== 'any') params.date = dateFilter;
     setSearchParams(params, { replace: true });
-  }, [debouncedQuery, selectedCategory, selectedLocation, setSearchParams]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, setSearchParams]);
 
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-  }, [debouncedQuery, selectedCategory, selectedLocation, sort]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, sort]);
 
   const filtered = useMemo(() => {
     let result = listings;
@@ -118,6 +131,15 @@ export default function SearchPage() {
       const loc = selectedLocation.toLowerCase();
       result = result.filter(l => l.location.toLowerCase().includes(loc));
     }
+    if (dateFilter !== 'any') {
+      const now = Date.now();
+      const limitDays = dateFilter === 'week' ? 7 : dateFilter === 'month' ? 30 : 90;
+      result = result.filter(l => {
+        if (!l.expiry_date) return dateFilter === 'ongoing';
+        const diffDays = Math.ceil((new Date(l.expiry_date).getTime() - now) / 86400000);
+        return diffDays >= 0 && diffDays <= limitDays;
+      });
+    }
     if (debouncedQuery.trim()) {
       const q = debouncedQuery.toLowerCase();
       result = result.filter(l =>
@@ -127,11 +149,17 @@ export default function SearchPage() {
         l.location.toLowerCase().includes(q)
       );
     }
-    if (sort === 'az') {
+    if (sort === 'closing') {
+      result = [...result].sort((a, b) => {
+        const aTime = a.expiry_date ? new Date(a.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        const bTime = b.expiry_date ? new Date(b.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
+      });
+    } else if (sort === 'az') {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
     return result;
-  }, [listings, debouncedQuery, selectedCategory, selectedLocation, sort]);
+  }, [listings, debouncedQuery, selectedCategory, selectedLocation, dateFilter, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -252,12 +280,43 @@ export default function SearchPage() {
 
       <section className="bg-white px-6 py-8 md:px-16 md:py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <p className="font-body text-sm text-brand-text-secondary">
               {debouncedQuery.trim()
                 ? `Showing ${filtered.length} results for '${debouncedQuery}'`
                 : `${filtered.length} opportunities available`}
             </p>
+          </div>
+
+          <div className="sticky top-0 z-10 bg-white border border-brand-card-border rounded-xl p-3 mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="relative">
+              <label className="sr-only" htmlFor="location-filter">Location</label>
+              <select
+                id="location-filter"
+                value={selectedLocation || 'All Victoria'}
+                onChange={e => setSelectedLocation(e.target.value === 'All Victoria' ? '' : e.target.value)}
+                className="w-full appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+              >
+                {locationOptions.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+            </div>
+            <div className="relative">
+              <label className="sr-only" htmlFor="date-filter">Date</label>
+              <select
+                id="date-filter"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                className="w-full appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+              >
+                <option value="any">Any date</option>
+                <option value="week">Closing this week</option>
+                <option value="month">Closing this month</option>
+                <option value="quarter">Next 90 days</option>
+                <option value="ongoing">Ongoing only</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+            </div>
             <div className="relative w-full sm:w-auto">
               <select
                 value={sort}
@@ -265,6 +324,7 @@ export default function SearchPage() {
                 className="w-full sm:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
               >
                 <option value="newest">Newest first</option>
+                <option value="closing">Closing soon</option>
                 <option value="az">A–Z</option>
               </select>
               <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
@@ -301,6 +361,7 @@ export default function SearchPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visible.map(listing => {
                   const dateDisplay = getDateDisplay(listing);
+                  const urgencyLabel = getUrgencyLabel(listing);
                   return (
                     <div
                       key={listing.id}
@@ -320,6 +381,11 @@ export default function SearchPage() {
                           <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
                             {listing.category}
                           </span>
+                          {urgencyLabel && (
+                            <span className="absolute top-2.5 left-2.5 bg-brand-coral text-white font-body font-medium text-[11px] rounded-full px-2.5 py-[3px]">
+                              {urgencyLabel}
+                            </span>
+                          )}
                           <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave({ id: listing.id, title: listing.title, category: listing.category, organisation: listing.organisation, location: listing.location }); }}
                             className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors"
@@ -348,6 +414,14 @@ export default function SearchPage() {
                             <span>{dateDisplay}</span>
                           </div>
                         )}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">{listing.location}</span>
+                          {listing.expiry_date ? (
+                            <span className="bg-brand-violet-surface text-brand-violet font-body text-[10px] rounded-full px-2 py-0.5">Has deadline</span>
+                          ) : (
+                            <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">Ongoing</span>
+                          )}
+                        </div>
                         {listing.description && (
                           <p className="font-body text-[13px] text-brand-text-muted line-clamp-2 mb-3">
                             {listing.description.replace(/^\[Link needs review\]\s*/i, '')}
