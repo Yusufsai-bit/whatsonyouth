@@ -217,8 +217,8 @@ export default function AdminScanner() {
       images_resolved: 0,
       images_from_unsplash: 0,
       images_pending: 0,
-          expired_deactivated: 0,
-          paused_low_balance: false,
+      expired_deactivated: 0,
+      paused_low_balance: false,
     };
 
     try {
@@ -383,7 +383,7 @@ export default function AdminScanner() {
               />
 
               {summary && (
-                <div className="grid grid-cols-4 lg:grid-cols-7 gap-3">
+                <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
                   {[
                     { label: 'Sources', value: summary.scanned },
                     { label: 'Found', value: summary.found },
