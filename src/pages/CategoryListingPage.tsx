@@ -239,13 +239,15 @@ export default function CategoryListingPage({ category }: { category: string }) 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [locationFilter, setLocationFilter] = useState('All Victoria');
-  const [sort, setSort] = useState<'newest' | 'oldest' | 'az'>('newest');
+  const [dateFilter, setDateFilter] = useState('any');
+  const [sort, setSort] = useState<'newest' | 'closing' | 'az'>('newest');
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const { isSaved, toggleSave } = useSavedListings();
 
   useEffect(() => {
     setSearch('');
     setLocationFilter('All Victoria');
+    setDateFilter('any');
     setSort('newest');
     setVisibleCount(ITEMS_PER_PAGE);
     setLoading(true);
@@ -278,23 +280,45 @@ export default function CategoryListingPage({ category }: { category: string }) 
         l.location.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
-    if (sort === 'oldest') {
-      result = [...result].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    if (dateFilter !== 'any') {
+      const now = Date.now();
+      const limitDays = dateFilter === 'week' ? 7 : dateFilter === 'month' ? 30 : 90;
+      result = result.filter(l => {
+        if (!l.expiry_date) return dateFilter === 'ongoing';
+        const diffDays = Math.ceil((new Date(l.expiry_date).getTime() - now) / 86400000);
+        return diffDays >= 0 && diffDays <= limitDays;
+      });
+    }
+    if (sort === 'closing') {
+      result = [...result].sort((a, b) => {
+        const aTime = a.expiry_date ? new Date(a.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        const bTime = b.expiry_date ? new Date(b.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
+      });
     } else if (sort === 'az') {
       result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     }
     return result;
-  }, [listings, search, locationFilter, sort]);
+  }, [listings, search, locationFilter, dateFilter, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
-  const hasFilters = search.trim() !== '' || locationFilter !== 'All Victoria';
+  const hasFilters = search.trim() !== '' || locationFilter !== 'All Victoria' || dateFilter !== 'any';
 
   function getDateDisplay(listing: Listing) {
     if (category === 'Events' && listing.expiry_date) return formatDate(listing.expiry_date);
     if (category === 'Jobs') return `Posted ${daysAgo(listing.created_at)}`;
     if (category === 'Grants' && listing.expiry_date) return `Closes ${formatDate(listing.expiry_date)}`;
     if (listing.expiry_date) return formatDate(listing.expiry_date);
+    return null;
+  }
+
+  function getUrgencyLabel(listing: Listing) {
+    if (!listing.expiry_date || listing.category === 'Wellbeing') return null;
+    const days = Math.ceil((new Date(listing.expiry_date).getTime() - Date.now()) / 86400000);
+    if (days < 0) return null;
+    if (days <= 7) return 'Closing soon';
+    if (days <= 30) return 'Closes this month';
     return null;
   }
 
