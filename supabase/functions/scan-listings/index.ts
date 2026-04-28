@@ -548,14 +548,7 @@ serve(async (req) => {
       console.warn('Credit usage log insert failed:', creditLogError);
     }
 
-    // Auto-deactivate expired listings (Wellbeing listings are excluded — they never expire)
-    const today = new Date().toISOString().split("T")[0];
-    await supabase
-      .from("listings")
-      .update({ is_active: false })
-      .lt("expiry_date", today)
-      .eq("is_active", true)
-      .neq("category", "Wellbeing");
+    const { data: expiredCleaned } = await supabase.rpc("deactivate_expired_listings");
 
     return new Response(
       JSON.stringify({
@@ -569,6 +562,8 @@ serve(async (req) => {
           images_resolved: totalImagesResolved,
           images_from_unsplash: totalImagesUnsplash,
           images_pending: totalImagesPending,
+          expired_deactivated: expiredCleaned || 0,
+          paused_low_balance: pausedLowBalance,
         },
         results,
       }),
