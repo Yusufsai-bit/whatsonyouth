@@ -39,6 +39,7 @@ const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'));
 const AdminSEO = lazy(() => import('./pages/admin/AdminSEO'));
 const AdminCreditUsage = lazy(() => import('./pages/admin/AdminCreditUsage'));
 const RegionalPage = lazy(() => import('./pages/RegionalPage'));
+const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +94,12 @@ const App = () => (
             <Route path="/bendigo" element={<RegionalPage region="bendigo" />} />
             <Route path="/gippsland" element={<RegionalPage region="gippsland" />} />
             <Route path="/shepparton" element={<RegionalPage region="shepparton" />} />
+            <Route path="/youth-events-melbourne" element={<SeoLandingPage slug="youth-events-melbourne" />} />
+            <Route path="/youth-jobs-victoria" element={<SeoLandingPage slug="youth-jobs-victoria" />} />
+            <Route path="/grants-for-young-people-victoria" element={<SeoLandingPage slug="grants-for-young-people-victoria" />} />
+            <Route path="/youth-programs-victoria" element={<SeoLandingPage slug="youth-programs-victoria" />} />
+            <Route path="/volunteering-for-young-people-victoria" element={<SeoLandingPage slug="volunteering-for-young-people-victoria" />} />
+            <Route path="/mental-health-support-young-people-victoria" element={<SeoLandingPage slug="mental-health-support-young-people-victoria" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/about" element={<AboutPage />} />
