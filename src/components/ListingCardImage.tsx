@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -22,6 +22,8 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
   const [src, setSrc] = useState<string | null>(imageUrl || null);
   const [resolving, setResolving] = useState(!imageUrl);
   const [failed, setFailed] = useState(false);
+  const [visible, setVisible] = useState(Boolean(imageUrl));
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const resolve = useCallback(async () => {
     setResolving(true);
@@ -42,10 +44,27 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
   }, [listingId]);
 
   useEffect(() => {
-    if (!imageUrl) {
+    if (imageUrl || visible) return;
+    const node = containerRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '240px' });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [imageUrl, visible]);
+
+  useEffect(() => {
+    if (!imageUrl && visible) {
       resolve();
     }
-  }, [imageUrl, resolve]);
+  }, [imageUrl, visible, resolve]);
 
   const handleError = () => {
     if (!resolving && !failed) {
@@ -61,22 +80,23 @@ export default function ListingCardImage({ listingId, imageUrl, title, category,
 
   // Shimmer loading
   if (resolving && !src) {
-    return <div className={`${className} skeleton-shimmer`} />;
+    return <div ref={containerRef} className={`${className} skeleton-shimmer`} />;
   }
 
   // Category color fallback
   if (failed && !src) {
-    return <div className={className} style={{ backgroundColor: fallbackColor }} />;
+    return <div ref={containerRef} className={className} style={{ backgroundColor: fallbackColor }} />;
   }
 
   return (
-    <div className={`${className} relative`} style={{ backgroundColor: fallbackColor }}>
+    <div ref={containerRef} className={`${className} relative`} style={{ backgroundColor: fallbackColor }}>
       {src && (
         <img
           src={src}
           alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
           onError={handleError}
         />
       )}
