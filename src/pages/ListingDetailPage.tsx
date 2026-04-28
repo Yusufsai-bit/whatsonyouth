@@ -382,6 +382,13 @@ export default function ListingDetailPage() {
                 {copied ? <><Check size={14} /> Link copied!</> : <><Copy size={14} /> Share this listing</>}
               </button>
 
+              <Link
+                to={backRoute}
+                className="flex items-center justify-center gap-2 w-full border border-brand-card-border text-brand-text-primary font-body font-medium text-sm rounded-lg py-3 hover:bg-brand-section-alt transition-colors min-h-[48px]"
+              >
+                More {listing.category.toLowerCase()}
+              </Link>
+
               <a
                 href={whatsappUrl}
                 target="_blank"
