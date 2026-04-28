@@ -245,7 +245,6 @@ export default function ListingDetailPage() {
         ogImage={listing.image_url || undefined}
         ogType="article"
         canonical={listingUrl}
-        noindex={Boolean(isExpired)}
         jsonLd={[listingJsonLd, breadcrumbJsonLd]}
       />
       <Navbar />
