@@ -17,6 +17,13 @@ interface LastScan {
   status: string;
 }
 
+interface OpsStats {
+  expiredActive: number;
+  needsReview: number;
+  duplicateGroups: number;
+  weakSources: number;
+}
+
 interface RecentListing {
   id: string;
   title: string;
@@ -45,6 +52,7 @@ export default function AdminDashboard() {
   const [recent, setRecent] = useState<RecentListing[]>([]);
   const [categories, setCategories] = useState<CategoryCount[]>([]);
   const [lastScan, setLastScan] = useState<LastScan | null>(null);
+  const [ops, setOps] = useState<OpsStats>({ expiredActive: 0, needsReview: 0, duplicateGroups: 0, weakSources: 0 });
 
   function getNextScanDate(): string {
     const now = new Date();
@@ -101,6 +109,22 @@ export default function AdminDashboard() {
       .order('scanned_at', { ascending: false })
       .limit(1);
     if (scanData && scanData.length > 0) setLastScan(scanData[0]);
+
+    const [{ data: qualityData }, { data: sourceHealth }] = await Promise.all([
+      supabase.from('admin_listing_quality' as any).select('quality_label, duplicate_fingerprint'),
+      supabase.from('admin_scan_source_health' as any).select('health_label'),
+    ]);
+
+    const duplicateFingerprints = new Set<string>();
+    (qualityData || []).forEach((row: any) => {
+      if (row.quality_label === 'possible_duplicate' && row.duplicate_fingerprint) duplicateFingerprints.add(row.duplicate_fingerprint);
+    });
+    setOps({
+      expiredActive: (qualityData || []).filter((row: any) => row.quality_label === 'expired_active').length,
+      needsReview: (qualityData || []).filter((row: any) => row.quality_label === 'needs_review').length,
+      duplicateGroups: duplicateFingerprints.size,
+      weakSources: (sourceHealth || []).filter((row: any) => row.health_label === 'weak' || row.health_label === 'poor').length,
+    });
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -127,6 +151,20 @@ export default function AdminDashboard() {
                 <p className="font-body text-xs text-[#1D9E75] mt-1">{card.trend}</p>
               )}
             </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Expired still active', value: ops.expiredActive, to: '/admin/listings' },
+            { label: 'Needs review', value: ops.needsReview, to: '/admin/listings' },
+            { label: 'Duplicate groups', value: ops.duplicateGroups, to: '/admin/listings' },
+            { label: 'Weak sources', value: ops.weakSources, to: '/admin/scanner' },
+          ].map((card) => (
+            <Link key={card.label} to={card.to} className="bg-white border border-[#EBEBEB] rounded-xl p-5 hover:border-[#5847E0] transition-colors">
+              <p className="font-body text-[13px] text-[#888888]">{card.label}</p>
+              <p className={`font-heading font-bold text-[32px] mt-1 leading-tight ${card.value > 0 ? 'text-[#D85A30]' : 'text-[#1D9E75]'}`}>{card.value}</p>
+            </Link>
           ))}
         </div>
 
