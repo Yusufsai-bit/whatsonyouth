@@ -280,12 +280,43 @@ export default function SearchPage() {
 
       <section className="bg-white px-6 py-8 md:px-16 md:py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <p className="font-body text-sm text-brand-text-secondary">
               {debouncedQuery.trim()
                 ? `Showing ${filtered.length} results for '${debouncedQuery}'`
                 : `${filtered.length} opportunities available`}
             </p>
+          </div>
+
+          <div className="sticky top-0 z-10 bg-white border border-brand-card-border rounded-xl p-3 mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="relative">
+              <label className="sr-only" htmlFor="location-filter">Location</label>
+              <select
+                id="location-filter"
+                value={selectedLocation || 'All Victoria'}
+                onChange={e => setSelectedLocation(e.target.value === 'All Victoria' ? '' : e.target.value)}
+                className="w-full appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+              >
+                {locationOptions.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+            </div>
+            <div className="relative">
+              <label className="sr-only" htmlFor="date-filter">Date</label>
+              <select
+                id="date-filter"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                className="w-full appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
+              >
+                <option value="any">Any date</option>
+                <option value="week">Closing this week</option>
+                <option value="month">Closing this month</option>
+                <option value="quarter">Next 90 days</option>
+                <option value="ongoing">Ongoing only</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
+            </div>
             <div className="relative w-full sm:w-auto">
               <select
                 value={sort}
@@ -293,6 +324,7 @@ export default function SearchPage() {
                 className="w-full sm:w-auto appearance-none border border-brand-input-border rounded-lg py-2.5 pl-3.5 pr-9 font-body text-[16px] md:text-sm text-brand-text-primary focus:outline-none focus:border-brand-violet bg-white min-h-[44px]"
               >
                 <option value="newest">Newest first</option>
+                <option value="closing">Closing soon</option>
                 <option value="az">A–Z</option>
               </select>
               <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted pointer-events-none" />
