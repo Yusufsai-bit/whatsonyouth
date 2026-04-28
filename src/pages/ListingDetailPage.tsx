@@ -66,6 +66,7 @@ export default function ListingDetailPage() {
   const [copied, setCopied] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [reportCategory, setReportCategory] = useState('broken_link');
   const [reportSent, setReportSent] = useState(false);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [related, setRelated] = useState<RelatedListing[]>([]);
@@ -137,18 +138,21 @@ export default function ListingDetailPage() {
 
   const handleReport = async () => {
     const reason = sanitizeText(reportReason);
-    if (!reason || reason.length > 500 || !id) return;
+    const allowedCategories = ['broken_link', 'expired', 'incorrect_info', 'unsafe_or_spam', 'other'];
+    if (!reason || reason.length > 500 || !id || !allowedCategories.includes(reportCategory)) return;
     setReportSubmitting(true);
     await supabase.from('listing_reports').insert({
       listing_id: id,
+      reason_category: reportCategory,
       reason,
-    });
+    } as any);
     setReportSubmitting(false);
     setReportSent(true);
     setTimeout(() => {
       setShowReport(false);
       setReportSent(false);
       setReportReason('');
+      setReportCategory('broken_link');
     }, 2000);
   };
 
