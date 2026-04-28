@@ -39,6 +39,7 @@ const AdminScanner = lazy(() => import('./pages/admin/AdminScanner'));
 const AdminSEO = lazy(() => import('./pages/admin/AdminSEO'));
 const AdminCreditUsage = lazy(() => import('./pages/admin/AdminCreditUsage'));
 const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 const RegionalPage = lazy(() => import('./pages/RegionalPage'));
 const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
 
@@ -116,6 +117,7 @@ const App = () => (
             <Route path="/admin/users" element={<AdminGuard><AdminUsers /></AdminGuard>} />
             <Route path="/admin/settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
             <Route path="/admin/scanner" element={<AdminGuard><AdminScanner /></AdminGuard>} />
+            <Route path="/admin/reports" element={<AdminGuard><AdminReports /></AdminGuard>} />
             <Route path="/admin/scan-log" element={<AdminGuard><AdminScanLog /></AdminGuard>} />
             <Route path="/admin/credit-usage" element={<AdminGuard><AdminCreditUsage /></AdminGuard>} />
             <Route path="/admin/audit-log" element={<AdminGuard><AdminAuditLog /></AdminGuard>} />
