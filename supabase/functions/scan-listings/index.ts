@@ -435,30 +435,36 @@ serve(async (req) => {
         error_message: errorMessage,
       });
 
-      // Update health metadata on scan_sources (consecutive_failures + last_success_at)
-      // Auto-deactivate is handled centrally by discover-sources at threshold 5
-      if (status === 'error') {
-        // increment consecutive_failures
-        const { data: srcRow } = await supabase
-          .from('scan_sources')
-          .select('consecutive_failures')
-          .eq('url', source.url)
-          .maybeSingle();
-        const newCount = ((srcRow as any)?.consecutive_failures || 0) + 1;
-        await supabase
-          .from('scan_sources')
-          .update({ consecutive_failures: newCount } as any)
-          .eq('url', source.url);
-      } else {
-        // success → reset counter, stamp last_success_at
-        await supabase
-          .from('scan_sources')
-          .update({
-            consecutive_failures: 0,
-            last_success_at: new Date().toISOString(),
-          } as any)
-          .eq('url', source.url);
-      }
+      const { data: srcRow } = await supabase
+        .from('scan_sources')
+        .select('total_scans, successful_scans, failed_scans, total_listings_found, total_listings_created, total_listings_skipped, consecutive_failures')
+        .eq('url', source.url)
+        .maybeSingle();
+      const previous = (srcRow || {}) as any;
+      const nextTotalScans = (previous.total_scans || 0) + 1;
+      const nextSuccessfulScans = (previous.successful_scans || 0) + (status === 'success' ? 1 : 0);
+      const nextFailedScans = (previous.failed_scans || 0) + (status === 'success' ? 0 : 1);
+      const nextFailures = status === 'success' ? 0 : ((previous.consecutive_failures || 0) + 1);
+      const nextCreated = (previous.total_listings_created || 0) + created;
+      const nextSkipped = (previous.total_listings_skipped || 0) + skipped;
+
+      await supabase
+        .from('scan_sources')
+        .update({
+          total_scans: nextTotalScans,
+          successful_scans: nextSuccessfulScans,
+          failed_scans: nextFailedScans,
+          total_listings_found: (previous.total_listings_found || 0) + found,
+          total_listings_created: nextCreated,
+          total_listings_skipped: nextSkipped,
+          consecutive_failures: nextFailures,
+          last_scan_at: new Date().toISOString(),
+          last_scan_status: status,
+          last_scan_error: errorMessage,
+          last_success_at: status === 'success' ? new Date().toISOString() : previous.last_success_at,
+          quality_score: calculateSourceQuality(nextTotalScans, nextSuccessfulScans, nextCreated, nextSkipped, nextFailures),
+        } as any)
+        .eq('url', source.url);
 
       totalFound += found;
       totalCreated += created;
@@ -478,6 +484,8 @@ serve(async (req) => {
       if (i < sources.length - 1) {
         await new Promise((r) => setTimeout(r, 800));
       }
+
+      if (pausedLowBalance) break;
     }
 
     // Fire image resolution async — don't await
@@ -499,8 +507,8 @@ serve(async (req) => {
     totalImagesPending = pendingImageIds.length;
 
     // Session summary log entry
-    const sessionStatus = totalErrors === 0 ? 'success' : totalErrors === sources.length ? 'error' : 'partial';
-    const sessionError = totalErrors > 0 ? `${totalErrors} source(s) failed` : null;
+    const sessionStatus = pausedLowBalance ? 'paused_low_balance' : totalErrors === 0 ? 'success' : totalErrors === sources.length ? 'error' : 'partial';
+    const sessionError = pausedLowBalance ? 'AI balance appears low; automatic scanner paused' : totalErrors > 0 ? `${totalErrors} source(s) failed` : null;
     const { data: sessionLog } = await supabase.from('scan_log').insert({
       scan_session_id: scanSessionId,
       source_url: '__session_summary__',
