@@ -10,7 +10,7 @@ const FAILURE_THRESHOLD = 5;
 const TARGET_NEW_SOURCES = 2; // we aim for 1-2 keepers per fortnight
 const MAX_CANDIDATES_TO_EVALUATE = 12;
 
-const CATEGORIES = ["events", "jobs", "grants", "volunteering", "education", "wellbeing"];
+const CATEGORIES = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
 
 interface Candidate {
   url: string;
@@ -119,11 +119,11 @@ serve(async (req) => {
         {
           role: "system",
           content:
-            "You suggest web search queries to discover NEW Australian (Victoria-focused) websites that publish opportunities for young people aged 15-25 (events, jobs, grants, volunteering, education, wellbeing). Be specific and prefer .org.au and .gov.au domains. Avoid huge job aggregators (Seek, Indeed, LinkedIn) — they block scrapers.",
+            "You suggest web search queries to discover NEW Australian, Victoria-focused source websites for young people aged 15-25. Use only these categories: Events, Jobs, Grants, Programs, Wellbeing. Prefer stable .gov.au, .org.au, education, council, and established nonprofit source pages. Avoid job boards, grant directories, ticketing platforms, generic news/blog sites, social posts, search result pages, and individual opportunity pages.",
         },
         {
           role: "user",
-          content: `Generate 6 diverse Google search queries that would surface fresh Victorian youth opportunity sources we likely don't already know about. Cover varied categories: ${CATEGORIES.join(", ")}.`,
+          content: `Generate 6 diverse Google search queries that would surface stable Victorian youth opportunity source pages we likely don't already know about. Cover only these categories: ${CATEGORIES.join(", ")}.`,
         },
       ],
       [
@@ -202,7 +202,7 @@ serve(async (req) => {
         {
           role: "system",
           content:
-            "You evaluate candidate websites for inclusion in a Victorian youth-opportunities directory. Approve ONLY if: (1) clearly Victoria/Australia focused, (2) regularly publishes opportunities relevant to ages 15-25, (3) NOT a generic news site, blog, or aggregator that blocks scrapers, (4) has a stable listings page (not just a homepage). Be strict — reject when in doubt.",
+            "You evaluate candidate websites for inclusion in a Victorian youth-opportunities directory. Approve ONLY if: (1) clearly Victoria/Australia focused, (2) regularly publishes opportunities relevant to ages 15-25, (3) fits exactly one category: Events, Jobs, Grants, Programs, Wellbeing, (4) is a stable source page from an official organisation, council, education provider, or nonprofit. Reject job boards, grant directories, ticketing platforms, social media posts, generic news/blog sites, individual ads, individual event pages, individual grant pages, and unstable search result pages. Be strict — reject when in doubt.",
         },
         {
           role: "user",
@@ -256,7 +256,7 @@ serve(async (req) => {
         name: a.cleaned_name || c.name,
         url: c.url,
         category: a.category,
-        is_active: true,
+        is_active: false,
         discovered_by_ai: true,
         discovered_at: new Date().toISOString(),
       });
@@ -264,7 +264,7 @@ serve(async (req) => {
         console.error(`Failed to insert ${c.url}:`, error.message);
         continue;
       }
-      summary.added.push({ name: a.cleaned_name, url: c.url, category: a.category, reason: a.reason });
+      summary.added.push({ name: a.cleaned_name, url: c.url, category: a.category, status: "pending_admin_review", reason: a.reason });
       summary.sources_added++;
     }
 
