@@ -58,6 +58,35 @@ function passesQualityCheck(listing: any): {
   if (!listing.link || !listing.link.startsWith('http'))
     return { passes: false, reason: 'Invalid link' };
 
+  // Domain blocklist — reject ephemeral listing URLs
+  // that expire when the individual job/grant closes
+  const BANNED_LINK_PATTERNS = [
+    'seek.com.au/job/',
+    'seek.com.au/jobs/in-',
+    'seek.com.au/student-jobs/',
+    'linkedin.com/jobs/',
+    'linkedin.com/job/',
+    'indeed.com/viewjob',
+    'indeed.com/jobs/view',
+    'jora.com/job/',
+    'grants.gov.au/Go/Display/',
+    'grants.gov.au/Go/List',
+    'communitygrants.gov.au/grants/',
+    'humanitix.com/event/',
+    'eventbrite.com.au/e/',
+    'trybooking.com/events/',
+  ];
+  const linkLower = listing.link.toLowerCase();
+  const bannedPattern = BANNED_LINK_PATTERNS.find(
+    pattern => linkLower.includes(pattern)
+  );
+  if (bannedPattern) {
+    return {
+      passes: false,
+      reason: `Blocked domain pattern: ${bannedPattern}`
+    };
+  }
+
   if (!listing.location || listing.location.length < 3)
     return { passes: false, reason: 'Missing location' };
 
@@ -106,9 +135,22 @@ Reject anything that is:
 - Targeted at adults over 25 or children under 15
 - A past event or closed opportunity
 - A generic article, blog post, or news item with no specific opportunity to apply for or attend
+- A link pointing to an individual job ad on seek.com.au, linkedin.com, indeed.com, jora.com, or any URL path containing /job/ as a segment — these listings expire within days
+- An individual grant listing on grants.gov.au/Go/Display/ or communitygrants.gov.au — these expire when the grant round closes
+- An individual ticketing page on eventbrite.com.au/e/, humanitix.com/event/, or trybooking.com — use the organiser's own page instead
 - A commercial product or paid service
 
 Look for: events, jobs, grants, programs, volunteering, leadership, wellbeing support, arts, sport.
+
+CATEGORY-SPECIFIC RULES:
+
+JOBS: Only extract employer program pages, traineeship schemes, apprenticeship programs, graduate pathways, and youth employment services. Do NOT extract individual job ads — they expire within days. A valid Jobs listing links to a stable program page like 'Apply for our school-based traineeship' not 'Senior Developer — apply now'.
+
+GRANTS: Only extract grant programs and funding rounds from the source organisation directly. Do NOT extract links to grants.gov.au individual listings. A valid Grants listing links to the funder's own grant page, not a directory entry.
+
+EVENTS: Always extract the expiry_date for events — this is the event date or last date to register. If no date can be found at all, skip the listing entirely rather than saving it with null expiry_date. Events without dates cannot be managed for freshness.
+
+WELLBEING: Link to stable top-level organisation pages or major section pages. Never link to collection subpages, individual resource articles, or campaign pages that may move or be removed.
 
 Return ONLY a valid JSON array — no markdown, no explanation, no other text whatsoever.
 
@@ -117,7 +159,12 @@ Each object must have exactly these fields:
 - category: exactly one of: Events, Jobs, Grants, Programs, Wellbeing
 - organisation: string (who runs it)
 - location: string (suburb, city, "Victoria-wide", "Regional Victoria", or "Online")
-- link: full URL to this specific opportunity — if no specific URL use ${source.url}
+- link: URL to this opportunity. STRICT RULES:
+  1. Always prefer the source domain URL over linking out to job boards or grant directories
+  2. NEVER use: seek.com.au/job/, linkedin.com/jobs/, indeed.com/viewjob, jora.com/job/, grants.gov.au/Go/Display/, eventbrite.com.au/e/, humanitix.com/event/, trybooking.com/events/
+  3. If the only link available is from a banned domain above, use ${source.url} as the link instead
+  4. Never extract URLs that contain /job/ as a path segment — they expire within days
+  5. For Wellbeing sources: always link to the top-level organisation page or a stable section page, never to a deep resource or collection subpage that could move
 - description: 1-2 sentences, max 400 chars — what it is, who it is for, key dates or benefit
 - contact_email: string (or empty string "")
 - expiry_date: YYYY-MM-DD string (or null)
@@ -361,7 +408,12 @@ serve(async (req) => {
             // Quality check — skip entirely if it fails
             const quality = passesQualityCheck(listing);
             if (!quality.passes) {
-              console.log(`Quality skip: ${listing.title} — ${quality.reason}`);
+              const isBlocked = quality.reason
+                .startsWith('Blocked domain pattern');
+              console.log(
+                `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ` +
+                `${listing.title} — ${quality.reason}`
+              );
               skipped++;
               continue;
             }
