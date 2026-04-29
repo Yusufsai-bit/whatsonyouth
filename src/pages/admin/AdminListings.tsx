@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { StatusBadge, SourceBadge } from '@/pages/admin/AdminDashboard';
-import { Pencil, Trash2, Star, AlertCircle, ImageIcon } from 'lucide-react';
+import { Pencil, Trash2, Star, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 
@@ -69,32 +69,6 @@ export default function AdminListings() {
       return true;
     });
   }, [listings, search, categoryFilter, statusFilter, sourceFilter, expiryFilter]);
-
-  const pendingDrafts = useMemo(() => 
-    listings.filter(l => 
-      !l.is_active && 
-      (l.source === 'admin' || l.source === 'ai_scan')
-    ), 
-    [listings]
-  );
-
-  const showDrafts = () => {
-    setStatusFilter('inactive');
-    setSourceFilter('');
-    setCategoryFilter('');
-    setSearch('');
-    setExpiryFilter('');
-    setPage(1);
-  };
-
-  const activateAllDrafts = async () => {
-    const ids = pendingDrafts.map(l => l.id);
-    for (const id of ids) {
-      await supabase.from('listings').update({ is_active: true }).eq('id', id);
-    }
-    toast.success(`${ids.length} draft listings published`);
-    fetchListings();
-  };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -230,37 +204,6 @@ export default function AdminListings() {
           </select>
           <button onClick={clearFilters} className="font-body text-[13px] text-[#5847E0] hover:underline">Clear filters</button>
         </div>
-
-        {pendingDrafts.length > 0 && (
-          <div className="bg-[#FFF8F0] border border-[#F5C68A] rounded-xl px-5 py-4 mb-4 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <AlertCircle size={20} className="text-[#D85A30] shrink-0" />
-              <div>
-                <p className="font-heading font-bold text-[15px] text-[#0A0A0A]">
-                  {pendingDrafts.length} draft listing{pendingDrafts.length !== 1 ? 's' : ''} pending review
-                </p>
-                <p className="font-body text-[13px] text-[#555555]">
-                  Scanned listings waiting to be reviewed and published.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={showDrafts}
-                className="font-heading font-bold text-[13px] border-2 border-[#0A0A0A] text-[#0A0A0A] px-4 py-2 rounded-lg hover:bg-[#F7F7F7]"
-              >
-                Review drafts
-              </button>
-              <button
-                onClick={activateAllDrafts}
-                className="font-heading font-bold text-[13px] bg-[#D85A30] text-white px-4 py-2 rounded-lg hover:bg-[#C04E28]"
-              >
-                Publish all
-              </button>
-            </div>
-          </div>
-        )}
-
 
         {/* Batch image resolve */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl px-5 py-4 mb-4 flex items-center justify-between flex-wrap gap-3">
