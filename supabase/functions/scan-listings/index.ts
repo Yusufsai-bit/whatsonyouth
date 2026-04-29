@@ -42,6 +42,57 @@ function normaliseLocation(location: string): string {
   return map[lower] || l;
 }
 
+function unstableOpportunityUrlReason(rawUrl: string, category?: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return 'Invalid URL';
+  }
+
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+  const path = parsed.pathname.toLowerCase().replace(/\/+$/, '');
+  const href = parsed.href.toLowerCase();
+  const segments = path.split('/').filter(Boolean);
+  const isHost = (domain: string) => host === domain || host.endsWith(`.${domain}`);
+  const hasSegment = (segment: string) => segments.includes(segment);
+
+  if (['seek.com.au', 'linkedin.com', 'indeed.com', 'indeed.com.au', 'jora.com', 'ethicaljobs.com.au', 'jobsforyouth.com.au']
+    .some(isHost)) {
+    return `Blocked unstable job-board domain: ${host}`;
+  }
+
+  if (category === 'Jobs' && (hasSegment('job') || (hasSegment('jobs') && segments.length > 1))) {
+    return 'Blocked individual job URL path';
+  }
+
+  if (isHost('grants.gov.au') && (path.startsWith('/go/display') || path.startsWith('/go/list'))) {
+    return 'Blocked unstable grants directory URL';
+  }
+
+  if (isHost('communitygrants.gov.au') && path.startsWith('/grants')) {
+    return 'Blocked unstable grants directory URL';
+  }
+
+  if (isHost('eventbrite.com.au') && path.startsWith('/e/')) {
+    return 'Blocked unstable ticketing URL';
+  }
+
+  if (isHost('humanitix.com') && (path.startsWith('/event/') || path.startsWith('/events/'))) {
+    return 'Blocked unstable ticketing URL';
+  }
+
+  if (isHost('trybooking.com') && path.startsWith('/events/')) {
+    return 'Blocked unstable ticketing URL';
+  }
+
+  if (/[?&](jobid|job_id|jk|gh_jid|job)=/.test(href)) {
+    return 'Blocked query-based individual job URL';
+  }
+
+  return null;
+}
+
 function passesQualityCheck(listing: any): {
   passes: boolean;
   reason: string;
@@ -58,34 +109,8 @@ function passesQualityCheck(listing: any): {
   if (!listing.link || !listing.link.startsWith('http'))
     return { passes: false, reason: 'Invalid link' };
 
-  // Domain blocklist — reject ephemeral listing URLs
-  // that expire when the individual job/grant closes
-  const BANNED_LINK_PATTERNS = [
-    'seek.com.au/job/',
-    'seek.com.au/jobs/in-',
-    'seek.com.au/student-jobs/',
-    'linkedin.com/jobs/',
-    'linkedin.com/job/',
-    'indeed.com/viewjob',
-    'indeed.com/jobs/view',
-    'jora.com/job/',
-    'grants.gov.au/Go/Display/',
-    'grants.gov.au/Go/List',
-    'communitygrants.gov.au/grants/',
-    'humanitix.com/event/',
-    'eventbrite.com.au/e/',
-    'trybooking.com/events/',
-  ];
-  const linkLower = listing.link.toLowerCase();
-  const bannedPattern = BANNED_LINK_PATTERNS.find(
-    pattern => linkLower.includes(pattern)
-  );
-  if (bannedPattern) {
-    return {
-      passes: false,
-      reason: `Blocked domain pattern: ${bannedPattern}`
-    };
-  }
+  const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
+  if (unstableReason) return { passes: false, reason: unstableReason };
 
   if (!listing.location || listing.location.length < 3)
     return { passes: false, reason: 'Missing location' };
