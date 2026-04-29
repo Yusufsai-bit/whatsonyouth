@@ -1,126 +1,82 @@
-I checked the current scanner code, the latest migration, the database state, and scheduled job configuration. The broken links are still happening for concrete reasons, not because the idea was impossible.
+I’ll implement the agreed backend cleanup recommendations as a narrow backend-only change set.
 
-## What is happening
+## Changes to make
 
-1. The cleanup/source replacement migration appears incomplete.
-   - The latest migration only schedules `link-health-sweep` cron jobs.
-   - It does not contain the requested listing cleanup SQL.
-   - It does not contain the requested scan source replacement SQL.
-   - The existing active database still has many old `ai_scan` listings.
+### 1. Deactivate the remaining bad Jobs listing
 
-2. There are still many active old scanner-created listings.
-   - Active listings by source currently include:
-     - Events: 16 `ai_scan`
-     - Grants: 5 `ai_scan`
-     - Jobs: 46 `ai_scan`
-     - Programs: 110 `ai_scan`
-     - Wellbeing: 89 `ai_scan`
-   - These were created before the stricter scanner rules and can still be visible if their URLs are broken.
+Deactivate the active listing that still matches the unstable Jobs URL pattern:
 
-3. The current banned pattern check is too narrow.
-   - It blocks specific strings like `seek.com.au/job/`, `linkedin.com/jobs/`, and `grants.gov.au/Go/Display/`.
-   - It does not generically block any URL path containing `/job/` even though the prompt says it should.
-   - That is why active Jobs still include `jobsforyouth.com.au/job/...` links. I counted 43 active Jobs with job-like URL paths.
+- `Team Member - Melton`
+- `jobsforyouth.com.au/job/team-member-melton`
 
-4. The health sweep schedule is configured, but likely cannot run successfully yet.
-   - The cron jobs build their target URL from `platform_settings.key = 'supabase_url'`.
-   - The database currently has `scan_api_key`, but no `supabase_url` setting.
-   - That means the scheduled health sweep has no proper endpoint URL to call.
-   - Also, the health sweep job has no recorded cron run history yet.
+This keeps individual short-lived job ads off the public site.
 
-5. The existing `link-health-sweep` function does not currently use the request body category.
-   - The cron sends `{ "category": "Jobs" }` for the daily Jobs sweep.
-   - The function currently checks all active listings up to 500 and auto-expires old Jobs, but it does not filter by category from the request body.
-   - You previously said not to change the health sweep function itself, so the safe fix is to correct the schedule and data/source rules around it.
+### 2. Remove the duplicate weekly health sweep
 
-## Permanent fix plan
+Unschedule/remove:
 
-I will make only the surgical backend/data changes needed, and avoid public pages, admin UI, auth, routing, brand files, and unrelated functions.
+- `link-health-sweep-weekly`
 
-### 1. Add a corrective SQL migration for database cleanup
+Keep:
 
-Create a new migration that:
+- `link-health-sweep-jobs` — daily Jobs cleanup
+- `link-health-sweep-all` — weekly all-category cleanup
 
-- Deactivates active listings with known broken/ephemeral patterns, including:
-  - known job-board and per-job URL patterns
-  - generic `/job/` and `/jobs/` style paths where they are individual ads
-  - grant directory detail pages
-  - ticketing/event detail pages that commonly expire
-  - “page not found” style known-bad URL patterns if present
-- Targets all 5 categories where relevant.
-- Preserves existing working listings that do not match the banned/broken patterns.
-- Corrects legacy source labels where needed so scanner-created listings are no longer incorrectly treated as clean/stable.
+This reduces duplicate backend work while preserving link protection.
 
-### 2. Replace unstable scan sources with stable source pages
+### 3. Pause automatic source discovery
 
-In the same migration, update `scan_sources` so unstable Jobs sources and obvious directory sources are deactivated or replaced with stable organisation/program pages.
+Unschedule/remove:
 
-Specific corrections will include:
+- `discover-sources-fortnightly`
 
-- Deactivate or replace remaining unstable sources such as `Ethical Jobs Australia` and other job-board/directories.
-- Replace Jobs sources with stable employer or official youth employment program pages.
-- Fix category casing problems currently visible in the database (`jobs` vs `Jobs`, `volunteering` vs a valid category).
-- Ensure source rows point to top-level or durable program pages, not search result pages or individual opportunity pages.
+Reason: it can introduce new source websites automatically, which is useful later but currently less important than quality control.
 
-### 3. Strengthen scanner URL quality checks
+Existing sources will remain. This only stops the automatic discovery job from adding new source websites in the background.
 
-Edit only `supabase/functions/scan-listings/index.ts` to add a stronger deterministic URL gate before insert:
+### 4. Reduce scanner frequency
 
-- Parse the URL using `new URL()`.
-- Block known unstable domains and URL patterns.
-- Block generic path segments such as:
-  - `/job/`
-  - `/jobs/` when used as an individual listing path
-  - `/careers/job/`
-  - query-based job IDs where applicable
-- Block detail pages from ticketing and grants directories.
-- Keep allowing stable careers/program pages like `/careers`, `/graduate-programs`, `/apprenticeships`, `/traineeships`, etc.
+Change:
 
-This matters because prompt rules alone are not enough. The model can still return a bad URL; deterministic code must reject it.
+- `scheduled-scan-chunk` from every 15 minutes
 
-### 4. Tighten the AI extraction prompt
+To:
 
-In the same scanner file, improve the prompt so it clearly says:
+- hourly
 
-- Do not return individual jobs, individual grants, individual ticketing pages, directory results, or per-resource pages.
-- If a discovered opportunity only has an unstable detail link, use the stable source/program page instead.
-- For each category, prefer:
-  - Events: organiser event listing/calendar page or official recurring program page, not ticketing detail pages.
-  - Jobs: employer careers/program pages, apprenticeships, traineeships, graduate/youth employment programs; never individual job ads.
-  - Grants: funder program pages, not grants directory detail pages.
-  - Programs: stable program pages.
-  - Wellbeing: top-level service or major section pages.
+This keeps auto-scanning active but reduces background usage and unnecessary repeated scans.
 
-### 5. Fix health sweep scheduling without changing the health sweep function
+### 5. Tighten future source discovery code
 
-Create a migration that repairs the scheduled sweep setup:
+Update only the `discover-sources` backend function so that if source discovery is re-enabled later:
 
-- Insert/update the missing backend URL setting needed by cron.
-- Recreate the two cron jobs with valid URLs and headers.
-- Keep the intended cadence:
-  - Daily Jobs sweep at 3am AEST equivalent.
-  - Weekly all-category sweep Sunday 4am AEST equivalent.
-- Keep using the existing `scan_api_key` setting.
-- Do not edit `supabase/functions/link-health-sweep/index.ts`.
+- it only uses the site’s real categories: `Events`, `Jobs`, `Grants`, `Programs`, `Wellbeing`
+- it does not create lowercase or invalid categories like `jobs`, `volunteering`, or `education`
+- newly discovered sources are saved as inactive by default for admin review before use
+- prompts prefer stable .gov.au/.org.au source pages and reject aggregators/directories
 
-### 6. Verification after implementation
+This makes the disabled discovery feature safer for future use.
 
-After changes are applied, verify with read-only checks:
+### 6. Verification
 
-- Count remaining active listings matching banned patterns.
-- Confirm unstable scan sources are inactive/replaced.
-- Confirm cron jobs exist and have valid commands.
-- Confirm scanner code contains deterministic bans for generic `/job/` paths.
+After applying the changes, verify:
+
+- no active listings match known bad URL patterns
+- `scheduled-scan-chunk` is hourly
+- `link-health-sweep-weekly` is gone/inactive
+- `discover-sources-fortnightly` is gone/inactive
+- `link-health-sweep-jobs` and `link-health-sweep-all` remain active
+- active scan source categories are only the 5 approved public categories
 
 ## Scope guardrails
 
 I will not change:
 
-- Public-facing pages/components.
-- Admin pages/UI.
-- Auth or routing logic.
-- Brand files or logos.
-- Any edge function except `scan-listings`.
-- `link-health-sweep` itself.
+- public-facing pages
+- admin UI
+- auth or routing
+- brand files/logos
+- listing card display
+- `link-health-sweep` function itself
 
-Credit usage reminder: this investigation used credits for code/database inspection; implementation and verification will use additional credits.
+Credit usage reminder: implementing and verifying this backend cleanup will use additional credits.
