@@ -160,8 +160,9 @@ Reject anything that is:
 - Targeted at adults over 25 or children under 15
 - A past event or closed opportunity
 - A generic article, blog post, or news item with no specific opportunity to apply for or attend
-- A link pointing to an individual job ad on seek.com.au, linkedin.com, indeed.com, jora.com, or any URL path containing /job/ as a segment — these listings expire within days
-- An individual grant listing on grants.gov.au/Go/Display/ or communitygrants.gov.au — these expire when the grant round closes
+- Individual jobs, individual grants, individual ticketing pages, directory result pages, or per-resource pages that can disappear
+- A link pointing to an individual job ad on any job board or any URL path containing /job/ as a segment — these listings expire within days
+- An individual grant listing on grants.gov.au/Go/Display/, grants.gov.au/Go/List, or communitygrants.gov.au — these expire when the grant round closes
 - An individual ticketing page on eventbrite.com.au/e/, humanitix.com/event/, or trybooking.com — use the organiser's own page instead
 - A commercial product or paid service
 
@@ -169,13 +170,15 @@ Look for: events, jobs, grants, programs, volunteering, leadership, wellbeing su
 
 CATEGORY-SPECIFIC RULES:
 
-JOBS: Only extract employer program pages, traineeship schemes, apprenticeship programs, graduate pathways, and youth employment services. Do NOT extract individual job ads — they expire within days. A valid Jobs listing links to a stable program page like 'Apply for our school-based traineeship' not 'Senior Developer — apply now'.
+JOBS: Only extract employer careers pages, traineeship schemes, apprenticeship programs, graduate pathways, and youth employment services. Do NOT extract individual job ads, job-board pages, search results, or URLs with /job/ or /jobs/ individual paths. A valid Jobs listing links to a stable program page like 'School-based traineeships' or 'Youth employment program', not 'Team Member - Melton'.
 
-GRANTS: Only extract grant programs and funding rounds from the source organisation directly. Do NOT extract links to grants.gov.au individual listings. A valid Grants listing links to the funder's own grant page, not a directory entry.
+GRANTS: Only extract grant programs and funding rounds from the source organisation directly. Do NOT extract links to grants.gov.au or communitygrants.gov.au directory/detail pages. A valid Grants listing links to the funder's own durable grant page, not a directory entry.
 
-EVENTS: Always extract the expiry_date for events — this is the event date or last date to register. If no date can be found at all, skip the listing entirely rather than saving it with null expiry_date. Events without dates cannot be managed for freshness.
+EVENTS: Use the organiser's event listing/calendar page or official recurring program page. Do NOT use ticketing detail URLs. Always extract the expiry_date for events — this is the event date or last date to register. If no date can be found at all, skip the listing entirely rather than saving it with null expiry_date.
 
-WELLBEING: Link to stable top-level organisation pages or major section pages. Never link to collection subpages, individual resource articles, or campaign pages that may move or be removed.
+PROGRAMS: Link to stable program pages on the organisation's own website. Avoid temporary announcements, news posts, PDFs, third-party directories, or application forms that may move.
+
+WELLBEING: Link to stable top-level service pages or major section pages. Never link to collection subpages, individual resource articles, campaign pages, or temporary content that may move or be removed.
 
 Return ONLY a valid JSON array — no markdown, no explanation, no other text whatsoever.
 
@@ -186,10 +189,11 @@ Each object must have exactly these fields:
 - location: string (suburb, city, "Victoria-wide", "Regional Victoria", or "Online")
 - link: URL to this opportunity. STRICT RULES:
   1. Always prefer the source domain URL over linking out to job boards or grant directories
-  2. NEVER use: seek.com.au/job/, linkedin.com/jobs/, indeed.com/viewjob, jora.com/job/, grants.gov.au/Go/Display/, eventbrite.com.au/e/, humanitix.com/event/, trybooking.com/events/
-  3. If the only link available is from a banned domain above, use ${source.url} as the link instead
-  4. Never extract URLs that contain /job/ as a path segment — they expire within days
-  5. For Wellbeing sources: always link to the top-level organisation page or a stable section page, never to a deep resource or collection subpage that could move
+  2. NEVER use job boards, grant directories, ticketing detail pages, search result pages, or individual ad/detail pages
+  3. NEVER use URLs containing /job/ as a path segment or individual /jobs/... ad paths
+  4. NEVER use: seek.com.au, linkedin.com/jobs, indeed, jora, ethicaljobs.com.au, jobsforyouth.com.au, grants.gov.au/Go, communitygrants.gov.au/grants, eventbrite.com.au/e/, humanitix.com/event/, trybooking.com/events/
+  5. If the only link available is unstable or banned, use ${source.url} as the link instead
+  6. For Wellbeing sources: always link to the top-level organisation page or a stable section page, never to a deep resource or collection subpage that could move
 - description: 1-2 sentences, max 400 chars — what it is, who it is for, key dates or benefit
 - contact_email: string (or empty string "")
 - expiry_date: YYYY-MM-DD string (or null)
