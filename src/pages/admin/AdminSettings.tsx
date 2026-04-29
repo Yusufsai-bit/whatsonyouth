@@ -4,8 +4,6 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 
 function timeAgoShort(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -182,24 +180,6 @@ export default function AdminSettings() {
               <p className="font-body text-sm text-[#888888]">Scans run every Tuesday and Friday at 7:00 AM AEST</p>
             </div>
 
-            <div>
-              <p className={labelClass}>Publish mode for scheduled scans</p>
-              <RadioGroup
-                value={getValue('auto_scan_mode') || 'live'}
-                onValueChange={(val) => setValue('auto_scan_mode', val)}
-                className="mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="live" id="scan-mode-live" />
-                  <Label htmlFor="scan-mode-live" className="font-body text-sm text-[#0A0A0A] cursor-pointer">Auto-publish</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="draft" id="scan-mode-draft" />
-                  <Label htmlFor="scan-mode-draft" className="font-body text-sm text-[#0A0A0A] cursor-pointer">Save as drafts</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
             {recentScans.length > 0 && (
               <div>
                 <p className={labelClass}>Recent scheduled scans</p>
@@ -222,8 +202,8 @@ export default function AdminSettings() {
             )}
           </div>
           <div className="flex items-center gap-3 mt-4">
-            <button onClick={() => saveKeys(['auto_scan_enabled', 'auto_scan_mode'])} className="bg-[#5847E0] text-white font-heading font-bold text-sm rounded-lg px-5 py-2.5">Save</button>
-            {latestUpdate(['auto_scan_enabled', 'auto_scan_mode']) && <span className="font-body text-xs text-[#888888]">Last updated {latestUpdate(['auto_scan_enabled', 'auto_scan_mode'])}</span>}
+            <button onClick={() => saveKeys(['auto_scan_enabled'])} className="bg-[#5847E0] text-white font-heading font-bold text-sm rounded-lg px-5 py-2.5">Save</button>
+            {latestUpdate(['auto_scan_enabled']) && <span className="font-body text-xs text-[#888888]">Last updated {latestUpdate(['auto_scan_enabled'])}</span>}
           </div>
         </div>
       </div>
