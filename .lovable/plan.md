@@ -1,87 +1,69 @@
-
 ## Goal
 
-Insert the genuinely useful subset of your 70 curated listings — with every URL validated reachable and every duplicate removed — using your existing data conventions (`source = 'admin'`, real contact email, proper migration). Nothing inserted that is broken, duplicated, or pointed at the wrong page.
+1. Replace every `contact_email` on the site with **info@whatsonyouth.org.au**.
+2. On listing cards/detail pages, replace the generic "Curated by WOY" / "Curated by What's On Youth" badge with the **organisation name** — but only for admin/scanner-created listings (`source = 'admin'`). User submissions keep "Submitted by community".
 
-## What I found in the de-dupe pass
+Yes, this makes sense. Here's exactly what changes.
 
-12 candidates **already exist** at the same URL and will be skipped:
+---
 
-| Candidate | Already in DB as |
-|---|---|
-| ReachOut (`au.reachout.com/`) | "First Nations Wellbeing Resources and Support" — same URL, wrong title. **Will fix existing title instead of inserting.** |
-| Duke of Ed | The Duke of Edinburgh's International Award |
-| headspace home (`headspace.org.au/`) | headspace centres |
-| headspace centres (Programs + Jobs candidates) | headspace Work and Study Support |
-| Kids Helpline | already listed twice |
-| Beyond Blue Young | Beyond Blue Forums (Youth) |
-| Coles Careers | Store Teams & Leadership Opportunities |
-| Lifeline | Urgent Mental Health Help (Lifeline) |
-| SANE | SANE Support Line |
-| Vic Apprenticeships | Victorian Government Traineeship Program (currently miscategorised as Programs — see fix below) |
-| YMCA Careers | Y Careers |
+## Part 1 — Update all contact emails to info@whatsonyouth.org.au
 
-Also flagged:
-- **18 existing listings** already use `headspace.org.au` — both `headspace.org.au/headspace-centres/` candidates (Jobs + Programs) get **dropped entirely**. headspace coverage is already saturated.
-- The candidate "Vic Grants Directory" (`vic.gov.au/grants-and-programs`) only collides on domain, not URL — it's still safe to add.
+**Database (data update):**
+- Update every row in `listings.contact_email` to `info@whatsonyouth.org.au`. Currently 16 distinct emails are in use across 335 listings (incl. `hello@whatsonyouth.org.au`, lsv.com.au addresses, kids helpline, etc). All become `info@whatsonyouth.org.au`.
+- Update `platform_settings` row where `key = 'contact_email'` to the same value.
 
-**Net new to insert: ~55 listings** (70 minus 12 dupes minus 2 headspace-centres minus 1 ReachOut handled as update).
+**Code defaults (so future inserts also use info@):**
+- `supabase/functions/scan-listings/index.ts` — change default fallback email from `hello@whatsonyouth.org.au` → `info@whatsonyouth.org.au`.
+- Any other edge function referencing `hello@whatsonyouth.org.au` for inserts (`pillar-listings-import`, etc. — I'll grep and fix).
+- Update memory file `mem://index.md` and any feature memory referencing `hello@whatsonyouth.org.au` to use `info@whatsonyouth.org.au`.
 
-## Steps
+**Not changed:** the user-submission form (`SubmitPage.tsx`) still lets community submitters provide their own contact email — that's correct behaviour. This change only affects admin/scanner-curated listings and the platform's own contact setting.
 
-### 1. URL validation pass (read-only)
-Run every net-new URL through your existing `validate-source-url` edge function in batches. Drop any that return `reachable: false`. Show you the validation table before inserting anything. Estimated 55 fetches.
+---
 
-### 2. Small fixes to existing data
-Two surgical updates to existing listings (no new rows):
-- **ReachOut row** — change title from "First Nations Wellbeing Resources and Support" to "ReachOut — Online Mental Health Support for Young People" and update description. Wrong title for that URL today.
-- **Vic Apprenticeships row** — move from `Programs` → `Jobs` (where it belongs).
+## Part 2 — Show organisation name instead of "Curated by WOY"
 
-### 3. Insert validated, de-duped listings via migration
-A single transactional migration that inserts only validated, non-duplicate rows with:
-- `source = 'admin'` (matches your project convention — not `'curated'`)
-- `user_id` = first admin from `public.admins`
-- `contact_email = 'hello@whatsonyouth.org.au'` for all rows (your `contact_email` column is NOT NULL; using a single shared mailbox keeps it clean)
-- `is_active = true`, `is_featured = false`
-- `expiry_date` only set on Events (so Programs/Wellbeing/Grants/Jobs index pages don't auto-deactivate)
-- All URLs lowercased and normalised
+Currently 4 spots render the static "Curated by WOY" / "Curated by What's On Youth" label:
 
-Quality-score trigger and duplicate-fingerprint trigger will run automatically on insert.
+| File | Line | Current |
+|---|---|---|
+| `src/pages/CategoryListingPage.tsx` | 625 | "Curated by WOY" |
+| `src/pages/SearchPage.tsx` | 436 | "Curated by WOY" |
+| `src/components/FeaturedOpportunities.tsx` | 102 | "Curated by WOY" |
+| `src/pages/ListingDetailPage.tsx` | 204, 334 | "Curated by What's On Youth" |
 
-### 4. Verification
-After insert, run:
-```sql
-SELECT category, count(*) FROM listings 
-WHERE source = 'admin' AND created_at > now() - interval '10 minutes'
-GROUP BY category;
+**New logic (applied to all 4 spots):**
 ```
-…and report counts vs. the 168 → ~218 expected total.
+if (source === 'user') → "Submitted by community"
+if (source === 'admin') → `By ${organisation}`   // e.g. "By headspace", "By Scouts Victoria"
+```
 
-### 5. Protect them from accidental deactivation
-Add the inserted listing IDs (or their domains) to a new `platform_settings` key `link_health_whitelist` containing a JSON array. Update `link-health-sweep` to skip any URL whose domain is in the whitelist. This means the next health sweep can never knock these pillar listings offline because of a transient 503 or rate-limit.
+The `organisation` field is already required on every listing and already fetched in each of these views, so no extra queries needed.
 
-## Technical details
+---
 
-**Files / changes:**
-- 1 migration: `INSERT INTO listings ...` (one statement, one transaction)
-- 2 small `UPDATE` statements on existing listings (ReachOut title, Vic Apprenticeships category)
-- 1 `INSERT` into `platform_settings` for the whitelist
-- 1 small edit to `supabase/functions/link-health-sweep/index.ts` to consult the whitelist
-- No schema changes
-- No frontend changes
+## Files changed
 
-**Things I will NOT change:**
-- Scanner behaviour
-- Admin UI
-- Existing 168 active listings (other than the 2 small fixes above)
-- Brand, routing, auth
+1. `supabase/functions/scan-listings/index.ts` — default email constant
+2. Any other edge function with `hello@whatsonyouth.org.au` (will sweep)
+3. `src/pages/CategoryListingPage.tsx` — replace badge text with org-aware logic
+4. `src/pages/SearchPage.tsx` — same
+5. `src/components/FeaturedOpportunities.tsx` — same
+6. `src/pages/ListingDetailPage.tsx` — update `sourceLabel` + line 334 badge
+7. `mem://index.md` — update pillar contact email rule
+8. DB: bulk UPDATE on `listings.contact_email` + `platform_settings.contact_email`
 
-## Decision points before I run
+---
 
-1. **Contact email** — OK to use `hello@whatsonyouth.org.au` for all 55 rows? (Your `contact_email` column is required.)
-2. **Whitelist scope** — should the link-health whitelist match by full URL (strict) or by domain (broader, also protects e.g. all of `headspace.org.au`)? I recommend **full URL** so we don't accidentally protect bad subpages.
-3. **ReachOut + Vic Apprenticeships fixes** — OK to update those two existing rows? They're clearly mislabeled today.
+## Verification after changes
 
-If you say "go", I'll default to: shared contact email, full-URL whitelist, and yes-fix-the-two-existing-rows.
+- Run a `SELECT DISTINCT contact_email FROM listings` → should return only `info@whatsonyouth.org.au`.
+- Spot-check a curated listing card — should now read e.g. "By Scouts Victoria" instead of "Curated by WOY".
+- Spot-check a community-submitted listing — should still read "Submitted by community".
 
-*Credit usage reminder: validation step (~55 URL fetches), one migration, one edge function edit, one verification query. Moderate credit usage overall — most of it in the URL validation phase.*
+Approve and I'll implement it end-to-end.
+
+---
+
+**Credits used this response:** ~1 message credit (planning only, read-only tools).
