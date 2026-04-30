@@ -621,8 +621,8 @@ export default function CategoryListingPage({ category }: { category: string }) 
                         )}
                         <div className="mt-auto flex items-center justify-between pt-2">
                           {listing.source !== 'user' ? (
-                            <span className="bg-[#E6F1FB] text-[#0C447C] font-body text-[10px] rounded-full px-2 py-0.5">
-                              Curated by WOY
+                            <span className="bg-[#E6F1FB] text-[#0C447C] font-body text-[10px] rounded-full px-2 py-0.5 truncate max-w-[60%]">
+                              By {listing.organisation}
                             </span>
                           ) : (
                             <span className="bg-brand-section-alt text-brand-text-muted font-body text-[10px] rounded-full px-2 py-0.5">
