@@ -75,17 +75,44 @@ serve(async (req) => {
 
     const summary = {
       checked: 0,
+      whitelisted_skipped: 0,
       deactivated_dead_links: 0,
       deactivated_old_jobs: 0,
       errors: 0,
       deactivated: [] as { id: string; title: string; reason: string }[],
     };
 
+    // ============ STEP 0: Load protected URL whitelist ============
+    const normaliseLink = (u: string) =>
+      u.toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "");
+
+    const { data: whitelistRow } = await supabase
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "link_health_whitelist")
+      .maybeSingle();
+
+    let whitelist = new Set<string>();
+    if (whitelistRow?.value) {
+      try {
+        const arr = JSON.parse(whitelistRow.value as string);
+        if (Array.isArray(arr)) {
+          whitelist = new Set(arr.map((s: string) => normaliseLink(String(s))));
+        }
+      } catch (e) {
+        console.error("Could not parse link_health_whitelist:", e);
+      }
+    }
+    console.log(`Loaded ${whitelist.size} whitelisted URLs`);
+
+    const isWhitelisted = (link: string) => whitelist.has(normaliseLink(link));
+
     // ============ STEP 1: Auto-expire Job listings older than 30 days ============
+    // (Whitelisted pillar Jobs pages — index/career hubs — are excluded.)
     const cutoff = new Date(Date.now() - JOB_MAX_AGE_DAYS * 24 * 60 * 60 * 1000).toISOString();
     const { data: oldJobs, error: oldJobsErr } = await supabase
       .from("listings")
-      .select("id, title")
+      .select("id, title, link")
       .eq("is_active", true)
       .ilike("category", "jobs")
       .lt("created_at", cutoff);
@@ -93,6 +120,10 @@ serve(async (req) => {
     if (oldJobsErr) console.error("Failed to query old jobs:", oldJobsErr.message);
 
     for (const j of oldJobs || []) {
+      if (isWhitelisted(j.link)) {
+        summary.whitelisted_skipped++;
+        continue;
+      }
       await supabase.from("listings").update({ is_active: false }).eq("id", j.id);
       summary.deactivated_old_jobs++;
       summary.deactivated.push({ id: j.id, title: j.title, reason: `Job >${JOB_MAX_AGE_DAYS}d old (auto-expire)` });
@@ -110,6 +141,10 @@ serve(async (req) => {
     if (listErr) throw listErr;
 
     for (const l of activeListings || []) {
+      if (isWhitelisted(l.link)) {
+        summary.whitelisted_skipped++;
+        continue;
+      }
       summary.checked++;
       const result = await checkUrl(l.link);
       if (!result.ok) {
