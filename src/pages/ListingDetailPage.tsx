@@ -201,7 +201,7 @@ export default function ListingDetailPage() {
     listing.category === 'Grants' ? 'Apply / learn more' :
     listing.category === 'Programs' ? 'Register interest' : 'Visit website';
 
-  const sourceLabel = listing.source === 'user' ? 'Submitted by community' : 'Curated by What’s On Youth';
+  const sourceLabel = listing.source === 'user' ? 'Submitted by community' : `By ${listing.organisation}`;
   const dateLabel = listing.category === 'Events' ? 'Date' : listing.category === 'Jobs' ? 'Posted' : listing.category === 'Grants' ? 'Closes' : listing.expiry_date ? 'Deadline' : 'Availability';
   const dateValue = listing.expiry_date ? formatDate(listing.expiry_date) : listing.category === 'Wellbeing' ? 'Ongoing support' : `Listed ${daysAgo(listing.created_at)}`;
 
@@ -331,7 +331,7 @@ export default function ListingDetailPage() {
                 </span>
               ) : (
                 <span className="inline-block bg-brand-section-alt text-brand-text-muted font-body text-xs rounded-full px-3 py-1">
-                  Curated by WOY
+                  By {listing.organisation}
                 </span>
               )}
             </div>
