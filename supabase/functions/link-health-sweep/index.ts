@@ -141,6 +141,10 @@ serve(async (req) => {
     if (listErr) throw listErr;
 
     for (const l of activeListings || []) {
+      if (isWhitelisted(l.link)) {
+        summary.whitelisted_skipped++;
+        continue;
+      }
       summary.checked++;
       const result = await checkUrl(l.link);
       if (!result.ok) {
