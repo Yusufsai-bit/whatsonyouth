@@ -456,9 +456,14 @@ serve(async (req) => {
               description: (listing.description || "").slice(0, 500),
               contact_email: listing.contact_email || "",
               // Wellbeing listings never expire (ongoing services, not time-bound opportunities)
-              expiry_date: listing.category === 'Wellbeing' ? null : (listing.expiry_date || null),
+              expiry_date: listing.category === 'Wellbeing'
+                ? null
+                : (listing.expiry_date || (['Events','Jobs','Grants'].includes(listing.category)
+                    ? new Date(Date.now() + 60*24*60*60*1000).toISOString().slice(0,10)
+                    : null)),
               image_url: null,
-              is_active: true,
+              // Default new scrapes to inactive (pending admin review)
+              is_active: false,
               is_featured: false,
               source: "admin",
               user_id: adminUserId,
