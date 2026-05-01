@@ -124,7 +124,7 @@ serve(async (req) => {
         summary.whitelisted_skipped++;
         continue;
       }
-      await supabase.from("listings").update({ is_active: false }).eq("id", j.id);
+      await supabase.from("listings").update({ is_active: false, expired_at: new Date().toISOString() }).eq("id", j.id);
       summary.deactivated_old_jobs++;
       summary.deactivated.push({ id: j.id, title: j.title, reason: `Job >${JOB_MAX_AGE_DAYS}d old (auto-expire)` });
     }
