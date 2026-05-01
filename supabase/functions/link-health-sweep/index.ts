@@ -124,7 +124,7 @@ serve(async (req) => {
         summary.whitelisted_skipped++;
         continue;
       }
-      await supabase.from("listings").update({ is_active: false }).eq("id", j.id);
+      await supabase.from("listings").update({ is_active: false, expired_at: new Date().toISOString() }).eq("id", j.id);
       summary.deactivated_old_jobs++;
       summary.deactivated.push({ id: j.id, title: j.title, reason: `Job >${JOB_MAX_AGE_DAYS}d old (auto-expire)` });
     }
@@ -148,7 +148,7 @@ serve(async (req) => {
       summary.checked++;
       const result = await checkUrl(l.link);
       if (!result.ok) {
-        await supabase.from("listings").update({ is_active: false }).eq("id", l.id);
+        await supabase.from("listings").update({ is_active: false, expired_at: new Date().toISOString() }).eq("id", l.id);
         summary.deactivated_dead_links++;
         summary.deactivated.push({ id: l.id, title: l.title, reason: result.reason || "unknown" });
         console.log(`Deactivated ${l.id} (${l.title}): ${result.reason}`);
@@ -156,6 +156,29 @@ serve(async (req) => {
       // gentle pause between requests
       await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
     }
+
+    // ============ STEP 3: Hard-delete listings inactive for >90 days ============
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: toDelete } = await supabase
+      .from("listings")
+      .select("id, title, organisation, link")
+      .eq("is_active", false)
+      .lt("expired_at", cutoff)
+      .limit(200);
+
+    let deleted = 0;
+    for (const row of toDelete || []) {
+      await supabase.from("admin_audit_log").insert({
+        action: "auto_delete_stale_listing",
+        entity_table: "listings",
+        entity_id: row.id,
+        metadata: { title: row.title, organisation: row.organisation, link: row.link, reason: "inactive_>90_days" },
+      });
+      await supabase.from("listings").delete().eq("id", row.id);
+      deleted++;
+    }
+    (summary as any).deleted_stale = deleted;
+    console.log(`Hard-deleted ${deleted} stale listings`);
 
     return new Response(JSON.stringify({ success: true, summary }), {
       status: 200,

@@ -360,6 +360,11 @@ export default function ListingDetailPage() {
                 href={listing.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  void supabase.functions.invoke('track-click', {
+                    body: { listing_id: listing.id, referrer: window.location.href },
+                  }).catch(() => {});
+                }}
                 className="flex items-center justify-center gap-2 w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 transition-colors hover:bg-brand-coral-light min-h-[48px]"
               >
                 {ctaLabel}
@@ -463,6 +468,11 @@ export default function ListingDetailPage() {
           href={listing.link}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => {
+            void supabase.functions.invoke('track-click', {
+              body: { listing_id: listing.id, referrer: window.location.href },
+            }).catch(() => {});
+          }}
           className="flex items-center justify-center gap-2 w-full bg-brand-coral text-white font-heading font-bold text-base rounded-lg py-3.5 hover:bg-brand-coral-light min-h-[48px]"
         >
           {ctaLabel}

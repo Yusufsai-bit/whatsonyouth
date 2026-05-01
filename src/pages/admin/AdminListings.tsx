@@ -202,6 +202,13 @@ export default function AdminListings() {
             <option value="active">Active</option>
             <option value="expiring">Expiring soon</option>
           </select>
+          <button
+            onClick={() => { setStatusFilter('inactive'); setSourceFilter('admin'); setPage(1); }}
+            className="font-body text-[13px] px-3 py-1.5 rounded-md bg-[#FFF1ED] text-[#D85A30] border border-[#FFD9CC] hover:bg-[#FFE4DA]"
+            title="Show admin/scanner listings awaiting approval"
+          >
+            Pending review ({listings.filter(l => !l.is_active && l.source === 'admin').length})
+          </button>
           <button onClick={clearFilters} className="font-body text-[13px] text-[#5847E0] hover:underline">Clear filters</button>
         </div>
 

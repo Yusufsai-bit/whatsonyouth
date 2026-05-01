@@ -1,69 +1,54 @@
 ## Goal
+Address all blind spots, risks, and assumptions identified in the sparring review. Tighten data quality, automation safety, security, and engagement measurement.
 
-1. Replace every `contact_email` on the site with **info@whatsonyouth.org.au**.
-2. On listing cards/detail pages, replace the generic "Curated by WOY" / "Curated by What's On Youth" badge with the **organisation name** — but only for admin/scanner-created listings (`source = 'admin'`). User submissions keep "Submitted by community".
+## Scope of Changes
 
-Yes, this makes sense. Here's exactly what changes.
+### 1. Admin Review Queue (human-in-the-loop for scanner)
+- Update `supabase/functions/scan-listings/index.ts` so newly scraped listings insert with `is_active = false` (pending review).
+- Add an "Pending Review" tab/filter in the admin listings dashboard with bulk Approve / Reject actions.
+- Approving sets `is_active = true`; rejecting deletes the row and adds the source URL to `rejected_sources`.
 
----
+### 2. Data quality & lifecycle
+- Add `expiry_date` validation trigger requiring it for categories `Events`, `Jobs`, `Grants` (Programs and Wellbeing remain optional).
+- Add a scheduled job (extend `link-health-sweep` or new cron) that **hard-deletes** listings inactive for >90 days, after writing a row to `admin_audit_log` for traceability.
+- Improve `listing_duplicate_fingerprint` to use `(normalised_domain + normalised_org + normalised_title_tokens)` so minor title variations still collide. Backfill fingerprints on existing rows.
 
-## Part 1 — Update all contact emails to info@whatsonyouth.org.au
+### 3. Click tracking (measure real utility)
+- New table `listing_clicks (id, listing_id, clicked_at, referrer, user_agent_hash, ip_hash)` with RLS: anon INSERT allowed (rate-limited via edge function), admin SELECT only.
+- New edge function `track-click` that validates payload, hashes IP/UA, inserts row, then returns the redirect URL.
+- Update `ListingDetailPage.tsx` and any "Visit" CTA to call `track-click` before navigating to `listing.link`.
+- Surface click counts per listing in the admin dashboard.
 
-**Database (data update):**
-- Update every row in `listings.contact_email` to `info@whatsonyouth.org.au`. Currently 16 distinct emails are in use across 335 listings (incl. `hello@whatsonyouth.org.au`, lsv.com.au addresses, kids helpline, etc). All become `info@whatsonyouth.org.au`.
-- Update `platform_settings` row where `key = 'contact_email'` to the same value.
+### 4. Anti-abuse on public inserts
+- Add a `submission_rate_limit` edge function gating `digest_subscribers` and `listing_reports` inserts (max N per IP per hour) using a small `rate_limit_log` table.
+- Switch the public-facing forms to call these edge functions instead of inserting directly via the client.
 
-**Code defaults (so future inserts also use info@):**
-- `supabase/functions/scan-listings/index.ts` — change default fallback email from `hello@whatsonyouth.org.au` → `info@whatsonyouth.org.au`.
-- Any other edge function referencing `hello@whatsonyouth.org.au` for inserts (`pillar-listings-import`, etc. — I'll grep and fix).
-- Update memory file `mem://index.md` and any feature memory referencing `hello@whatsonyouth.org.au` to use `info@whatsonyouth.org.au`.
+### 5. Security hardening
+- Tighten `list_users()` SECURITY DEFINER function: explicit admin check + `revoke execute from public/anon`, grant only to `authenticated`.
+- Re-run `supabase--linter` and resolve remaining warnings.
 
-**Not changed:** the user-submission form (`SubmitPage.tsx`) still lets community submitters provide their own contact email — that's correct behaviour. This change only affects admin/scanner-curated listings and the platform's own contact setting.
+### 6. Contact email clarity
+- Add an optional `provider_contact_email` column on `listings` (nullable). Admin curation form lets us record the organiser's real email separately from the platform contact.
+- Detail page shows: "Provider: {provider_contact_email or organisation website}" and "Platform support: info@whatsonyouth.org.au".
 
----
+### 7. Memory + docs
+- Update `mem://index.md` and add memory files for: review-queue workflow, click tracking, 90-day deletion policy, fingerprint v2.
 
-## Part 2 — Show organisation name instead of "Curated by WOY"
+## Technical Notes
+- All schema changes via migration tool; data backfills via insert tool.
+- Cron jobs use `pg_cron` + `pg_net` (already in use for link-health-sweep).
+- Rate-limit hashing uses SHA-256 with a server-side salt secret (`RATE_LIMIT_SALT` — will request via secrets tool).
+- No breaking RLS changes to existing public read of `listings`.
 
-Currently 4 spots render the static "Curated by WOY" / "Curated by What's On Youth" label:
+## Out of Scope (flag for later)
+- Newsletter visibility / send pipeline (separate effort once subscribers > 0).
+- Turnstile / captcha integration (rate limits first; revisit if abuse appears).
 
-| File | Line | Current |
-|---|---|---|
-| `src/pages/CategoryListingPage.tsx` | 625 | "Curated by WOY" |
-| `src/pages/SearchPage.tsx` | 436 | "Curated by WOY" |
-| `src/components/FeaturedOpportunities.tsx` | 102 | "Curated by WOY" |
-| `src/pages/ListingDetailPage.tsx` | 204, 334 | "Curated by What's On Youth" |
+## Rollout Order
+1. Migrations (schema + trigger + fingerprint v2 + new tables)
+2. Edge functions (scan default-inactive, track-click, submission_rate_limit, 90-day cleanup cron)
+3. Admin UI (review queue, click counts, provider email field)
+4. Public UI wiring (track-click, rate-limited forms, provider contact display)
+5. Linter pass + memory update
 
-**New logic (applied to all 4 spots):**
-```
-if (source === 'user') → "Submitted by community"
-if (source === 'admin') → `By ${organisation}`   // e.g. "By headspace", "By Scouts Victoria"
-```
-
-The `organisation` field is already required on every listing and already fetched in each of these views, so no extra queries needed.
-
----
-
-## Files changed
-
-1. `supabase/functions/scan-listings/index.ts` — default email constant
-2. Any other edge function with `hello@whatsonyouth.org.au` (will sweep)
-3. `src/pages/CategoryListingPage.tsx` — replace badge text with org-aware logic
-4. `src/pages/SearchPage.tsx` — same
-5. `src/components/FeaturedOpportunities.tsx` — same
-6. `src/pages/ListingDetailPage.tsx` — update `sourceLabel` + line 334 badge
-7. `mem://index.md` — update pillar contact email rule
-8. DB: bulk UPDATE on `listings.contact_email` + `platform_settings.contact_email`
-
----
-
-## Verification after changes
-
-- Run a `SELECT DISTINCT contact_email FROM listings` → should return only `info@whatsonyouth.org.au`.
-- Spot-check a curated listing card — should now read e.g. "By Scouts Victoria" instead of "Curated by WOY".
-- Spot-check a community-submitted listing — should still read "Submitted by community".
-
-Approve and I'll implement it end-to-end.
-
----
-
-**Credits used this response:** ~1 message credit (planning only, read-only tools).
+Estimated credit usage: ~8–12 message credits across migrations, edge functions, and UI.

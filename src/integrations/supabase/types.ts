@@ -122,6 +122,33 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          ip_hash: string | null
+          listing_id: string
+          referrer: string | null
+          user_agent_hash: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          listing_id: string
+          referrer?: string | null
+          user_agent_hash?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          listing_id?: string
+          referrer?: string | null
+          user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
       listing_reports: {
         Row: {
           admin_notes: string | null
@@ -176,6 +203,7 @@ export type Database = {
           link: string
           location: string
           organisation: string
+          provider_contact_email: string | null
           quality_score: number
           source: string
           title: string
@@ -199,6 +227,7 @@ export type Database = {
           link: string
           location: string
           organisation: string
+          provider_contact_email?: string | null
           quality_score?: number
           source?: string
           title: string
@@ -222,6 +251,7 @@ export type Database = {
           link?: string
           location?: string
           organisation?: string
+          provider_contact_email?: string | null
           quality_score?: number
           source?: string
           title?: string
