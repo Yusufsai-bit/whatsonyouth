@@ -1,54 +1,35 @@
-## Goal
-Address all blind spots, risks, and assumptions identified in the sparring review. Tighten data quality, automation safety, security, and engagement measurement.
+# About Us deck — partner orgs (PPTX)
 
-## Scope of Changes
+A short, design-forward 7-slide presentation matching the What's On Youth website (violet #5847E0, coral #D85A30, dark #0A0A0A, Plus Jakarta Sans). Tailored for **partner organisations / community groups** with a clear ask: **list your opportunities for free on WOY**.
 
-### 1. Admin Review Queue (human-in-the-loop for scanner)
-- Update `supabase/functions/scan-listings/index.ts` so newly scraped listings insert with `is_active = false` (pending review).
-- Add an "Pending Review" tab/filter in the admin listings dashboard with bulk Approve / Reject actions.
-- Approving sets `is_active = true`; rejecting deletes the row and adds the source URL to `rejected_sources`.
+## Output
 
-### 2. Data quality & lifecycle
-- Add `expiry_date` validation trigger requiring it for categories `Events`, `Jobs`, `Grants` (Programs and Wellbeing remain optional).
-- Add a scheduled job (extend `link-health-sweep` or new cron) that **hard-deletes** listings inactive for >90 days, after writing a row to `admin_audit_log` for traceability.
-- Improve `listing_duplicate_fingerprint` to use `(normalised_domain + normalised_org + normalised_title_tokens)` so minor title variations still collide. Backfill fingerprints on existing rows.
+- `/mnt/documents/whats-on-youth-partner-deck.pptx` (16:9, downloadable)
+- Built with `pptxgenjs` so it's editable in PowerPoint, Keynote, and Google Slides.
 
-### 3. Click tracking (measure real utility)
-- New table `listing_clicks (id, listing_id, clicked_at, referrer, user_agent_hash, ip_hash)` with RLS: anon INSERT allowed (rate-limited via edge function), admin SELECT only.
-- New edge function `track-click` that validates payload, hashes IP/UA, inserts row, then returns the redirect URL.
-- Update `ListingDetailPage.tsx` and any "Visit" CTA to call `track-click` before navigating to `listing.link`.
-- Surface click counts per listing in the admin dashboard.
+## Slide outline
 
-### 4. Anti-abuse on public inserts
-- Add a `submission_rate_limit` edge function gating `digest_subscribers` and `listing_reports` inserts (max N per IP per hour) using a small `rate_limit_log` table.
-- Switch the public-facing forms to call these edge functions instead of inserting directly via the client.
+1. **Cover** — Dark background, large wordmark. "What's On Youth — A free home for every youth opportunity in Victoria." Subtitle: "A short intro for partner organisations." Footer: whatsonyouth.org.au
+2. **The problem we solve** — Stat callouts on light bg. Young Victorians (15–25) miss out because opportunities are scattered across council sites, socials, PDFs and newsletters. Regional youth miss out the most.
+3. **What we are** — Three icon-cards on violet accents: *One platform* (Events, Jobs, Grants, Programs, Wellbeing) · *Victoria-wide* (incl. regional) · *Always free* (for users and orgs).
+4. **Who uses it** — Audience snapshot: ages 15–25, students, jobseekers, regional youth, families, youth workers. Visual: large age band + category breakdown.
+5. **Why list with us (the ask)** — Coral-accent benefits grid: free forever · reach the right age group · regional + metro coverage · "Listed by {your org}" attribution · admin-curated for trust · no account needed to browse.
+6. **How it works in 60 seconds** — 3-step horizontal flow: 1) Submit at whatsonyouth.org.au/submit  2) We review for quality & age-fit  3) Goes live, indexed, shareable. Note: we also auto-discover from public sources, but a direct submission gives you control.
+7. **Get in touch / CTA** — Dark slide, coral CTA block. "Submit your first listing today — whatsonyouth.org.au/submit". Contact: info@whatsonyouth.org.au. Built by Yusuf Sai, Victoria.
 
-### 5. Security hardening
-- Tighten `list_users()` SECURITY DEFINER function: explicit admin check + `revoke execute from public/anon`, grant only to `authenticated`.
-- Re-run `supabase--linter` and resolve remaining warnings.
+## Visual system (matches site)
 
-### 6. Contact email clarity
-- Add an optional `provider_contact_email` column on `listings` (nullable). Admin curation form lets us record the organiser's real email separately from the platform contact.
-- Detail page shows: "Provider: {provider_contact_email or organisation website}" and "Platform support: info@whatsonyouth.org.au".
+- Palette: bg `#0A0A0A` (dark slides) and `#FFFFFF` (light), primary `#5847E0` violet, accent `#D85A30` coral, muted text `#6B7280`.
+- Type: Plus Jakarta Sans (bold for headings 36–60pt, regular for body 14–18pt). Falls back to Calibri if PJS not installed locally.
+- Motif: rounded-corner cards, thick coral underline on section labels, violet pill chips for tags — same vocabulary as the website.
+- Every slide has either an icon, a stat, or a coloured block — no plain bullet slides.
 
-### 7. Memory + docs
-- Update `mem://index.md` and add memory files for: review-queue workflow, click tracking, 90-day deletion policy, fingerprint v2.
+## QA before delivery
 
-## Technical Notes
-- All schema changes via migration tool; data backfills via insert tool.
-- Cron jobs use `pg_cron` + `pg_net` (already in use for link-health-sweep).
-- Rate-limit hashing uses SHA-256 with a server-side salt secret (`RATE_LIMIT_SALT` — will request via secrets tool).
-- No breaking RLS changes to existing public read of `listings`.
+Render the .pptx → PDF → JPGs, then visually inspect every slide for overflow, contrast, alignment, and brand consistency. Fix and re-render until clean. Report what was checked.
 
-## Out of Scope (flag for later)
-- Newsletter visibility / send pipeline (separate effort once subscribers > 0).
-- Turnstile / captcha integration (rate limits first; revisit if abuse appears).
+## Out of scope (can add later if you want)
 
-## Rollout Order
-1. Migrations (schema + trigger + fingerprint v2 + new tables)
-2. Edge functions (scan default-inactive, track-click, submission_rate_limit, 90-day cleanup cron)
-3. Admin UI (review queue, click counts, provider email field)
-4. Public UI wiring (track-click, rate-limited forms, provider contact display)
-5. Linter pass + memory update
-
-Estimated credit usage: ~8–12 message credits across migrations, edge functions, and UI.
+- Real photography (would need image rights — happy to add Unsplash hero images on request).
+- Stakeholder-specific variants (gov, funders, sponsors).
+- Animations / transitions.
