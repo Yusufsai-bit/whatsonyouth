@@ -201,7 +201,7 @@ export default function ListingDetailPage() {
     listing.category === 'Grants' ? 'Apply / learn more' :
     listing.category === 'Programs' ? 'Register interest' : 'Visit website';
 
-  const sourceLabel = listing.source === 'user' ? 'Submitted by community' : `By ${listing.organisation}`;
+  const sourceLabel = listing.source === 'user' ? 'Submitted by community' : `Listed by ${listing.organisation}`;
   const dateLabel = listing.category === 'Events' ? 'Date' : listing.category === 'Jobs' ? 'Posted' : listing.category === 'Grants' ? 'Closes' : listing.expiry_date ? 'Deadline' : 'Availability';
   const dateValue = listing.expiry_date ? formatDate(listing.expiry_date) : listing.category === 'Wellbeing' ? 'Ongoing support' : `Listed ${daysAgo(listing.created_at)}`;
 
