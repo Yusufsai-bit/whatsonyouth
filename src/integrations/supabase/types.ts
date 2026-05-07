@@ -195,13 +195,16 @@ export type Database = {
           expired_at: string | null
           expiry_date: string | null
           featured_order: number | null
+          geocoded_at: string | null
           id: string
           image_url: string | null
           is_active: boolean
           is_featured: boolean
           last_quality_checked_at: string | null
+          latitude: number | null
           link: string
           location: string
+          longitude: number | null
           organisation: string
           provider_contact_email: string | null
           quality_score: number
@@ -219,13 +222,16 @@ export type Database = {
           expired_at?: string | null
           expiry_date?: string | null
           featured_order?: number | null
+          geocoded_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
           last_quality_checked_at?: string | null
+          latitude?: number | null
           link: string
           location: string
+          longitude?: number | null
           organisation: string
           provider_contact_email?: string | null
           quality_score?: number
@@ -243,13 +249,16 @@ export type Database = {
           expired_at?: string | null
           expiry_date?: string | null
           featured_order?: number | null
+          geocoded_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           is_featured?: boolean
           last_quality_checked_at?: string | null
+          latitude?: number | null
           link?: string
           location?: string
+          longitude?: number | null
           organisation?: string
           provider_contact_email?: string | null
           quality_score?: number

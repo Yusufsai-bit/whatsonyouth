@@ -243,7 +243,7 @@ export default function ListingDetailPage() {
         ogTitle={listing.title}
         ogDescription={truncDesc}
         ogUrl={listingUrl}
-        ogImage={listing.image_url || undefined}
+        ogImage={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-image?id=${listing.id}`}
         ogType="article"
         canonical={listingUrl}
         jsonLd={[listingJsonLd, breadcrumbJsonLd]}

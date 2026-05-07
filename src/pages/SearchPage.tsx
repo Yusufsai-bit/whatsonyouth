@@ -9,6 +9,8 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { orgToSlug } from '@/lib/org-slug';
+import { lazy, Suspense } from 'react';
+const MapView = lazy(() => import('@/components/MapView'));
 
 const ITEMS_PER_PAGE = 12;
 
@@ -35,6 +37,8 @@ interface Listing {
   created_at: string;
   expiry_date: string | null;
   category: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 function daysAgo(dateStr: string) {
@@ -88,6 +92,7 @@ export default function SearchPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [view, setView] = useState<'list' | 'map'>('list');
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -96,7 +101,7 @@ export default function SearchPage() {
   useEffect(() => {
     supabase
       .from('listings')
-      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category')
+      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category, latitude, longitude')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .then(({ data }) => {
@@ -335,7 +340,31 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {loading ? (
+          <div className="flex justify-end mb-4">
+            <div className="inline-flex rounded-lg border border-brand-card-border overflow-hidden">
+              <button
+                onClick={() => setView('list')}
+                className={`px-4 py-1.5 font-body text-sm ${view === 'list' ? 'bg-brand-dark text-white' : 'bg-white text-brand-text-secondary hover:bg-brand-section-alt'}`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setView('map')}
+                className={`px-4 py-1.5 font-body text-sm border-l border-brand-card-border ${view === 'map' ? 'bg-brand-dark text-white' : 'bg-white text-brand-text-secondary hover:bg-brand-section-alt'}`}
+              >
+                Map
+              </button>
+            </div>
+          </div>
+
+          {view === 'map' ? (
+            <Suspense fallback={<div className="h-[600px] bg-brand-section-alt rounded-xl animate-pulse" />}>
+              <MapView pins={filtered.filter(l => l.latitude != null && l.longitude != null).map(l => ({
+                id: l.id, title: l.title, organisation: l.organisation, location: l.location,
+                category: l.category, latitude: l.latitude as number, longitude: l.longitude as number,
+              }))} />
+            </Suspense>
+          ) : loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i} />
