@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Shield, Search } from 'lucide-react';
+import { Heart, Shield, Search, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import useSavedListings from '@/hooks/useSavedListings';
 import logo from '@/assets/woy-logo-reversed.svg';
+
+const TOP_STRIP_KEY = 'woy_top_strip_dismissed_v1';
 
 const categoryLinks = [
   { label: 'Events', href: '/events' },
