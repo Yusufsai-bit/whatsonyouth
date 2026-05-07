@@ -35,6 +35,8 @@ interface Listing {
   created_at: string;
   expiry_date: string | null;
   category: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 function daysAgo(dateStr: string) {
