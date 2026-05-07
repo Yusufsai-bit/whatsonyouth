@@ -9,6 +9,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
+import { orgToSlug } from '@/lib/org-slug';
 
 interface Listing {
   id: string;
