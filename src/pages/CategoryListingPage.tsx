@@ -10,6 +10,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
+import { orgToSlug } from '@/lib/org-slug';
 
 const categoryColors: Record<string, string> = {
   Events: '#2D1B69',
@@ -115,7 +116,7 @@ const categoryConfig: Record<string, {
     faq: [
       { q: "Are these events free for young people?", a: "Many events listed on What's On Youth are free or low cost. Each listing links directly to the organiser where you can check pricing and book." },
       { q: "Do you list events outside Melbourne?", a: "Yes — we specifically source events from across Victoria including Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura and Warrnambool, not just the CBD." },
-      { q: "How often are new events added?", a: "New events are scanned and added every Tuesday and Friday automatically from verified Victorian event sources." },
+      { q: "How often are new events added?", a: "New events are scanned and added every day automatically from verified Victorian event sources." },
       { q: "Can I submit my own event?", a: "Yes — organisations and community groups can submit events for free. Create a free account and submit your listing at whatsonyouth.org.au/submit." },
     ],
   },
@@ -588,9 +589,13 @@ export default function CategoryListingPage({ category }: { category: string }) 
                         </div>
                       </Link>
                       <div className="p-4 flex flex-col flex-1">
-                        <p className="font-body text-xs text-brand-text-muted uppercase tracking-[0.04em] mb-1.5">
+                        <Link
+                          to={`/org/${orgToSlug(listing.organisation)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-body text-xs text-brand-text-muted uppercase tracking-[0.04em] mb-1.5 hover:text-brand-violet-text hover:underline"
+                        >
                           {listing.organisation}
-                        </p>
+                        </Link>
                         <Link to={`/listings/${listing.id}`}>
                           <h3 className="font-heading font-bold text-[16px] text-brand-text-primary leading-[1.3] mb-2 line-clamp-2">
                             {listing.title}

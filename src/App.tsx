@@ -42,6 +42,7 @@ const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'));
 const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 const RegionalPage = lazy(() => import('./pages/RegionalPage'));
 const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
+const OrgProfilePage = lazy(() => import('./pages/OrgProfilePage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,7 +72,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthProvider>
-          <div className="pt-14 md:pt-[60px]">
+          <div style={{ paddingTop: 'calc(var(--nav-h, 56px) + var(--top-strip-h, 28px))' }}>
           <Suspense fallback={
             <div className="min-h-screen bg-white flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-[#5847E0] border-t-transparent rounded-full animate-spin" />
@@ -104,6 +105,7 @@ const App = () => (
             <Route path="/mental-health-support-young-people-victoria" element={<SeoLandingPage slug="mental-health-support-young-people-victoria" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
+            <Route path="/org/:slug" element={<OrgProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />

@@ -9,6 +9,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
+import { orgToSlug } from '@/lib/org-slug';
 
 interface Listing {
   id: string;
@@ -205,7 +206,7 @@ export default function RegionalPage({ region }: { region: string }) {
                       </div>
                     </Link>
                     <div className="p-4 flex flex-col flex-1">
-                      <p className="font-body text-xs text-brand-text-muted uppercase tracking-[0.04em] mb-1.5">{listing.organisation}</p>
+                      <Link to={`/org/${orgToSlug(listing.organisation)}`} onClick={(e) => e.stopPropagation()} className="font-body text-xs text-brand-text-muted uppercase tracking-[0.04em] mb-1.5 hover:text-brand-violet-text hover:underline">{listing.organisation}</Link>
                       <Link to={`/listings/${listing.id}`}>
                         <h3 className="font-heading font-bold text-[16px] text-brand-text-primary leading-[1.3] mb-2 line-clamp-2">{listing.title}</h3>
                       </Link>

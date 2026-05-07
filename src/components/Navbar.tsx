@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Shield, Search } from 'lucide-react';
+import { Heart, Shield, Search, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import useSavedListings from '@/hooks/useSavedListings';
 import logo from '@/assets/woy-logo-reversed.svg';
+
+const TOP_STRIP_KEY = 'woy_top_strip_dismissed_v1';
 
 const categoryLinks = [
   { label: 'Events', href: '/events' },
@@ -20,6 +22,25 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const location = window.location;
   const { savedIds } = useSavedListings();
+  const [showStrip, setShowStrip] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(TOP_STRIP_KEY) !== '1';
+  });
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--top-strip-h', showStrip ? '28px' : '0px');
+    const setNavH = () => {
+      document.documentElement.style.setProperty('--nav-h', window.innerWidth >= 768 ? '60px' : '56px');
+    };
+    setNavH();
+    window.addEventListener('resize', setNavH);
+    return () => window.removeEventListener('resize', setNavH);
+  }, [showStrip]);
+
+  const dismissStrip = () => {
+    localStorage.setItem(TOP_STRIP_KEY, '1');
+    setShowStrip(false);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -38,7 +59,20 @@ export default function Navbar() {
   const mobileLinkInactive = "font-heading font-bold text-[20px] text-brand-nav-link hover:text-white py-3 border-b border-[#1A1A1A] block min-h-[44px] flex items-center";
 
   return (
-    <nav className="bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 fixed top-0 left-0 right-0 z-40 border-b border-brand-nav-border">
+    <>
+    {showStrip && (
+      <div className="bg-brand-violet text-white text-center text-[12px] md:text-[13px] font-body font-medium px-10 py-1.5 fixed top-0 left-0 right-0 z-50 flex items-center justify-center">
+        <span>✨ New listings added every day · Free for young people, free for partners</span>
+        <button
+          onClick={dismissStrip}
+          aria-label="Dismiss"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:opacity-80"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    )}
+    <nav className={`bg-brand-dark h-14 md:h-[60px] flex items-center px-6 md:px-16 fixed left-0 right-0 z-40 border-b border-brand-nav-border ${showStrip ? 'top-7 md:top-7' : 'top-0'}`}>
       <Link to="/" className="shrink-0">
         <img src={logo} alt="What's On Youth" className="h-[30px]" />
       </Link>
@@ -97,6 +131,12 @@ export default function Navbar() {
             Log in
           </Link>
         ) : null}
+        <Link
+          to="/submit"
+          className="border border-white/30 text-white font-body font-medium text-sm rounded-full px-[14px] py-2 transition-colors duration-100 hover:bg-white/10"
+        >
+          List an opportunity
+        </Link>
         <Link
           to="/submit"
           className="bg-brand-coral text-white font-body font-medium text-sm rounded-full px-[18px] py-2 transition-colors duration-100 hover:bg-brand-coral-light"
@@ -179,5 +219,6 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+    </>
   );
 }
