@@ -1,8 +1,5 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/woy-logo-reversed.svg';
-import { emailSchema } from '@/lib/validation';
 
 const exploreLinks = [
   { label: 'Events', href: '/events' },
