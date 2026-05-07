@@ -8,6 +8,7 @@ import SEO from '@/components/SEO';
 import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
+import { orgToSlug } from '@/lib/org-slug';
 
 const ITEMS_PER_PAGE = 12;
 
