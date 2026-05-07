@@ -9,6 +9,8 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { orgToSlug } from '@/lib/org-slug';
+import { lazy, Suspense } from 'react';
+const MapView = lazy(() => import('@/components/MapView'));
 
 const ITEMS_PER_PAGE = 12;
 
