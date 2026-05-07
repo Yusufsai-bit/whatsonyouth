@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const heroCards = [
   { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=400&q=75' },
@@ -7,6 +9,33 @@ const heroCards = [
   { label: 'Programs', bg: '#0A2A3A', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=400&q=75' },
   { label: 'Wellbeing', bg: '#2A1A3A', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=75' },
 ];
+
+function HeroCounter() {
+  const [total, setTotal] = useState<number | null>(null);
+  const [weekly, setWeekly] = useState<number | null>(null);
+
+  useEffect(() => {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    Promise.all([
+      supabase.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true).gt('created_at', since),
+    ]).then(([a, b]) => {
+      setTotal(a.count ?? 0);
+      setWeekly(b.count ?? 0);
+    });
+  }, []);
+
+  return (
+    <p className="font-body text-sm text-brand-text-secondary mb-6 flex items-center gap-2 flex-wrap">
+      <span className="inline-flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <strong className="text-brand-text-primary font-semibold">{total ?? '—'}</strong> opportunities right now
+      </span>
+      <span className="text-brand-text-muted">·</span>
+      <span><strong className="text-brand-text-primary font-semibold">{weekly ?? '—'}</strong> added this week</span>
+    </p>
+  );
+}
 
 export default function Hero() {
   return (
