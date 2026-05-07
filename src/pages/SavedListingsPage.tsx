@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
+import { orgToSlug } from '@/lib/org-slug';
 
 interface Listing {
   id: string;
