@@ -101,7 +101,7 @@ export default function SearchPage() {
   useEffect(() => {
     supabase
       .from('listings')
-      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category')
+      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category, latitude, longitude')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .then(({ data }) => {
