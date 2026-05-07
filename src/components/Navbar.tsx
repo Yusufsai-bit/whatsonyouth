@@ -22,6 +22,15 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const location = window.location;
   const { savedIds } = useSavedListings();
+  const [showStrip, setShowStrip] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(TOP_STRIP_KEY) !== '1';
+  });
+
+  const dismissStrip = () => {
+    localStorage.setItem(TOP_STRIP_KEY, '1');
+    setShowStrip(false);
+  };
 
   useEffect(() => {
     if (!user) {
