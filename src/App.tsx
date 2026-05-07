@@ -42,6 +42,7 @@ const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'));
 const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 const RegionalPage = lazy(() => import('./pages/RegionalPage'));
 const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
+const OrgProfilePage = lazy(() => import('./pages/OrgProfilePage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
