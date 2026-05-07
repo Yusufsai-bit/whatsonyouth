@@ -27,6 +27,10 @@ export default function Navbar() {
     return localStorage.getItem(TOP_STRIP_KEY) !== '1';
   });
 
+  useEffect(() => {
+    document.documentElement.style.setProperty('--top-strip-h', showStrip ? '28px' : '0px');
+  }, [showStrip]);
+
   const dismissStrip = () => {
     localStorage.setItem(TOP_STRIP_KEY, '1');
     setShowStrip(false);
