@@ -33,7 +33,8 @@ async function ensureResvg() {
 let fontPromise: Promise<ArrayBuffer> | null = null;
 function loadFont() {
   if (!fontPromise) {
-    fontPromise = fetch('https://fonts.gstatic.com/s/plusjakartasans/v8/LDIbaomQNQcsA88c7O9yZ4KMCoOg4Ko_2vDJpa0.woff')
+    // Inter Bold TTF from rsms/inter (raw GitHub)
+    fontPromise = fetch('https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Bold.woff')
       .then(r => r.arrayBuffer());
   }
   return fontPromise;
