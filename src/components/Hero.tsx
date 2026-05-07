@@ -48,9 +48,10 @@ export default function Hero() {
           <h1 className="text-[32px] md:text-[72px] leading-[1.1] tracking-[-0.03em] text-brand-text-primary mb-4">
             Your next opportunity starts here
           </h1>
-          <p className="font-body text-lg text-brand-text-secondary leading-relaxed w-full max-w-[480px] mb-8">
+          <p className="font-body text-lg text-brand-text-secondary leading-relaxed w-full max-w-[480px] mb-5">
             Discover events, jobs, grants, programs, and wellbeing support — all in one place, built for young Victorians.
           </p>
+          <HeroCounter />
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/search"
