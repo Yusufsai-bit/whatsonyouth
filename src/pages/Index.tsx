@@ -66,7 +66,7 @@ const Index = () => {
       )}
       <Hero />
       <p className="sr-only">
-        What's On Youth is Victoria's free platform for young people aged 15 to 25. Find free events near you, entry level jobs and internships, grants and scholarships, youth programs and courses, and mental health and wellbeing support — all in one place. Serving Melbourne, Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura, Warrnambool, Frankston and all of regional Victoria. Updated every Tuesday and Friday.
+        What's On Youth is Victoria's free platform for young people aged 15 to 25. Find free events near you, entry level jobs and internships, grants and scholarships, youth programs and courses, and mental health and wellbeing support — all in one place. Serving Melbourne, Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura, Warrnambool, Frankston and all of regional Victoria. Updated every day.
       </p>
       <CategoryGrid />
       <FeaturedOpportunities />
@@ -82,7 +82,7 @@ const Index = () => {
             What's On Youth brings together free events, entry-level jobs, grants, youth programs and mental health support from across Victoria — all in one place. Built specifically for young people aged 15–25. Free to use, free to browse, free to submit.
           </p>
           <p className="font-body text-[15px] text-brand-text-muted leading-[1.7]">
-            We cover all of Victoria — not just Melbourne. From Geelong, Ballarat and Bendigo to Shepparton, Gippsland, Mildura, Warrnambool and everywhere in between. New listings every Tuesday and Friday.
+            We cover all of Victoria — not just Melbourne. From Geelong, Ballarat and Bendigo to Shepparton, Gippsland, Mildura, Warrnambool and everywhere in between. New listings every day.
           </p>
         </div>
       </section>

@@ -115,7 +115,7 @@ const categoryConfig: Record<string, {
     faq: [
       { q: "Are these events free for young people?", a: "Many events listed on What's On Youth are free or low cost. Each listing links directly to the organiser where you can check pricing and book." },
       { q: "Do you list events outside Melbourne?", a: "Yes — we specifically source events from across Victoria including Geelong, Ballarat, Bendigo, Shepparton, Gippsland, Mildura and Warrnambool, not just the CBD." },
-      { q: "How often are new events added?", a: "New events are scanned and added every Tuesday and Friday automatically from verified Victorian event sources." },
+      { q: "How often are new events added?", a: "New events are scanned and added every day automatically from verified Victorian event sources." },
       { q: "Can I submit my own event?", a: "Yes — organisations and community groups can submit events for free. Create a free account and submit your listing at whatsonyouth.org.au/submit." },
     ],
   },
