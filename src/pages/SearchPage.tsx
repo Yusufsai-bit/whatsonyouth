@@ -92,6 +92,7 @@ export default function SearchPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [view, setView] = useState<'list' | 'map'>('list');
 
   useEffect(() => {
     inputRef.current?.focus();
