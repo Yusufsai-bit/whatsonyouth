@@ -71,7 +71,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthProvider>
-          <div className="pt-14 md:pt-[60px]">
+          <div className="pt-[84px] md:pt-[88px]">
           <Suspense fallback={
             <div className="min-h-screen bg-white flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-[#5847E0] border-t-transparent rounded-full animate-spin" />
