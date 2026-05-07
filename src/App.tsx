@@ -105,6 +105,7 @@ const App = () => (
             <Route path="/mental-health-support-young-people-victoria" element={<SeoLandingPage slug="mental-health-support-young-people-victoria" />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
+            <Route path="/org/:slug" element={<OrgProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
