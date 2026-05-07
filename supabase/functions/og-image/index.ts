@@ -34,8 +34,8 @@ let fontPromise: Promise<ArrayBuffer> | null = null;
 function loadFont() {
   if (!fontPromise) {
     // Inter Bold TTF from rsms/inter (raw GitHub)
-    fontPromise = fetch('https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Bold.woff')
-      .then(r => r.arrayBuffer());
+    fontPromise = fetch('https://cdn.jsdelivr.net/gh/rsms/inter@v4.0/docs/font-files/Inter-Bold.woff')
+      .then(r => { if (!r.ok) throw new Error(`font fetch ${r.status}`); return r.arrayBuffer(); });
   }
   return fontPromise;
 }
