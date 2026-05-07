@@ -246,6 +246,8 @@ export default function CategoryListingPage({ category }: { category: string }) 
   const [dateFilter, setDateFilter] = useState('any');
   const [sort, setSort] = useState<'newest' | 'closing' | 'az'>('newest');
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [view, setView] = useState<'list' | 'map'>('list');
+  const supportsMap = category === 'Events' || category === 'Programs';
   const { isSaved, toggleSave } = useSavedListings();
 
   useEffect(() => {
