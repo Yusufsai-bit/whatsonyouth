@@ -340,7 +340,31 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {loading ? (
+          <div className="flex justify-end mb-4">
+            <div className="inline-flex rounded-lg border border-brand-card-border overflow-hidden">
+              <button
+                onClick={() => setView('list')}
+                className={`px-4 py-1.5 font-body text-sm ${view === 'list' ? 'bg-brand-dark text-white' : 'bg-white text-brand-text-secondary hover:bg-brand-section-alt'}`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setView('map')}
+                className={`px-4 py-1.5 font-body text-sm border-l border-brand-card-border ${view === 'map' ? 'bg-brand-dark text-white' : 'bg-white text-brand-text-secondary hover:bg-brand-section-alt'}`}
+              >
+                Map
+              </button>
+            </div>
+          </div>
+
+          {view === 'map' ? (
+            <Suspense fallback={<div className="h-[600px] bg-brand-section-alt rounded-xl animate-pulse" />}>
+              <MapView pins={filtered.filter(l => l.latitude != null && l.longitude != null).map(l => ({
+                id: l.id, title: l.title, organisation: l.organisation, location: l.location,
+                category: l.category, latitude: l.latitude as number, longitude: l.longitude as number,
+              }))} />
+            </Suspense>
+          ) : loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i} />
