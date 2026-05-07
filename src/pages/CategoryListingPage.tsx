@@ -255,7 +255,7 @@ export default function CategoryListingPage({ category }: { category: string }) 
 
     supabase
       .from('listings')
-      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category')
+      .select('id, title, organisation, location, description, link, image_url, source, created_at, expiry_date, category, latitude, longitude')
       .eq('category', category)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
