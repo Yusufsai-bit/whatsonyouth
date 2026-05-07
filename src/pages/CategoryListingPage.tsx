@@ -75,6 +75,8 @@ interface Listing {
   created_at: string;
   expiry_date: string | null;
   category: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const ITEMS_PER_PAGE = 12;
