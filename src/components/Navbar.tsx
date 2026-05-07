@@ -29,6 +29,12 @@ export default function Navbar() {
 
   useEffect(() => {
     document.documentElement.style.setProperty('--top-strip-h', showStrip ? '28px' : '0px');
+    const setNavH = () => {
+      document.documentElement.style.setProperty('--nav-h', window.innerWidth >= 768 ? '60px' : '56px');
+    };
+    setNavH();
+    window.addEventListener('resize', setNavH);
+    return () => window.removeEventListener('resize', setNavH);
   }, [showStrip]);
 
   const dismissStrip = () => {
