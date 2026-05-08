@@ -62,6 +62,7 @@ export default function Hero() {
             </Link>
             <Link
               to="/submit"
+              onClick={() => trackEvent('submit_listing_click', { source: 'hero' })}
               className="w-full sm:w-auto border-2 border-brand-dark text-brand-dark font-heading font-bold text-base rounded-lg px-7 py-3.5 text-center transition-colors duration-100 hover:bg-brand-section-alt min-h-[48px] flex items-center justify-center"
             >
               Submit a listing
