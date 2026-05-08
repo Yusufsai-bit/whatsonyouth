@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { trackEvent } from '@/lib/analytics';
 
 const heroCards = [
   { label: 'Events', bg: '#2D1B69', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=400&q=75' },
