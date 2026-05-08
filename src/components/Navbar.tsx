@@ -134,12 +134,14 @@ export default function Navbar() {
         ) : null}
         <Link
           to="/submit"
+          onClick={() => trackEvent('submit_listing_click', { source: 'navbar_secondary' })}
           className="border border-white/30 text-white font-body font-medium text-sm rounded-full px-[14px] py-2 transition-colors duration-100 hover:bg-white/10"
         >
           List an opportunity
         </Link>
         <Link
           to="/submit"
+          onClick={() => trackEvent('submit_listing_click', { source: 'navbar_primary' })}
           className="bg-brand-coral text-white font-body font-medium text-sm rounded-full px-[18px] py-2 transition-colors duration-100 hover:bg-brand-coral-light"
         >
           Submit a listing
