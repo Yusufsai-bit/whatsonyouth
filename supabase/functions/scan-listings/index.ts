@@ -403,20 +403,43 @@ serve(async (req) => {
         }
 
         const html = await pageRes.text();
-        const pageText = stripHtml(html);
-        if (pageText.length < 50) {
+        let pageText = stripHtml(html);
+        if (pageText.length < 50 && !FIRECRAWL_API_KEY) {
           throw new Error("Page content too short to analyse");
         }
 
         // Diagnostic: flag suspiciously thin pages (likely JS-rendered SPAs)
-        // Heuristic: <1500 chars of stripped text on a page that's supposed to list opportunities
         const THIN_CONTENT_THRESHOLD = 1500;
         const isThinContent = pageText.length < THIN_CONTENT_THRESHOLD;
+        let usedFirecrawl = false;
+
         if (isThinContent) {
           console.warn(
-            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ` +
-            `${source.url} — likely JS-rendered, consider Firecrawl fallback`
+            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ${source.url}`
           );
+
+          // Firecrawl fallback for JS-rendered pages
+          if (FIRECRAWL_API_KEY) {
+            try {
+              const fcText = await firecrawlScrape(source.url, FIRECRAWL_API_KEY);
+              if (fcText && fcText.length > pageText.length) {
+                console.log(
+                  `🔥 Firecrawl rendered ${fcText.length} chars for ${source.name} ` +
+                  `(was ${pageText.length})`
+                );
+                pageText = fcText.slice(0, 20000);
+                usedFirecrawl = true;
+              } else {
+                console.warn(`🔥 Firecrawl returned no extra content for ${source.name}`);
+              }
+            } catch (fcErr) {
+              console.error(`🔥 Firecrawl failed for ${source.name}:`, fcErr);
+            }
+          }
+        }
+
+        if (pageText.length < 50) {
+          throw new Error("Page content too short to analyse (even after fallback)");
         }
 
         // Step 2: Extract listings via Lovable AI
@@ -424,9 +447,12 @@ serve(async (req) => {
         found = listings.length;
 
         if (isThinContent && found === 0) {
-          // Tag the error_message so it surfaces in scan_log / admin UI
-          errorMessage = `[thin-content] Only ${pageText.length} chars of HTML text — page likely needs JS rendering (Firecrawl candidate)`;
+          errorMessage = usedFirecrawl
+            ? `[thin-content] Firecrawl rendered ${pageText.length} chars but AI found 0 listings — page may not actually contain opportunities`
+            : `[thin-content] Only ${pageText.length} chars of HTML text — page likely needs JS rendering (Firecrawl unavailable)`;
           console.warn(`⚠️ ${source.name}: ${errorMessage}`);
+        } else if (usedFirecrawl && found > 0) {
+          console.log(`✅ Firecrawl rescue: ${found} listings extracted from ${source.name}`);
         }
 
         // Step 3: Insert listings
