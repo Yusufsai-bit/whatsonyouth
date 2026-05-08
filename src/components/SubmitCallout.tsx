@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { trackEvent } from '@/lib/analytics';
 
 const steps = [
   'Create a free account or log in',
