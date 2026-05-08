@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import useSavedListings from '@/hooks/useSavedListings';
 import logo from '@/assets/woy-logo-reversed.svg';
+import { trackEvent } from '@/lib/analytics';
 
 const TOP_STRIP_KEY = 'woy_top_strip_dismissed_v1';
 
