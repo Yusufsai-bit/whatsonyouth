@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import useSavedListings from '@/hooks/useSavedListings';
 import logo from '@/assets/woy-logo-reversed.svg';
+import { trackEvent } from '@/lib/analytics';
 
 const TOP_STRIP_KEY = 'woy_top_strip_dismissed_v1';
 
@@ -133,12 +134,14 @@ export default function Navbar() {
         ) : null}
         <Link
           to="/submit"
+          onClick={() => trackEvent('submit_listing_click', { source: 'navbar_secondary' })}
           className="border border-white/30 text-white font-body font-medium text-sm rounded-full px-[14px] py-2 transition-colors duration-100 hover:bg-white/10"
         >
           List an opportunity
         </Link>
         <Link
           to="/submit"
+          onClick={() => trackEvent('submit_listing_click', { source: 'navbar_primary' })}
           className="bg-brand-coral text-white font-body font-medium text-sm rounded-full px-[18px] py-2 transition-colors duration-100 hover:bg-brand-coral-light"
         >
           Submit a listing
@@ -190,7 +193,7 @@ export default function Navbar() {
             <Link to="/saved" onClick={() => setOpen(false)} className={isActive('/saved') ? mobileLinkClass : mobileLinkInactive}>
               Saved {savedIds.length > 0 && `(${savedIds.length})`}
             </Link>
-            <Link to="/submit" onClick={() => setOpen(false)} className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}>
+            <Link to="/submit" onClick={() => { trackEvent('submit_listing_click', { source: 'navbar_mobile' }); setOpen(false); }} className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}>
               Submit a listing
             </Link>
             {!loading && user ? (

@@ -11,6 +11,7 @@ import useRecentlyViewed from '@/hooks/useRecentlyViewed';
 import { buildListingJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 import { sanitizeText } from '@/lib/validation';
 import { orgToSlug } from '@/lib/org-slug';
+import { trackEvent } from '@/lib/analytics';
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
@@ -88,6 +89,13 @@ export default function ListingDetailPage() {
           addRecentlyViewed(data.id);
           // Increment view count
           supabase.rpc('increment_listing_views', { listing_id: data.id });
+          trackEvent('view_listing', {
+            listing_id: data.id,
+            listing_title: data.title,
+            category: data.category,
+            organisation: data.organisation,
+            location: data.location,
+          });
           // Fetch related
           supabase
             .from('listings')

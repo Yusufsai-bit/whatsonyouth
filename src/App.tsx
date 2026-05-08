@@ -63,6 +63,18 @@ function ScrollToTop() {
   return null;
 }
 
+function RouteAnalytics() {
+  const { pathname, search } = useLocation();
+  useEffect(() => {
+    // Defer slightly so document.title (set by SEO/Helmet) is up to date
+    const t = setTimeout(() => {
+      import('@/lib/analytics').then(({ trackPageView }) => trackPageView(pathname + search));
+    }, 50);
+    return () => clearTimeout(t);
+  }, [pathname, search]);
+  return null;
+}
+
 const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
@@ -71,6 +83,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <RouteAnalytics />
         <AuthProvider>
           <div style={{ paddingTop: 'calc(var(--nav-h, 56px) + var(--top-strip-h, 28px))' }}>
           <Suspense fallback={

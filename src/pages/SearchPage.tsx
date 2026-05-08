@@ -9,6 +9,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import ListingCardImage from '@/components/ListingCardImage';
 import useSavedListings from '@/hooks/useSavedListings';
 import { orgToSlug } from '@/lib/org-slug';
+import { trackEvent } from '@/lib/analytics';
 import { lazy, Suspense } from 'react';
 const MapView = lazy(() => import('@/components/MapView'));
 
@@ -122,6 +123,14 @@ export default function SearchPage() {
     if (selectedLocation) params.location = selectedLocation;
     if (dateFilter !== 'any') params.date = dateFilter;
     setSearchParams(params, { replace: true });
+    if (debouncedQuery && debouncedQuery.trim().length >= 2) {
+      trackEvent('search', {
+        search_term: debouncedQuery.trim(),
+        category: selectedCategory,
+        location: selectedLocation || undefined,
+        date_filter: dateFilter,
+      });
+    }
   }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, setSearchParams]);
 
   useEffect(() => {

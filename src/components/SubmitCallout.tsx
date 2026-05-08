@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { trackEvent } from '@/lib/analytics';
 
 const steps = [
   'Create a free account or log in',
@@ -20,6 +21,7 @@ export default function SubmitCallout() {
           </p>
           <Link
             to="/submit"
+            onClick={() => trackEvent('submit_listing_click', { source: 'callout' })}
             className="inline-block bg-brand-coral text-white font-heading font-bold text-base rounded-lg px-7 py-3.5 mt-6 transition-colors duration-100 hover:bg-brand-coral-light"
           >
             Submit a listing
