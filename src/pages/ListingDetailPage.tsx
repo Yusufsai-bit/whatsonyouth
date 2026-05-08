@@ -89,6 +89,13 @@ export default function ListingDetailPage() {
           addRecentlyViewed(data.id);
           // Increment view count
           supabase.rpc('increment_listing_views', { listing_id: data.id });
+          trackEvent('view_listing', {
+            listing_id: data.id,
+            listing_title: data.title,
+            category: data.category,
+            organisation: data.organisation,
+            location: data.location,
+          });
           // Fetch related
           supabase
             .from('listings')
