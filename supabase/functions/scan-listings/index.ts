@@ -339,6 +339,11 @@ serve(async (req) => {
       });
     }
 
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
+    if (!FIRECRAWL_API_KEY) {
+      console.warn("FIRECRAWL_API_KEY not configured — thin-content fallback disabled");
+    }
+
     const supabase = serviceClient;
 
     const scanSessionId = crypto.randomUUID();
