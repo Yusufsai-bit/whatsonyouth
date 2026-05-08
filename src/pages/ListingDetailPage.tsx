@@ -11,6 +11,7 @@ import useRecentlyViewed from '@/hooks/useRecentlyViewed';
 import { buildListingJsonLd, buildBreadcrumbJsonLd } from '@/lib/structured-data';
 import { sanitizeText } from '@/lib/validation';
 import { orgToSlug } from '@/lib/org-slug';
+import { trackEvent } from '@/lib/analytics';
 
 const categoryRoutes: Record<string, string> = {
   Events: '/events',
