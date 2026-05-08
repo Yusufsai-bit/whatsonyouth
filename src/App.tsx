@@ -83,6 +83,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <RouteAnalytics />
         <AuthProvider>
           <div style={{ paddingTop: 'calc(var(--nav-h, 56px) + var(--top-strip-h, 28px))' }}>
           <Suspense fallback={
