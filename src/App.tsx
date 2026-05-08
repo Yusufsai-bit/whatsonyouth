@@ -63,6 +63,18 @@ function ScrollToTop() {
   return null;
 }
 
+function RouteAnalytics() {
+  const { pathname, search } = useLocation();
+  useEffect(() => {
+    // Defer slightly so document.title (set by SEO/Helmet) is up to date
+    const t = setTimeout(() => {
+      import('@/lib/analytics').then(({ trackPageView }) => trackPageView(pathname + search));
+    }, 50);
+    return () => clearTimeout(t);
+  }, [pathname, search]);
+  return null;
+}
+
 const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
