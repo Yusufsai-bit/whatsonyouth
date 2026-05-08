@@ -17,6 +17,43 @@ function stripHtml(html: string): string {
   return text.slice(0, 20000);
 }
 
+/**
+ * Firecrawl scrape — used as fallback when raw fetch returns thin (JS-rendered) content.
+ * Returns plain text (markdown) of the rendered page, or null on failure.
+ * Docs: https://docs.firecrawl.dev/api-reference/v2-introduction
+ */
+async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
+  const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url,
+      formats: ["markdown"],
+      onlyMainContent: true,
+    }),
+    signal: AbortSignal.timeout(45000),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Firecrawl HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  // v2 SDK shape: { success, data: { markdown, metadata } }
+  // Some responses also expose markdown at top level — handle both.
+  const markdown =
+    data?.data?.markdown ??
+    data?.markdown ??
+    null;
+
+  if (!markdown || typeof markdown !== "string") return null;
+  return markdown.replace(/\s+/g, " ").trim();
+}
+
 function normaliseLocation(location: string): string {
   if (!location) return 'Victoria';
   const l = location.trim();
@@ -339,6 +376,11 @@ serve(async (req) => {
       });
     }
 
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
+    if (!FIRECRAWL_API_KEY) {
+      console.warn("FIRECRAWL_API_KEY not configured — thin-content fallback disabled");
+    }
+
     const supabase = serviceClient;
 
     const scanSessionId = crypto.randomUUID();
@@ -403,20 +445,43 @@ serve(async (req) => {
         }
 
         const html = await pageRes.text();
-        const pageText = stripHtml(html);
-        if (pageText.length < 50) {
+        let pageText = stripHtml(html);
+        if (pageText.length < 50 && !FIRECRAWL_API_KEY) {
           throw new Error("Page content too short to analyse");
         }
 
         // Diagnostic: flag suspiciously thin pages (likely JS-rendered SPAs)
-        // Heuristic: <1500 chars of stripped text on a page that's supposed to list opportunities
         const THIN_CONTENT_THRESHOLD = 1500;
         const isThinContent = pageText.length < THIN_CONTENT_THRESHOLD;
+        let usedFirecrawl = false;
+
         if (isThinContent) {
           console.warn(
-            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ` +
-            `${source.url} — likely JS-rendered, consider Firecrawl fallback`
+            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ${source.url}`
           );
+
+          // Firecrawl fallback for JS-rendered pages
+          if (FIRECRAWL_API_KEY) {
+            try {
+              const fcText = await firecrawlScrape(source.url, FIRECRAWL_API_KEY);
+              if (fcText && fcText.length > pageText.length) {
+                console.log(
+                  `🔥 Firecrawl rendered ${fcText.length} chars for ${source.name} ` +
+                  `(was ${pageText.length})`
+                );
+                pageText = fcText.slice(0, 20000);
+                usedFirecrawl = true;
+              } else {
+                console.warn(`🔥 Firecrawl returned no extra content for ${source.name}`);
+              }
+            } catch (fcErr) {
+              console.error(`🔥 Firecrawl failed for ${source.name}:`, fcErr);
+            }
+          }
+        }
+
+        if (pageText.length < 50) {
+          throw new Error("Page content too short to analyse (even after fallback)");
         }
 
         // Step 2: Extract listings via Lovable AI
@@ -424,9 +489,12 @@ serve(async (req) => {
         found = listings.length;
 
         if (isThinContent && found === 0) {
-          // Tag the error_message so it surfaces in scan_log / admin UI
-          errorMessage = `[thin-content] Only ${pageText.length} chars of HTML text — page likely needs JS rendering (Firecrawl candidate)`;
+          errorMessage = usedFirecrawl
+            ? `[thin-content] Firecrawl rendered ${pageText.length} chars but AI found 0 listings — page may not actually contain opportunities`
+            : `[thin-content] Only ${pageText.length} chars of HTML text — page likely needs JS rendering (Firecrawl unavailable)`;
           console.warn(`⚠️ ${source.name}: ${errorMessage}`);
+        } else if (usedFirecrawl && found > 0) {
+          console.log(`✅ Firecrawl rescue: ${found} listings extracted from ${source.name}`);
         }
 
         // Step 3: Insert listings
