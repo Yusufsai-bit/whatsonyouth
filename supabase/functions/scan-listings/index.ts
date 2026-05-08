@@ -17,6 +17,43 @@ function stripHtml(html: string): string {
   return text.slice(0, 20000);
 }
 
+/**
+ * Firecrawl scrape — used as fallback when raw fetch returns thin (JS-rendered) content.
+ * Returns plain text (markdown) of the rendered page, or null on failure.
+ * Docs: https://docs.firecrawl.dev/api-reference/v2-introduction
+ */
+async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
+  const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url,
+      formats: ["markdown"],
+      onlyMainContent: true,
+    }),
+    signal: AbortSignal.timeout(45000),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Firecrawl HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  // v2 SDK shape: { success, data: { markdown, metadata } }
+  // Some responses also expose markdown at top level — handle both.
+  const markdown =
+    data?.data?.markdown ??
+    data?.markdown ??
+    null;
+
+  if (!markdown || typeof markdown !== "string") return null;
+  return markdown.replace(/\s+/g, " ").trim();
+}
+
 function normaliseLocation(location: string): string {
   if (!location) return 'Victoria';
   const l = location.trim();
