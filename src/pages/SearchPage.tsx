@@ -123,6 +123,14 @@ export default function SearchPage() {
     if (selectedLocation) params.location = selectedLocation;
     if (dateFilter !== 'any') params.date = dateFilter;
     setSearchParams(params, { replace: true });
+    if (debouncedQuery && debouncedQuery.trim().length >= 2) {
+      trackEvent('search', {
+        search_term: debouncedQuery.trim(),
+        category: selectedCategory,
+        location: selectedLocation || undefined,
+        date_filter: dateFilter,
+      });
+    }
   }, [debouncedQuery, selectedCategory, selectedLocation, dateFilter, setSearchParams]);
 
   useEffect(() => {
