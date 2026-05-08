@@ -193,7 +193,7 @@ export default function Navbar() {
             <Link to="/saved" onClick={() => setOpen(false)} className={isActive('/saved') ? mobileLinkClass : mobileLinkInactive}>
               Saved {savedIds.length > 0 && `(${savedIds.length})`}
             </Link>
-            <Link to="/submit" onClick={() => setOpen(false)} className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}>
+            <Link to="/submit" onClick={() => { trackEvent('submit_listing_click', { source: 'navbar_mobile' }); setOpen(false); }} className={isActive('/submit') ? mobileLinkClass : mobileLinkInactive}>
               Submit a listing
             </Link>
             {!loading && user ? (
