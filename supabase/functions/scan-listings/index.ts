@@ -408,9 +408,26 @@ serve(async (req) => {
           throw new Error("Page content too short to analyse");
         }
 
+        // Diagnostic: flag suspiciously thin pages (likely JS-rendered SPAs)
+        // Heuristic: <1500 chars of stripped text on a page that's supposed to list opportunities
+        const THIN_CONTENT_THRESHOLD = 1500;
+        const isThinContent = pageText.length < THIN_CONTENT_THRESHOLD;
+        if (isThinContent) {
+          console.warn(
+            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ` +
+            `${source.url} — likely JS-rendered, consider Firecrawl fallback`
+          );
+        }
+
         // Step 2: Extract listings via Lovable AI
         const listings = await extractListings(pageText, source, LOVABLE_API_KEY);
         found = listings.length;
+
+        if (isThinContent && found === 0) {
+          // Tag the error_message so it surfaces in scan_log / admin UI
+          errorMessage = `[thin-content] Only ${pageText.length} chars of HTML text — page likely needs JS rendering (Firecrawl candidate)`;
+          console.warn(`⚠️ ${source.name}: ${errorMessage}`);
+        }
 
         // Step 3: Insert listings
         const validCategories = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
