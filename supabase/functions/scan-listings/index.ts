@@ -22,7 +22,13 @@ function stripHtml(html: string): string {
  * Returns plain text (markdown) of the rendered page, or null on failure.
  * Docs: https://docs.firecrawl.dev/api-reference/v2-introduction
  */
-async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
+async function firecrawlScrape(
+  url: string,
+  apiKey: string,
+  opts: { includeLinks?: boolean } = {},
+): Promise<{ markdown: string; links: string[] } | null> {
+  const formats: any[] = ["markdown"];
+  if (opts.includeLinks) formats.push("links");
   const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
     method: "POST",
     headers: {
@@ -31,7 +37,7 @@ async function firecrawlScrape(url: string, apiKey: string): Promise<string | nu
     },
     body: JSON.stringify({
       url,
-      formats: ["markdown"],
+      formats,
       onlyMainContent: true,
     }),
     signal: AbortSignal.timeout(45000),
@@ -43,15 +49,37 @@ async function firecrawlScrape(url: string, apiKey: string): Promise<string | nu
   }
 
   const data = await res.json();
-  // v2 SDK shape: { success, data: { markdown, metadata } }
-  // Some responses also expose markdown at top level — handle both.
   const markdown =
     data?.data?.markdown ??
     data?.markdown ??
     null;
+  const links: string[] = Array.isArray(data?.data?.links)
+    ? data.data.links
+    : Array.isArray(data?.links) ? data.links : [];
 
   if (!markdown || typeof markdown !== "string") return null;
-  return markdown.replace(/\s+/g, " ").trim();
+  return { markdown: markdown.replace(/\s+/g, " ").trim(), links };
+}
+
+// Detect fabricated/placeholder IDs in URLs (sequential digits, all same digit, etc.)
+function looksFabricatedId(url: string): boolean {
+  // Find numeric runs of 8+ digits in the URL
+  const matches = url.match(/\d{8,}/g) || [];
+  for (const id of matches) {
+    // 1234567890... sequential ascending
+    if (/^1234567890/.test(id)) return true;
+    // All same digit: 0000000000, 9999999999
+    if (/^(\d)\1{7,}$/.test(id)) return true;
+    // Pure ascending or descending sequence of length >= 8
+    let asc = true, desc = true;
+    for (let i = 1; i < id.length; i++) {
+      const diff = id.charCodeAt(i) - id.charCodeAt(i - 1);
+      if (diff !== 1) asc = false;
+      if (diff !== -1) desc = false;
+    }
+    if (asc || desc) return true;
+  }
+  return false;
 }
 
 function normaliseLocation(location: string): string {
@@ -524,48 +552,62 @@ serve(async (req) => {
       }
 
       try {
-        // Step 1: Fetch page
-        const pageRes = await fetch(source.url, {
-          headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
-          signal: AbortSignal.timeout(MAX_SOURCE_MS),
-        });
+        // Determine allowlist context up-front so we can route allowlisted ticketing
+        // domains through Firecrawl FIRST (their pages are JS-rendered and the AI
+        // cannot invent real per-event URLs from raw HTML — it will fabricate IDs).
+        const sourceDomain = extractDomain(source.url);
+        const sourceAllowlisted = sourceDomain && [...allowedDomains].some(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          ? [...allowedDomains].filter(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          : [];
+        const forceFirecrawl = sourceAllowlisted.length > 0;
 
-        if (!pageRes.ok) {
-          throw new Error(`HTTP ${pageRes.status} fetching ${source.url}`);
-        }
-
-        const html = await pageRes.text();
-        let pageText = stripHtml(html);
-        if (pageText.length < 50 && !FIRECRAWL_API_KEY) {
-          throw new Error("Page content too short to analyse");
-        }
-
-        // Diagnostic: flag suspiciously thin pages (likely JS-rendered SPAs)
-        const THIN_CONTENT_THRESHOLD = 1500;
-        const isThinContent = pageText.length < THIN_CONTENT_THRESHOLD;
+        let pageText = '';
         let usedFirecrawl = false;
+        let isThinContent = false;
+        let discoveredLinks: string[] = [];
 
-        if (isThinContent) {
-          console.warn(
-            `🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — ${source.url}`
-          );
+        if (forceFirecrawl && FIRECRAWL_API_KEY) {
+          try {
+            const fc = await firecrawlScrape(source.url, FIRECRAWL_API_KEY, { includeLinks: true });
+            if (fc && fc.markdown.length > 50) {
+              pageText = fc.markdown.slice(0, 20000);
+              discoveredLinks = (fc.links || []).filter(l => typeof l === 'string' && /^https?:\/\//.test(l));
+              usedFirecrawl = true;
+              console.log(`🔥 Firecrawl-first (allowlisted) rendered ${fc.markdown.length} chars + ${discoveredLinks.length} links for ${source.name}`);
+            }
+          } catch (fcErr) {
+            console.error(`🔥 Firecrawl-first failed for ${source.name}:`, fcErr);
+          }
+        }
 
-          // Firecrawl fallback for JS-rendered pages
-          if (FIRECRAWL_API_KEY) {
+        // Fall back to raw fetch if Firecrawl wasn't used or returned nothing
+        if (!pageText) {
+          const pageRes = await fetch(source.url, {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; WhatsOnYouthBot/1.0)" },
+            signal: AbortSignal.timeout(MAX_SOURCE_MS),
+          });
+          if (!pageRes.ok) throw new Error(`HTTP ${pageRes.status} fetching ${source.url}`);
+          const html = await pageRes.text();
+          pageText = stripHtml(html);
+          if (pageText.length < 50 && !FIRECRAWL_API_KEY) {
+            throw new Error("Page content too short to analyse");
+          }
+
+          const THIN_CONTENT_THRESHOLD = 1500;
+          isThinContent = pageText.length < THIN_CONTENT_THRESHOLD;
+
+          if (isThinContent && FIRECRAWL_API_KEY) {
+            console.warn(`🪶 THIN CONTENT (${pageText.length} chars) for ${source.name} — falling back to Firecrawl`);
             try {
-              const fcText = await firecrawlScrape(source.url, FIRECRAWL_API_KEY);
-              if (fcText && fcText.length > pageText.length) {
-                console.log(
-                  `🔥 Firecrawl rendered ${fcText.length} chars for ${source.name} ` +
-                  `(was ${pageText.length})`
-                );
-                pageText = fcText.slice(0, 20000);
+              const fc = await firecrawlScrape(source.url, FIRECRAWL_API_KEY, { includeLinks: true });
+              if (fc && fc.markdown.length > pageText.length) {
+                pageText = fc.markdown.slice(0, 20000);
+                discoveredLinks = (fc.links || []).filter(l => typeof l === 'string' && /^https?:\/\//.test(l));
                 usedFirecrawl = true;
-              } else {
-                console.warn(`🔥 Firecrawl returned no extra content for ${source.name}`);
+                console.log(`🔥 Firecrawl rendered ${fc.markdown.length} chars + ${discoveredLinks.length} links for ${source.name}`);
               }
             } catch (fcErr) {
-              console.error(`🔥 Firecrawl failed for ${source.name}:`, fcErr);
+              console.error(`🔥 Firecrawl fallback failed for ${source.name}:`, fcErr);
             }
           }
         }
@@ -574,11 +616,19 @@ serve(async (req) => {
           throw new Error("Page content too short to analyse (even after fallback)");
         }
 
+        // For allowlisted sources, append the verified link list to the prompt
+        // so the AI is forced to pick from REAL URLs instead of inventing IDs.
+        if (sourceAllowlisted.length && discoveredLinks.length) {
+          const onDomain = discoveredLinks.filter(l => {
+            const d = extractDomain(l);
+            return d && sourceAllowlisted.some(ad => d === ad || d.endsWith(`.${ad}`));
+          }).slice(0, 200);
+          if (onDomain.length) {
+            pageText += `\n\n=== VERIFIED LINKS DISCOVERED ON THIS PAGE (you MUST pick listing URLs from this list — do NOT invent IDs) ===\n${onDomain.join('\n')}`;
+          }
+        }
+
         // Step 2: Extract listings via Lovable AI
-        const sourceDomain = extractDomain(source.url);
-        const sourceAllowlisted = sourceDomain && [...allowedDomains].some(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
-          ? [...allowedDomains].filter(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
-          : [];
         const listings = await extractListings(pageText, source, LOVABLE_API_KEY, sourceAllowlisted);
         found = listings.length;
 
@@ -591,6 +641,7 @@ serve(async (req) => {
           console.log(`✅ Firecrawl rescue: ${found} listings extracted from ${source.name}`);
         }
 
+
         // Step 3: Insert listings
         const validCategories = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
 
@@ -599,6 +650,26 @@ serve(async (req) => {
             if (!listing.title || !listing.link) continue;
             if (!validCategories.includes(listing.category)) {
               listing.category = source.category;
+            }
+
+            // Safety net: reject AI-fabricated placeholder IDs
+            if (looksFabricatedId(listing.link)) {
+              console.log(`🧪 Fabricated-ID skip: ${listing.title} — ${listing.link}`);
+              bump('fabricated/placeholder URL ID');
+              skipped++;
+              continue;
+            }
+
+            // For allowlisted sources, the URL must appear in the verified discovered links
+            if (sourceAllowlisted.length && discoveredLinks.length) {
+              const linkDom = extractDomain(listing.link);
+              const onAllowedDomain = linkDom && sourceAllowlisted.some(ad => linkDom === ad || linkDom.endsWith(`.${ad}`));
+              if (onAllowedDomain && !discoveredLinks.includes(listing.link)) {
+                console.log(`🚫 Unverified link skip: ${listing.title} — ${listing.link}`);
+                bump('link not in verified discovered list');
+                skipped++;
+                continue;
+              }
             }
 
             // In-memory dedup check
