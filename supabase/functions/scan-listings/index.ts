@@ -499,6 +499,8 @@ serve(async (req) => {
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       let found = 0, created = 0, skipped = 0;
+      const skipReasons: Record<string, number> = {};
+      const bump = (r: string) => { skipReasons[r] = (skipReasons[r] || 0) + 1; };
       let status = "success";
       let errorMessage: string | null = null;
 
