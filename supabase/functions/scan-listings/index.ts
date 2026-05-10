@@ -594,12 +594,14 @@ serve(async (req) => {
 
             // In-memory dedup check
             if (insertedLinks.has(listing.link)) {
+              bump('duplicate (this run)');
               skipped++;
               continue;
             }
 
             // Pre-loaded DB dedup check
             if (existingLinks.has(listing.link)) {
+              bump('duplicate (already in DB)');
               skipped++;
               continue;
             }
@@ -613,6 +615,7 @@ serve(async (req) => {
                 `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ` +
                 `${listing.title} — ${quality.reason}`
               );
+              bump(quality.reason);
               skipped++;
               continue;
             }
