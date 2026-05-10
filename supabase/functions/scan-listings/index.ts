@@ -165,8 +165,11 @@ function passesQualityCheck(listing: any): {
     return { passes: false, reason: `Blocked domain pattern: ${linkDomain} is in rejected_sources` };
   }
 
-  const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
-  if (unstableReason) return { passes: false, reason: unstableReason };
+  const isAllowlisted = !!(linkDomain && (allowedDomains.has(linkDomain) || [...allowedDomains].some(d => linkDomain === d || linkDomain.endsWith(`.${d}`))));
+  if (!isAllowlisted) {
+    const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
+    if (unstableReason) return { passes: false, reason: unstableReason };
+  }
 
   if (!listing.location || listing.location.length < 3)
     return { passes: false, reason: 'Missing location' };
