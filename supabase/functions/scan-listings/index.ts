@@ -132,6 +132,9 @@ function unstableOpportunityUrlReason(rawUrl: string, category?: string): string
 
 // Domains permanently blocked from being inserted (loaded from rejected_sources at scan start).
 const blockedDomains = new Set<string>();
+// Domains in the admin allowlist override — bypasses BOTH the rejected_sources block
+// AND the unstableOpportunityUrlReason guard so individual event/job URLs can be inserted.
+const allowedDomains = new Set<string>();
 
 function extractDomain(url: string): string | null {
   try {
