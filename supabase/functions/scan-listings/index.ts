@@ -429,7 +429,47 @@ serve(async (req) => {
       const fromUrl = extractDomain(r.url || '');
       if (fromUrl) blockedDomains.add(fromUrl);
     }
-    console.log(`🛡️ Loaded ${blockedDomains.size} blocked domain(s) from rejected_sources`);
+
+    // Allowlist override: domains here bypass the rejected_sources block
+    // Stored in platform_settings.scanner_domain_allowlist as a JSON array of domains
+    const overriddenDomains: string[] = [];
+    try {
+      const { data: allowRow } = await supabase
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'scanner_domain_allowlist')
+        .maybeSingle();
+      if (allowRow?.value) {
+        const parsed = JSON.parse(allowRow.value);
+        if (Array.isArray(parsed)) {
+          for (const raw of parsed) {
+            const d = String(raw || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+            if (d && blockedDomains.has(d)) {
+              blockedDomains.delete(d);
+              overriddenDomains.push(d);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load scanner_domain_allowlist:', e);
+    }
+
+    console.log(`🛡️ Loaded ${blockedDomains.size} blocked domain(s) from rejected_sources` +
+      (overriddenDomains.length ? ` (allowlist override: ${overriddenDomains.join(', ')})` : ''));
+
+    if (overriddenDomains.length) {
+      await supabase.from('admin_audit_log').insert({
+        entity_table: 'rejected_sources',
+        action: 'allowlist_override_applied',
+        entity_id: null,
+        metadata: {
+          overridden_domains: overriddenDomains,
+          scan_session_id: scanSessionId,
+          source: 'scan-listings',
+        },
+      });
+    }
 
     // Also track links inserted this run
     const insertedLinks = new Set<string>();
