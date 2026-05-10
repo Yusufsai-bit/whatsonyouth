@@ -644,6 +644,7 @@ serve(async (req) => {
 
             if (insertErr) {
               console.error("Insert error:", insertErr);
+              bump(`insert error: ${insertErr.message || insertErr.code || 'unknown'}`);
               skipped++;
             } else {
               created++;
@@ -660,8 +661,9 @@ serve(async (req) => {
                 });
               }
             }
-          } catch (e) {
+          } catch (e: any) {
             console.error("Listing insert error:", e);
+            bump(`exception: ${e?.message || 'unknown'}`);
             skipped++;
           }
         }
