@@ -268,7 +268,7 @@ Each object must have exactly these fields:
 - expiry_date: YYYY-MM-DD string (or null)
 
 If nothing meets all criteria, return []
-
+${allowlistedNote}
 Return ONLY the JSON array, nothing else.
 
 Page content:
