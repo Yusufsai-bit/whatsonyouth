@@ -737,6 +737,7 @@ serve(async (req) => {
         found,
         created,
         skipped,
+        skip_reasons: skipReasons,
         status,
         error: errorMessage,
       });
