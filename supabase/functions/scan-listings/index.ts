@@ -418,6 +418,19 @@ serve(async (req) => {
       (existingListings || []).map((l: any) => l.link)
     );
 
+    // Pre-load rejected domains (hard block — never insert from these)
+    blockedDomains.clear();
+    const { data: rejected } = await supabase
+      .from('rejected_sources')
+      .select('domain, url');
+    for (const r of (rejected || [])) {
+      const d = (r.domain || '').toLowerCase().replace(/^www\./, '');
+      if (d) blockedDomains.add(d);
+      const fromUrl = extractDomain(r.url || '');
+      if (fromUrl) blockedDomains.add(fromUrl);
+    }
+    console.log(`🛡️ Loaded ${blockedDomains.size} blocked domain(s) from rejected_sources`);
+
     // Also track links inserted this run
     const insertedLinks = new Set<string>();
 
