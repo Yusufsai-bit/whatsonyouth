@@ -130,6 +130,17 @@ function unstableOpportunityUrlReason(rawUrl: string, category?: string): string
   return null;
 }
 
+// Domains permanently blocked from being inserted (loaded from rejected_sources at scan start).
+const blockedDomains = new Set<string>();
+
+function extractDomain(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
 function passesQualityCheck(listing: any): {
   passes: boolean;
   reason: string;
