@@ -209,8 +209,13 @@ function calculateSourceQuality(totalScans: number, successfulScans: number, cre
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
-  apiKey: string
+  apiKey: string,
+  allowlistedSourceDomains: string[] = []
 ): Promise<any[]> {
+  const allowlistedNote = allowlistedSourceDomains.length
+    ? `\n\nADMIN ALLOWLIST OVERRIDE: The following domains are explicitly allowed for individual event/listing detail URLs in this scan: ${allowlistedSourceDomains.join(', ')}. For listings on these domains, you MUST extract the unique individual event/detail URL (for example eventbrite.com.au/e/<event-slug>-<id>, humanitix.com/event/<slug>, trybooking.com/events/<id>) — do NOT collapse multiple events to the same source/category URL. Each listing must have a unique link.`
+    : '';
+
   const prompt = `You are a listings extractor for What's On Youth — a Victorian platform for young people aged 15-25 living in Victoria, Australia.
 
 Analyse this webpage from '${source.name}' (${source.url}) and extract opportunities that meet ALL of these criteria:
