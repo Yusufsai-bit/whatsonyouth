@@ -132,6 +132,9 @@ function unstableOpportunityUrlReason(rawUrl: string, category?: string): string
 
 // Domains permanently blocked from being inserted (loaded from rejected_sources at scan start).
 const blockedDomains = new Set<string>();
+// Domains in the admin allowlist override — bypasses BOTH the rejected_sources block
+// AND the unstableOpportunityUrlReason guard so individual event/job URLs can be inserted.
+const allowedDomains = new Set<string>();
 
 function extractDomain(url: string): string | null {
   try {
@@ -162,8 +165,11 @@ function passesQualityCheck(listing: any): {
     return { passes: false, reason: `Blocked domain pattern: ${linkDomain} is in rejected_sources` };
   }
 
-  const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
-  if (unstableReason) return { passes: false, reason: unstableReason };
+  const isAllowlisted = !!(linkDomain && (allowedDomains.has(linkDomain) || [...allowedDomains].some(d => linkDomain === d || linkDomain.endsWith(`.${d}`))));
+  if (!isAllowlisted) {
+    const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
+    if (unstableReason) return { passes: false, reason: unstableReason };
+  }
 
   if (!listing.location || listing.location.length < 3)
     return { passes: false, reason: 'Missing location' };
@@ -203,8 +209,13 @@ function calculateSourceQuality(totalScans: number, successfulScans: number, cre
 async function extractListings(
   pageText: string,
   source: { name: string; url: string; category: string },
-  apiKey: string
+  apiKey: string,
+  allowlistedSourceDomains: string[] = []
 ): Promise<any[]> {
+  const allowlistedNote = allowlistedSourceDomains.length
+    ? `\n\nADMIN ALLOWLIST OVERRIDE: The following domains are explicitly allowed for individual event/listing detail URLs in this scan: ${allowlistedSourceDomains.join(', ')}. For listings on these domains, you MUST extract the unique individual event/detail URL (for example eventbrite.com.au/e/<event-slug>-<id>, humanitix.com/event/<slug>, trybooking.com/events/<id>) — do NOT collapse multiple events to the same source/category URL. Each listing must have a unique link.`
+    : '';
+
   const prompt = `You are a listings extractor for What's On Youth — a Victorian platform for young people aged 15-25 living in Victoria, Australia.
 
 Analyse this webpage from '${source.name}' (${source.url}) and extract opportunities that meet ALL of these criteria:
@@ -257,7 +268,7 @@ Each object must have exactly these fields:
 - expiry_date: YYYY-MM-DD string (or null)
 
 If nothing meets all criteria, return []
-
+${allowlistedNote}
 Return ONLY the JSON array, nothing else.
 
 Page content:
@@ -433,6 +444,7 @@ serve(async (req) => {
     // Allowlist override: domains here bypass the rejected_sources block
     // Stored in platform_settings.scanner_domain_allowlist as a JSON array of domains
     const overriddenDomains: string[] = [];
+    allowedDomains.clear();
     try {
       const { data: allowRow } = await supabase
         .from('platform_settings')
@@ -444,7 +456,9 @@ serve(async (req) => {
         if (Array.isArray(parsed)) {
           for (const raw of parsed) {
             const d = String(raw || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-            if (d && blockedDomains.has(d)) {
+            if (!d) continue;
+            allowedDomains.add(d);
+            if (blockedDomains.has(d)) {
               blockedDomains.delete(d);
               overriddenDomains.push(d);
             }
@@ -490,6 +504,8 @@ serve(async (req) => {
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       let found = 0, created = 0, skipped = 0;
+      const skipReasons: Record<string, number> = {};
+      const bump = (r: string) => { skipReasons[r] = (skipReasons[r] || 0) + 1; };
       let status = "success";
       let errorMessage: string | null = null;
 
@@ -559,7 +575,11 @@ serve(async (req) => {
         }
 
         // Step 2: Extract listings via Lovable AI
-        const listings = await extractListings(pageText, source, LOVABLE_API_KEY);
+        const sourceDomain = extractDomain(source.url);
+        const sourceAllowlisted = sourceDomain && [...allowedDomains].some(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          ? [...allowedDomains].filter(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          : [];
+        const listings = await extractListings(pageText, source, LOVABLE_API_KEY, sourceAllowlisted);
         found = listings.length;
 
         if (isThinContent && found === 0) {
@@ -583,12 +603,14 @@ serve(async (req) => {
 
             // In-memory dedup check
             if (insertedLinks.has(listing.link)) {
+              bump('duplicate (this run)');
               skipped++;
               continue;
             }
 
             // Pre-loaded DB dedup check
             if (existingLinks.has(listing.link)) {
+              bump('duplicate (already in DB)');
               skipped++;
               continue;
             }
@@ -602,6 +624,7 @@ serve(async (req) => {
                 `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ` +
                 `${listing.title} — ${quality.reason}`
               );
+              bump(quality.reason);
               skipped++;
               continue;
             }
@@ -630,6 +653,7 @@ serve(async (req) => {
 
             if (insertErr) {
               console.error("Insert error:", insertErr);
+              bump(`insert error: ${insertErr.message || insertErr.code || 'unknown'}`);
               skipped++;
             } else {
               created++;
@@ -646,8 +670,9 @@ serve(async (req) => {
                 });
               }
             }
-          } catch (e) {
+          } catch (e: any) {
             console.error("Listing insert error:", e);
+            bump(`exception: ${e?.message || 'unknown'}`);
             skipped++;
           }
         }
@@ -721,6 +746,7 @@ serve(async (req) => {
         found,
         created,
         skipped,
+        skip_reasons: skipReasons,
         status,
         error: errorMessage,
       });
