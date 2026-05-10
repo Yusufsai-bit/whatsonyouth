@@ -652,6 +652,26 @@ serve(async (req) => {
               listing.category = source.category;
             }
 
+            // Safety net: reject AI-fabricated placeholder IDs
+            if (looksFabricatedId(listing.link)) {
+              console.log(`🧪 Fabricated-ID skip: ${listing.title} — ${listing.link}`);
+              bump('fabricated/placeholder URL ID');
+              skipped++;
+              continue;
+            }
+
+            // For allowlisted sources, the URL must appear in the verified discovered links
+            if (sourceAllowlisted.length && discoveredLinks.length) {
+              const linkDom = extractDomain(listing.link);
+              const onAllowedDomain = linkDom && sourceAllowlisted.some(ad => linkDom === ad || linkDom.endsWith(`.${ad}`));
+              if (onAllowedDomain && !discoveredLinks.includes(listing.link)) {
+                console.log(`🚫 Unverified link skip: ${listing.title} — ${listing.link}`);
+                bump('link not in verified discovered list');
+                skipped++;
+                continue;
+              }
+            }
+
             // In-memory dedup check
             if (insertedLinks.has(listing.link)) {
               bump('duplicate (this run)');
