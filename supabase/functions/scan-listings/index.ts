@@ -130,6 +130,17 @@ function unstableOpportunityUrlReason(rawUrl: string, category?: string): string
   return null;
 }
 
+// Domains permanently blocked from being inserted (loaded from rejected_sources at scan start).
+const blockedDomains = new Set<string>();
+
+function extractDomain(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
 function passesQualityCheck(listing: any): {
   passes: boolean;
   reason: string;
@@ -145,6 +156,11 @@ function passesQualityCheck(listing: any): {
 
   if (!listing.link || !listing.link.startsWith('http'))
     return { passes: false, reason: 'Invalid link' };
+
+  const linkDomain = extractDomain(listing.link);
+  if (linkDomain && blockedDomains.has(linkDomain)) {
+    return { passes: false, reason: `Blocked domain pattern: ${linkDomain} is in rejected_sources` };
+  }
 
   const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
   if (unstableReason) return { passes: false, reason: unstableReason };
@@ -401,6 +417,19 @@ serve(async (req) => {
     const existingLinks = new Set(
       (existingListings || []).map((l: any) => l.link)
     );
+
+    // Pre-load rejected domains (hard block — never insert from these)
+    blockedDomains.clear();
+    const { data: rejected } = await supabase
+      .from('rejected_sources')
+      .select('domain, url');
+    for (const r of (rejected || [])) {
+      const d = (r.domain || '').toLowerCase().replace(/^www\./, '');
+      if (d) blockedDomains.add(d);
+      const fromUrl = extractDomain(r.url || '');
+      if (fromUrl) blockedDomains.add(fromUrl);
+    }
+    console.log(`🛡️ Loaded ${blockedDomains.size} blocked domain(s) from rejected_sources`);
 
     // Also track links inserted this run
     const insertedLinks = new Set<string>();
