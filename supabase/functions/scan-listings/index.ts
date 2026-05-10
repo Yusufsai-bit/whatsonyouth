@@ -154,10 +154,15 @@ function passesQualityCheck(listing: any): {
 
   const loc = listing.location.toLowerCase();
   const validLocations = [
-    'victoria', 'melbourne', 'vic', 'online',
+    // Broad regions
+    'victoria', 'melbourne', 'vic', 'online', 'virtual', 'remote',
+    'australia', 'national', 'regional', 'gippsland',
+    // Major regional cities
     'ballarat', 'bendigo', 'geelong', 'shepparton',
     'wodonga', 'mildura', 'warrnambool', 'frankston',
-    'gippsland', 'regional', 'australia', 'national'
+    'traralgon', 'sale', 'horsham', 'wangaratta', 'echuca', 'colac', 'bairnsdale',
+    // Melbourne metro suburbs (inner / north / west / east / south-east)
+    'abbotsford','airport west','albert park','alphington','altona','armadale','ascot vale','ashburton','ashwood','aspendale','balaclava','balwyn','bayswater','belmont','bentleigh','berwick','blackburn','box hill','braybrook','brighton','broadmeadows','brunswick','bulleen','bundoora','burnley','burwood','camberwell','campbellfield','canterbury','carlton','carnegie','carrum','caulfield','chadstone','chelsea','cheltenham','clayton','clifton hill','coburg','collingwood','craigieburn','cranbourne','croydon','dandenong','darebin','deer park','diamond creek','docklands','doncaster','donvale','eaglemont','east melbourne','elsternwick','eltham','elwood','epping','essendon','fairfield','fawkner','ferntree gully','fitzroy','flemington','footscray','forest hill','frankston','glen huntly','glen iris','glen waverley','glenroy','greensborough','hadfield','hampton','hawthorn','heidelberg','highett','hoppers crossing','hughesdale','ivanhoe','kensington','kew','keysborough','kingsbury','knox','lalor','laverton','lilydale','lower plenty','macleod','malvern','maribyrnong','melton','mentone','mickleham','middle park','mill park','mitcham','monash','moonee ponds','moorabbin','mooroolbark','mordialloc','mount waverley','mulgrave','murrumbeena','narre warren','newport','niddrie','noble park','north melbourne','northcote','nunawading','oakleigh','ormond','pakenham','parkdale','parkville','pascoe vale','plenty','point cook','port melbourne','prahran','preston','reservoir','richmond','ringwood','rosanna','rowville','roxburgh park','sandringham','seaford','seddon','south melbourne','south yarra','southbank','springvale','st albans','st kilda','strathmore','sunbury','sunshine','surrey hills','sydenham','tarneit','templestowe','thomastown','thornbury','toorak','truganina','tullamarine','vermont','viewbank','wantirna','warrandyte','watsonia','werribee','west melbourne','wheelers hill','williamstown','windsor','wyndham','yarraville',
   ];
   const isVictorianOrOnline = validLocations.some(v => loc.includes(v));
   if (!isVictorianOrOnline)
