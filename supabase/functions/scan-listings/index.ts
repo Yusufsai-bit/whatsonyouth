@@ -575,7 +575,11 @@ serve(async (req) => {
         }
 
         // Step 2: Extract listings via Lovable AI
-        const listings = await extractListings(pageText, source, LOVABLE_API_KEY);
+        const sourceDomain = extractDomain(source.url);
+        const sourceAllowlisted = sourceDomain && [...allowedDomains].some(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          ? [...allowedDomains].filter(d => sourceDomain === d || sourceDomain.endsWith(`.${d}`))
+          : [];
+        const listings = await extractListings(pageText, source, LOVABLE_API_KEY, sourceAllowlisted);
         found = listings.length;
 
         if (isThinContent && found === 0) {
