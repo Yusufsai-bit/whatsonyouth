@@ -146,6 +146,11 @@ function passesQualityCheck(listing: any): {
   if (!listing.link || !listing.link.startsWith('http'))
     return { passes: false, reason: 'Invalid link' };
 
+  const linkDomain = extractDomain(listing.link);
+  if (linkDomain && blockedDomains.has(linkDomain)) {
+    return { passes: false, reason: `Blocked domain pattern: ${linkDomain} is in rejected_sources` };
+  }
+
   const unstableReason = unstableOpportunityUrlReason(listing.link, listing.category);
   if (unstableReason) return { passes: false, reason: unstableReason };
 
