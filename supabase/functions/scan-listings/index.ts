@@ -22,7 +22,13 @@ function stripHtml(html: string): string {
  * Returns plain text (markdown) of the rendered page, or null on failure.
  * Docs: https://docs.firecrawl.dev/api-reference/v2-introduction
  */
-async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
+async function firecrawlScrape(
+  url: string,
+  apiKey: string,
+  opts: { includeLinks?: boolean } = {},
+): Promise<{ markdown: string; links: string[] } | null> {
+  const formats: any[] = ["markdown"];
+  if (opts.includeLinks) formats.push("links");
   const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
     method: "POST",
     headers: {
@@ -31,7 +37,7 @@ async function firecrawlScrape(url: string, apiKey: string): Promise<string | nu
     },
     body: JSON.stringify({
       url,
-      formats: ["markdown"],
+      formats,
       onlyMainContent: true,
     }),
     signal: AbortSignal.timeout(45000),
@@ -43,15 +49,37 @@ async function firecrawlScrape(url: string, apiKey: string): Promise<string | nu
   }
 
   const data = await res.json();
-  // v2 SDK shape: { success, data: { markdown, metadata } }
-  // Some responses also expose markdown at top level — handle both.
   const markdown =
     data?.data?.markdown ??
     data?.markdown ??
     null;
+  const links: string[] = Array.isArray(data?.data?.links)
+    ? data.data.links
+    : Array.isArray(data?.links) ? data.links : [];
 
   if (!markdown || typeof markdown !== "string") return null;
-  return markdown.replace(/\s+/g, " ").trim();
+  return { markdown: markdown.replace(/\s+/g, " ").trim(), links };
+}
+
+// Detect fabricated/placeholder IDs in URLs (sequential digits, all same digit, etc.)
+function looksFabricatedId(url: string): boolean {
+  // Find numeric runs of 8+ digits in the URL
+  const matches = url.match(/\d{8,}/g) || [];
+  for (const id of matches) {
+    // 1234567890... sequential ascending
+    if (/^1234567890/.test(id)) return true;
+    // All same digit: 0000000000, 9999999999
+    if (/^(\d)\1{7,}$/.test(id)) return true;
+    // Pure ascending or descending sequence of length >= 8
+    let asc = true, desc = true;
+    for (let i = 1; i < id.length; i++) {
+      const diff = id.charCodeAt(i) - id.charCodeAt(i - 1);
+      if (diff !== 1) asc = false;
+      if (diff !== -1) desc = false;
+    }
+    if (asc || desc) return true;
+  }
+  return false;
 }
 
 function normaliseLocation(location: string): string {
