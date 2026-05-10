@@ -439,6 +439,7 @@ serve(async (req) => {
     // Allowlist override: domains here bypass the rejected_sources block
     // Stored in platform_settings.scanner_domain_allowlist as a JSON array of domains
     const overriddenDomains: string[] = [];
+    allowedDomains.clear();
     try {
       const { data: allowRow } = await supabase
         .from('platform_settings')
@@ -450,7 +451,9 @@ serve(async (req) => {
         if (Array.isArray(parsed)) {
           for (const raw of parsed) {
             const d = String(raw || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-            if (d && blockedDomains.has(d)) {
+            if (!d) continue;
+            allowedDomains.add(d);
+            if (blockedDomains.has(d)) {
               blockedDomains.delete(d);
               overriddenDomains.push(d);
             }
