@@ -901,6 +901,24 @@ serve(async (req) => {
         error: errorMessage,
       });
 
+      // Audit log: one summary entry per source per scan (accountability for auto-publish)
+      if (created > 0 || skipped > 0 || status !== 'success') {
+        await supabase.from('admin_audit_log').insert({
+          entity_table: 'listings',
+          action: 'scanner_source_processed',
+          entity_id: null,
+          metadata: {
+            source_url: source.url,
+            source_name: source.name,
+            scan_session_id: scanSessionId,
+            found, created, skipped,
+            status,
+            error: errorMessage,
+            skip_reasons: skipReasons,
+          },
+        });
+      }
+
       // Delay between sources
       if (i < sources.length - 1) {
         await new Promise((r) => setTimeout(r, 800));
