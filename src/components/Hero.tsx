@@ -83,7 +83,7 @@ export default function Hero() {
                   <img
                     src={card.image}
                     alt={card.label}
-                    loading="lazy"
+                    loading="eager" fetchPriority="high"
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
@@ -102,7 +102,7 @@ export default function Hero() {
                 <img
                   src={heroCards[4].image}
                   alt={heroCards[4].label}
-                  loading="lazy"
+                  loading="eager" fetchPriority="high"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
@@ -129,7 +129,7 @@ export default function Hero() {
                   <img
                     src={card.image}
                     alt={card.label}
-                    loading="lazy"
+                    loading="eager" fetchPriority="high"
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
@@ -148,7 +148,7 @@ export default function Hero() {
                 <img
                   src={heroCards[4].image}
                   alt={heroCards[4].label}
-                  loading="lazy"
+                  loading="eager" fetchPriority="high"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />

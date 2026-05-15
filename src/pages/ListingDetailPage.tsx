@@ -246,8 +246,8 @@ export default function ListingDetailPage() {
   return (
     <>
       <SEO
-        title={`${listing.title} | ${listing.category} in ${listing.location} — What's On Youth`}
-        description={`${truncDesc} — Free ${listing.category.toLowerCase()} opportunity for young Victorians in ${listing.location}. Find more at What's On Youth.`}
+        title={`${listing.title} — What's On Youth`.slice(0, 60)}
+        description={`${listing.category} in ${listing.location}. ${truncDesc}`.replace(/\s+/g, ' ').slice(0, 157).trim() + '…'}
         ogTitle={listing.title}
         ogDescription={truncDesc}
         ogUrl={listingUrl}

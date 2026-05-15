@@ -1,5 +1,5 @@
 # Robots policy for What's On Youth
-# Verified against production routes on 2026-04-21.
+# Verified against production routes on 2026-05-15.
 
 User-agent: *
 Allow: /
@@ -21,5 +21,5 @@ Disallow: /search?q=
 
 # Sitemap index — points to sitemap-static.xml + dynamic listings sitemap.
 # Crawlers should only need the index; child sitemaps are listed for clarity.
-Sitemap: https://www.whatsonyouth.org.au/sitemap-index.xml
-Sitemap: https://www.whatsonyouth.org.au/sitemap-static.xml
+Sitemap: https://whatsonyouth.org.au/sitemap-index.xml
+Sitemap: https://whatsonyouth.org.au/sitemap-static.xml
