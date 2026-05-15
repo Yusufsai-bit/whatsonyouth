@@ -146,7 +146,7 @@ function auditRouteInIframe(entry: SeoManifestEntry): Promise<RouteAuditResult> 
               ],
             });
           }
-        }, 600);
+        }, 1500);
       } catch (err) {
         finish({
           route: entry.route,

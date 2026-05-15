@@ -110,7 +110,7 @@ const categoryConfig: Record<string, {
     subtext: 'Concerts, festivals, workshops and more — updated weekly',
     placeholderColor: '#2D1B69',
     seoTitle: "Free Events for Young People in Victoria — What's On Youth",
-    seoDescription: "Find free and low-cost events for young people aged 15–25 across Victoria. Concerts, festivals, workshops, art exhibitions, sports events and more in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria. Updated weekly.",
+    seoDescription: "Free and low-cost events for young Victorians aged 15–25 — concerts, festivals, workshops, arts and sports across Melbourne, Geelong, Ballarat and Bendigo.",
     slug: 'events',
     introContent: {
       body: "What's On Youth scans Victorian event listings every week to find free and low-cost events worth your time — concerts, festivals, exhibitions, workshops, sports events, cultural celebrations and more. Every listing links directly to the organiser so you can book, register or get in touch instantly.",
@@ -128,8 +128,8 @@ const categoryConfig: Record<string, {
     heading: 'Jobs and Internships for Young Victorians',
     subtext: 'Entry-level, part-time and casual work for ages 15–25',
     placeholderColor: '#1A2A4A',
-    seoTitle: "Entry Level Jobs & Internships for Young People in Victoria — What's On Youth",
-    seoDescription: "Find part-time jobs, casual work, internships, apprenticeships and traineeships for young people aged 15–25 in Victoria. No experience required. Melbourne, regional Victoria and online opportunities.",
+    seoTitle: "Youth Jobs & Internships in Victoria — What's On Youth",
+    seoDescription: "Part-time jobs, casual work, internships, apprenticeships and traineeships for young Victorians aged 15–25. No experience required. Across Victoria and online.",
     slug: 'jobs',
     introContent: {
       body: "Finding your first job or internship is hard. We make it easier by collecting entry-level jobs, part-time work, casual roles, apprenticeships, traineeships and graduate programs across Victoria — all in one place. No account needed to browse. New listings added every week.",
@@ -148,7 +148,7 @@ const categoryConfig: Record<string, {
     subtext: 'Free funding opportunities — arts, community, education and more',
     placeholderColor: '#1A3A2A',
     seoTitle: "Grants & Scholarships for Young Victorians — What's On Youth",
-    seoDescription: "Find grants, scholarships, bursaries and funding opportunities for young people aged 15–25 in Victoria. Arts grants, community grants, education funding, youth leadership awards and more. Free to apply.",
+    seoDescription: "Grants, scholarships, bursaries and funding for young Victorians aged 15–25. Arts, community, education and leadership awards — free to apply.",
     slug: 'grants',
     introContent: {
       body: "Grants and scholarships for young Victorians are more accessible than most people think. We surface funding opportunities from state and local government, foundations, arts bodies and community organisations — covering arts, education, community projects, leadership, sport and more.",
@@ -167,7 +167,7 @@ const categoryConfig: Record<string, {
     subtext: 'Free and low-cost programs, workshops and leadership opportunities',
     placeholderColor: '#2D1B4A',
     seoTitle: "Youth Programs & Courses in Victoria — What's On Youth",
-    seoDescription: "Discover free and low-cost youth programs, leadership courses, volunteering opportunities, skill development workshops and community programs for young people aged 15–25 across Victoria.",
+    seoDescription: "Free and low-cost youth programs, leadership courses, workshops and volunteering for young Victorians aged 15–25 — across Melbourne and regional Victoria.",
     slug: 'programs',
     introContent: {
       body: "From leadership programs and outdoor challenges to skill-building workshops and volunteering — Victoria has hundreds of programs designed specifically for young people. Browse free and low-cost opportunities that build your skills, expand your network, and look great on a resume.",
@@ -185,8 +185,8 @@ const categoryConfig: Record<string, {
     heading: 'Mental Health and Wellbeing Support',
     subtext: 'Free support services for young Victorians aged 15–25',
     placeholderColor: '#2A1A3A',
-    seoTitle: "Mental Health & Wellbeing Support for Young People in Victoria — What's On Youth",
-    seoDescription: "Find free mental health support, counselling services, youth wellbeing programs and crisis resources for young Victorians aged 15–25. Includes services in Melbourne, Geelong, Ballarat, Bendigo and online.",
+    seoTitle: "Youth Mental Health & Wellbeing Support in Victoria — What's On Youth",
+    seoDescription: "Free mental health, counselling and wellbeing support for young Victorians aged 15–25. Crisis services across Melbourne, Geelong, Ballarat, Bendigo and online.",
     slug: 'wellbeing',
     introContent: {
       body: "Finding the right support can be the hardest step. This page lists free and low-cost mental health services, counselling resources, crisis support lines, wellbeing programs and community organisations for young Victorians aged 15–25. You don't have to figure it out alone.",

@@ -42,8 +42,8 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="What's On Youth — Free Events, Jobs, Grants & Support for Young Victorians"
-        description="Victoria's free platform for young people aged 15–25. Find free events, entry-level jobs, grants, youth programs and mental health support across Melbourne, Geelong, Ballarat, Bendigo and all of Victoria."
+        title="What's On Youth — Free Events, Jobs & Grants for Young Victorians"
+        description="Free events, jobs, grants, youth programs and wellbeing support for young Victorians aged 15–25. Melbourne, Geelong, Ballarat, Bendigo & online."
         ogUrl="https://www.whatsonyouth.org.au"
         canonical="https://www.whatsonyouth.org.au"
       />

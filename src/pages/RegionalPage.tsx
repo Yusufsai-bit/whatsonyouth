@@ -36,7 +36,7 @@ export const regionConfig: Record<string, {
   melbourne: {
     name: 'Melbourne',
     slug: 'melbourne',
-    seoTitle: "Free Events & Opportunities for Young People in Melbourne — What's On Youth",
+    seoTitle: "Youth Events & Opportunities in Melbourne — What's On Youth",
     seoDescription: "Find free events, jobs, grants, programs and mental health support for young people in Melbourne. Updated weekly. For ages 15–25.",
     heading: 'Opportunities in Melbourne',
     subtext: 'Events, jobs, grants and support for young Melburnians',
