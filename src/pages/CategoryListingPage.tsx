@@ -185,8 +185,8 @@ const categoryConfig: Record<string, {
     heading: 'Mental Health and Wellbeing Support',
     subtext: 'Free support services for young Victorians aged 15–25',
     placeholderColor: '#2A1A3A',
-    seoTitle: "Mental Health & Wellbeing Support for Young People in Victoria — What's On Youth",
-    seoDescription: "Find free mental health support, counselling services, youth wellbeing programs and crisis resources for young Victorians aged 15–25. Includes services in Melbourne, Geelong, Ballarat, Bendigo and online.",
+    seoTitle: "Youth Mental Health & Wellbeing Support in Victoria — What's On Youth",
+    seoDescription: "Free mental health, counselling and wellbeing support for young Victorians aged 15–25. Crisis services across Melbourne, Geelong, Ballarat, Bendigo and online.",
     slug: 'wellbeing',
     introContent: {
       body: "Finding the right support can be the hardest step. This page lists free and low-cost mental health services, counselling resources, crisis support lines, wellbeing programs and community organisations for young Victorians aged 15–25. You don't have to figure it out alone.",
