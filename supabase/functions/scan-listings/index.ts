@@ -172,6 +172,23 @@ function extractDomain(url: string): string | null {
   }
 }
 
+// Mirrors public.calculate_listing_quality_score so we can decide is_active before insert.
+function estimateQualityScore(listing: {
+  title?: string; description?: string; organisation?: string; link?: string;
+  location?: string; expiry_date?: string | null; image_url?: string | null; category?: string;
+}): number {
+  let score = 0;
+  if ((listing.title || '').trim().length >= 10) score += 15;
+  if ((listing.description || '').trim().length >= 80) score += 20;
+  if ((listing.organisation || '').trim().length >= 3) score += 10;
+  if (/^https:\/\/.+/i.test(listing.link || '')) score += 15;
+  if ((listing.location || '').trim().length >= 3) score += 10;
+  if (listing.category === 'Wellbeing' || listing.expiry_date) score += 15;
+  if ((listing.image_url || '').trim().length > 0) score += 10;
+  if (['Events','Jobs','Grants','Programs','Wellbeing'].includes(listing.category || '')) score += 5;
+  return Math.min(score, 100);
+}
+
 function passesQualityCheck(listing: any): {
   passes: boolean;
   reason: string;
@@ -513,6 +530,36 @@ serve(async (req) => {
       });
     }
 
+    // Load minimum quality score threshold (listings below this go in as inactive)
+    let minQualityScore = 60;
+    try {
+      const { data: minQ } = await supabase
+        .from('platform_settings').select('value').eq('key', 'scanner_min_quality_score').maybeSingle();
+      const parsed = parseInt(minQ?.value || '60', 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) minQualityScore = parsed;
+    } catch { /* default 60 */ }
+
+    // Load platform contact email (used as the public contact_email on every scanner listing)
+    let platformContactEmail = 'info@whatsonyouth.org.au';
+    try {
+      const { data: ce } = await supabase
+        .from('platform_settings').select('value').eq('key', 'contact_email').maybeSingle();
+      if (ce?.value) platformContactEmail = ce.value;
+    } catch { /* default */ }
+
+    // Load per-source trust + daily cap (defaults: trusted, cap 25)
+    const sourceMeta = new Map<string, { trust_level: string; daily_publish_cap: number }>();
+    try {
+      const { data: srcRows } = await supabase
+        .from('scan_sources').select('url, trust_level, daily_publish_cap');
+      for (const r of (srcRows || [])) {
+        sourceMeta.set((r as any).url, {
+          trust_level: (r as any).trust_level || 'trusted',
+          daily_publish_cap: (r as any).daily_publish_cap ?? 25,
+        });
+      }
+    } catch { /* defaults */ }
+
     // Also track links inserted this run
     const insertedLinks = new Set<string>();
 
@@ -645,6 +692,24 @@ serve(async (req) => {
         // Step 3: Insert listings
         const validCategories = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
 
+        // Trust + daily-cap context for this source (defaults: trusted, cap 25)
+        const meta = sourceMeta.get(source.url) || { trust_level: 'trusted', daily_publish_cap: 25 };
+        const trustLevel = meta.trust_level;
+        const dailyCap = meta.daily_publish_cap ?? 25;
+
+        // How many listings have already been auto-published from this source today?
+        const startOfDay = new Date(); startOfDay.setUTCHours(0,0,0,0);
+        const { count: publishedToday } = await supabase
+          .from('listings')
+          .select('id', { count: 'exact', head: true })
+          .eq('source', 'admin')
+          .eq('is_active', true)
+          .gte('created_at', startOfDay.toISOString())
+          .ilike('link', `%${(extractDomain(source.url) || '').replace(/[%_]/g, '\\$&')}%`);
+        let remainingCap = Math.max(0, dailyCap - (publishedToday || 0));
+        let autoInactiveThisSource = 0;
+        let publishedThisSource = 0;
+
         for (const listing of listings) {
           try {
             if (!listing.title || !listing.link) continue;
@@ -689,15 +754,25 @@ serve(async (req) => {
             // Quality check — skip entirely if it fails
             const quality = passesQualityCheck(listing);
             if (!quality.passes) {
-              const isBlocked = quality.reason
-                .startsWith('Blocked domain pattern');
+              const isBlocked = quality.reason.startsWith('Blocked domain pattern');
               console.log(
-                `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ` +
-                `${listing.title} — ${quality.reason}`
+                `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ${listing.title} — ${quality.reason}`
               );
               bump(quality.reason);
               skipped++;
               continue;
+            }
+
+            // Decide is_active: trusted source + score ≥ threshold + cap not hit
+            const score = estimateQualityScore(listing);
+            let isActive = true;
+            let inactiveReason: string | null = null;
+            if (trustLevel !== 'trusted') {
+              isActive = false; inactiveReason = 'untrusted source';
+            } else if (score < minQualityScore) {
+              isActive = false; inactiveReason = `quality score ${score} < ${minQualityScore}`;
+            } else if (remainingCap <= 0) {
+              isActive = false; inactiveReason = `daily publish cap (${dailyCap}) reached for source`;
             }
 
             const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
@@ -707,16 +782,19 @@ serve(async (req) => {
               location: normaliseLocation(listing.location || "Victoria").slice(0, 200),
               link: listing.link,
               description: (listing.description || "").slice(0, 500),
-              contact_email: listing.contact_email || "",
-              // Wellbeing listings never expire (ongoing services, not time-bound opportunities)
+              // Platform contact stays on contact_email so user reports route to us;
+              // organiser's real email (if AI extracted one) lives on provider_contact_email.
+              contact_email: platformContactEmail,
+              provider_contact_email: (listing.contact_email && /\S+@\S+\.\S+/.test(listing.contact_email))
+                ? listing.contact_email.slice(0, 255)
+                : null,
               expiry_date: listing.category === 'Wellbeing'
                 ? null
                 : (listing.expiry_date || (['Events','Jobs','Grants'].includes(listing.category)
                     ? new Date(Date.now() + 60*24*60*60*1000).toISOString().slice(0,10)
                     : null)),
               image_url: null,
-              // Auto-publish scanner finds (no manual review)
-              is_active: true,
+              is_active: isActive,
               is_featured: false,
               source: "admin",
               user_id: adminUserId,
@@ -730,8 +808,9 @@ serve(async (req) => {
               created++;
               insertedLinks.add(listing.link);
               existingLinks.add(listing.link);
+              if (isActive) { publishedThisSource++; remainingCap--; }
+              else { autoInactiveThisSource++; bump(`inactive: ${inactiveReason}`); }
 
-              // Collect for post-scan image resolution
               if (inserted?.id) {
                 pendingImageIds.push({
                   id: inserted.id,
@@ -822,6 +901,24 @@ serve(async (req) => {
         error: errorMessage,
       });
 
+      // Audit log: one summary entry per source per scan (accountability for auto-publish)
+      if (created > 0 || skipped > 0 || status !== 'success') {
+        await supabase.from('admin_audit_log').insert({
+          entity_table: 'listings',
+          action: 'scanner_source_processed',
+          entity_id: null,
+          metadata: {
+            source_url: source.url,
+            source_name: source.name,
+            scan_session_id: scanSessionId,
+            found, created, skipped,
+            status,
+            error: errorMessage,
+            skip_reasons: skipReasons,
+          },
+        });
+      }
+
       // Delay between sources
       if (i < sources.length - 1) {
         await new Promise((r) => setTimeout(r, 800));
@@ -835,9 +932,12 @@ serve(async (req) => {
       (async () => {
         for (const item of pendingImageIds) {
           try {
+            // Skip random Unsplash for Wellbeing/Grants — branded placeholder is safer than off-topic stock
+            const skipUnsplash = item.category === 'Wellbeing' || item.category === 'Grants';
             await resolveImage(
               item.id, item.link,
-              item.title, item.category, supabase
+              item.title, item.category, supabase,
+              { skipUnsplash }
             );
           } catch { /* silent */ }
           await new Promise(r => setTimeout(r, 400));
