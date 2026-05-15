@@ -128,8 +128,8 @@ const categoryConfig: Record<string, {
     heading: 'Jobs and Internships for Young Victorians',
     subtext: 'Entry-level, part-time and casual work for ages 15–25',
     placeholderColor: '#1A2A4A',
-    seoTitle: "Entry Level Jobs & Internships for Young People in Victoria — What's On Youth",
-    seoDescription: "Find part-time jobs, casual work, internships, apprenticeships and traineeships for young people aged 15–25 in Victoria. No experience required. Melbourne, regional Victoria and online opportunities.",
+    seoTitle: "Youth Jobs & Internships in Victoria — What's On Youth",
+    seoDescription: "Part-time jobs, casual work, internships, apprenticeships and traineeships for young Victorians aged 15–25. No experience required. Across Victoria and online.",
     slug: 'jobs',
     introContent: {
       body: "Finding your first job or internship is hard. We make it easier by collecting entry-level jobs, part-time work, casual roles, apprenticeships, traineeships and graduate programs across Victoria — all in one place. No account needed to browse. New listings added every week.",
