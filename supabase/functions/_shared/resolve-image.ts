@@ -115,9 +115,9 @@ export async function resolveImage(
     }
   } catch { /* page fetch failed */ }
 
-  // Step 3: Unsplash with category-based query rotation
+  // Step 3: Unsplash with category-based query rotation (skipped for sensitive categories)
   const unsplashKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
-  if (unsplashKey) {
+  if (unsplashKey && !options.skipUnsplash) {
     try {
       const query = buildSearchQuery(listingTitle, category);
       const params = new URLSearchParams({
