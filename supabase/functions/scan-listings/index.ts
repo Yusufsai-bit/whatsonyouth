@@ -932,9 +932,12 @@ serve(async (req) => {
       (async () => {
         for (const item of pendingImageIds) {
           try {
+            // Skip random Unsplash for Wellbeing/Grants — branded placeholder is safer than off-topic stock
+            const skipUnsplash = item.category === 'Wellbeing' || item.category === 'Grants';
             await resolveImage(
               item.id, item.link,
-              item.title, item.category, supabase
+              item.title, item.category, supabase,
+              { skipUnsplash }
             );
           } catch { /* silent */ }
           await new Promise(r => setTimeout(r, 400));
