@@ -715,8 +715,8 @@ serve(async (req) => {
                     ? new Date(Date.now() + 60*24*60*60*1000).toISOString().slice(0,10)
                     : null)),
               image_url: null,
-              // Default new scrapes to inactive (pending admin review)
-              is_active: false,
+              // Auto-publish scanner finds (no manual review)
+              is_active: true,
               is_featured: false,
               source: "admin",
               user_id: adminUserId,
