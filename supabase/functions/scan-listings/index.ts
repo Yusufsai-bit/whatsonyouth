@@ -172,6 +172,23 @@ function extractDomain(url: string): string | null {
   }
 }
 
+// Mirrors public.calculate_listing_quality_score so we can decide is_active before insert.
+function estimateQualityScore(listing: {
+  title?: string; description?: string; organisation?: string; link?: string;
+  location?: string; expiry_date?: string | null; image_url?: string | null; category?: string;
+}): number {
+  let score = 0;
+  if ((listing.title || '').trim().length >= 10) score += 15;
+  if ((listing.description || '').trim().length >= 80) score += 20;
+  if ((listing.organisation || '').trim().length >= 3) score += 10;
+  if (/^https:\/\/.+/i.test(listing.link || '')) score += 15;
+  if ((listing.location || '').trim().length >= 3) score += 10;
+  if (listing.category === 'Wellbeing' || listing.expiry_date) score += 15;
+  if ((listing.image_url || '').trim().length > 0) score += 10;
+  if (['Events','Jobs','Grants','Programs','Wellbeing'].includes(listing.category || '')) score += 5;
+  return Math.min(score, 100);
+}
+
 function passesQualityCheck(listing: any): {
   passes: boolean;
   reason: string;
