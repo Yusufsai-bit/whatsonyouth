@@ -692,6 +692,24 @@ serve(async (req) => {
         // Step 3: Insert listings
         const validCategories = ["Events", "Jobs", "Grants", "Programs", "Wellbeing"];
 
+        // Trust + daily-cap context for this source (defaults: trusted, cap 25)
+        const meta = sourceMeta.get(source.url) || { trust_level: 'trusted', daily_publish_cap: 25 };
+        const trustLevel = meta.trust_level;
+        const dailyCap = meta.daily_publish_cap ?? 25;
+
+        // How many listings have already been auto-published from this source today?
+        const startOfDay = new Date(); startOfDay.setUTCHours(0,0,0,0);
+        const { count: publishedToday } = await supabase
+          .from('listings')
+          .select('id', { count: 'exact', head: true })
+          .eq('source', 'admin')
+          .eq('is_active', true)
+          .gte('created_at', startOfDay.toISOString())
+          .ilike('link', `%${(extractDomain(source.url) || '').replace(/[%_]/g, '\\$&')}%`);
+        let remainingCap = Math.max(0, dailyCap - (publishedToday || 0));
+        let autoInactiveThisSource = 0;
+        let publishedThisSource = 0;
+
         for (const listing of listings) {
           try {
             if (!listing.title || !listing.link) continue;
@@ -736,15 +754,25 @@ serve(async (req) => {
             // Quality check — skip entirely if it fails
             const quality = passesQualityCheck(listing);
             if (!quality.passes) {
-              const isBlocked = quality.reason
-                .startsWith('Blocked domain pattern');
+              const isBlocked = quality.reason.startsWith('Blocked domain pattern');
               console.log(
-                `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ` +
-                `${listing.title} — ${quality.reason}`
+                `${isBlocked ? '🚫 BLOCKED' : '⚠️ Quality skip'}: ${listing.title} — ${quality.reason}`
               );
               bump(quality.reason);
               skipped++;
               continue;
+            }
+
+            // Decide is_active: trusted source + score ≥ threshold + cap not hit
+            const score = estimateQualityScore(listing);
+            let isActive = true;
+            let inactiveReason: string | null = null;
+            if (trustLevel !== 'trusted') {
+              isActive = false; inactiveReason = 'untrusted source';
+            } else if (score < minQualityScore) {
+              isActive = false; inactiveReason = `quality score ${score} < ${minQualityScore}`;
+            } else if (remainingCap <= 0) {
+              isActive = false; inactiveReason = `daily publish cap (${dailyCap}) reached for source`;
             }
 
             const { data: inserted, error: insertErr } = await supabase.from("listings").insert({
@@ -754,16 +782,19 @@ serve(async (req) => {
               location: normaliseLocation(listing.location || "Victoria").slice(0, 200),
               link: listing.link,
               description: (listing.description || "").slice(0, 500),
-              contact_email: listing.contact_email || "",
-              // Wellbeing listings never expire (ongoing services, not time-bound opportunities)
+              // Platform contact stays on contact_email so user reports route to us;
+              // organiser's real email (if AI extracted one) lives on provider_contact_email.
+              contact_email: platformContactEmail,
+              provider_contact_email: (listing.contact_email && /\S+@\S+\.\S+/.test(listing.contact_email))
+                ? listing.contact_email.slice(0, 255)
+                : null,
               expiry_date: listing.category === 'Wellbeing'
                 ? null
                 : (listing.expiry_date || (['Events','Jobs','Grants'].includes(listing.category)
                     ? new Date(Date.now() + 60*24*60*60*1000).toISOString().slice(0,10)
                     : null)),
               image_url: null,
-              // Auto-publish scanner finds (no manual review)
-              is_active: true,
+              is_active: isActive,
               is_featured: false,
               source: "admin",
               user_id: adminUserId,
@@ -777,8 +808,9 @@ serve(async (req) => {
               created++;
               insertedLinks.add(listing.link);
               existingLinks.add(listing.link);
+              if (isActive) { publishedThisSource++; remainingCap--; }
+              else { autoInactiveThisSource++; bump(`inactive: ${inactiveReason}`); }
 
-              // Collect for post-scan image resolution
               if (inserted?.id) {
                 pendingImageIds.push({
                   id: inserted.id,
