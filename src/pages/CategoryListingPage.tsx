@@ -148,7 +148,7 @@ const categoryConfig: Record<string, {
     subtext: 'Free funding opportunities — arts, community, education and more',
     placeholderColor: '#1A3A2A',
     seoTitle: "Grants & Scholarships for Young Victorians — What's On Youth",
-    seoDescription: "Find grants, scholarships, bursaries and funding opportunities for young people aged 15–25 in Victoria. Arts grants, community grants, education funding, youth leadership awards and more. Free to apply.",
+    seoDescription: "Grants, scholarships, bursaries and funding for young Victorians aged 15–25. Arts, community, education and leadership awards — free to apply.",
     slug: 'grants',
     introContent: {
       body: "Grants and scholarships for young Victorians are more accessible than most people think. We surface funding opportunities from state and local government, foundations, arts bodies and community organisations — covering arts, education, community projects, leadership, sport and more.",
