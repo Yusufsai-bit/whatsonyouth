@@ -110,7 +110,7 @@ const categoryConfig: Record<string, {
     subtext: 'Concerts, festivals, workshops and more — updated weekly',
     placeholderColor: '#2D1B69',
     seoTitle: "Free Events for Young People in Victoria — What's On Youth",
-    seoDescription: "Find free and low-cost events for young people aged 15–25 across Victoria. Concerts, festivals, workshops, art exhibitions, sports events and more in Melbourne, Geelong, Ballarat, Bendigo and regional Victoria. Updated weekly.",
+    seoDescription: "Free and low-cost events for young Victorians aged 15–25 — concerts, festivals, workshops, arts and sports across Melbourne, Geelong, Ballarat and Bendigo.",
     slug: 'events',
     introContent: {
       body: "What's On Youth scans Victorian event listings every week to find free and low-cost events worth your time — concerts, festivals, exhibitions, workshops, sports events, cultural celebrations and more. Every listing links directly to the organiser so you can book, register or get in touch instantly.",
