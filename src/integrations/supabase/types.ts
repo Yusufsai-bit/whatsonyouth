@@ -382,6 +382,7 @@ export type Database = {
           category: string
           consecutive_failures: number
           created_at: string
+          daily_publish_cap: number
           discovered_at: string | null
           discovered_by_ai: boolean
           failed_scans: number
@@ -398,12 +399,14 @@ export type Database = {
           total_listings_found: number
           total_listings_skipped: number
           total_scans: number
+          trust_level: string
           url: string
         }
         Insert: {
           category: string
           consecutive_failures?: number
           created_at?: string
+          daily_publish_cap?: number
           discovered_at?: string | null
           discovered_by_ai?: boolean
           failed_scans?: number
@@ -420,12 +423,14 @@ export type Database = {
           total_listings_found?: number
           total_listings_skipped?: number
           total_scans?: number
+          trust_level?: string
           url: string
         }
         Update: {
           category?: string
           consecutive_failures?: number
           created_at?: string
+          daily_publish_cap?: number
           discovered_at?: string | null
           discovered_by_ai?: boolean
           failed_scans?: number
@@ -442,6 +447,7 @@ export type Database = {
           total_listings_found?: number
           total_listings_skipped?: number
           total_scans?: number
+          trust_level?: string
           url?: string
         }
         Relationships: []
