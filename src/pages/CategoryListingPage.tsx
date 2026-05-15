@@ -167,7 +167,7 @@ const categoryConfig: Record<string, {
     subtext: 'Free and low-cost programs, workshops and leadership opportunities',
     placeholderColor: '#2D1B4A',
     seoTitle: "Youth Programs & Courses in Victoria — What's On Youth",
-    seoDescription: "Discover free and low-cost youth programs, leadership courses, volunteering opportunities, skill development workshops and community programs for young people aged 15–25 across Victoria.",
+    seoDescription: "Free and low-cost youth programs, leadership courses, workshops and volunteering for young Victorians aged 15–25 — across Melbourne and regional Victoria.",
     slug: 'programs',
     introContent: {
       body: "From leadership programs and outdoor challenges to skill-building workshops and volunteering — Victoria has hundreds of programs designed specifically for young people. Browse free and low-cost opportunities that build your skills, expand your network, and look great on a resume.",
