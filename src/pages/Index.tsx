@@ -49,6 +49,7 @@ const Index = () => {
       />
       {/* Organization + WebSite JSON-LD live in index.html so they're visible to crawlers without JS */}
       <Navbar />
+      <main>
       {showBanner && (
         <div className="bg-brand-violet-surface border-b border-brand-violet-border px-6 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -87,6 +88,7 @@ const Index = () => {
         </div>
       </section>
       <HowItWorks />
+      </main>
       <Footer />
     </>
   );
