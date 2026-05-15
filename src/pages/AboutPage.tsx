@@ -29,10 +29,10 @@ export default function AboutPage() {
   return (
     <>
       <SEO
-        title="About What's On Youth — Free Youth Opportunity Platform for Victoria"
-        description="What's On Youth is a free platform connecting young Victorians aged 15–25 with events, jobs, grants, programs and wellbeing support. Victoria-wide, including Melbourne, Geelong, Ballarat, Bendigo and regional Victoria."
-        ogUrl="https://www.whatsonyouth.org.au/about"
-        canonical="https://www.whatsonyouth.org.au/about"
+        title="About What's On Youth — Youth Opportunities in Victoria"
+        description="Free platform connecting young Victorians aged 15–25 with events, jobs, grants, programs and wellbeing support across Victoria."
+        ogUrl="https://whatsonyouth.org.au/about"
+        canonical="https://whatsonyouth.org.au/about"
       />
       <Navbar />
 

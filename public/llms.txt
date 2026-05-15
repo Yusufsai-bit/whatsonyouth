@@ -1,0 +1,42 @@
+# What's On Youth
+
+> Free platform helping young Victorians aged 15–25 discover events, jobs, grants, programs and wellbeing support across Victoria, Australia.
+
+What's On Youth aggregates and curates opportunities from trusted sources and community submissions. Every listing is either curated by the team or submitted by verified community members. Coverage is Victoria-wide, including Melbourne, Geelong, Ballarat, Bendigo, Gippsland and Shepparton.
+
+## Categories
+
+- [Events](/events): Free and low-cost events for young Victorians.
+- [Jobs](/jobs): Entry-level jobs, traineeships and youth employment.
+- [Grants](/grants): Grants and funding opportunities for young people.
+- [Programs](/programs): Youth programs, leadership and skills development.
+- [Wellbeing](/wellbeing): Mental health and wellbeing support services.
+
+## Regional pages
+
+- [Melbourne](/melbourne): Opportunities in Greater Melbourne.
+- [Geelong](/geelong): Opportunities in Geelong and surrounds.
+- [Ballarat](/ballarat): Opportunities in Ballarat region.
+- [Bendigo](/bendigo): Opportunities in Bendigo region.
+- [Gippsland](/gippsland): Opportunities in Gippsland.
+- [Shepparton](/shepparton): Opportunities in Shepparton region.
+
+## High-intent landing pages
+
+- [Youth events Melbourne](/youth-events-melbourne): Curated events for young people in Melbourne.
+- [Youth jobs Victoria](/youth-jobs-victoria): Jobs for young Victorians.
+- [Grants for young people Victoria](/grants-for-young-people-victoria): Grants and funding.
+- [Youth programs Victoria](/youth-programs-victoria): Programs and development opportunities.
+- [Volunteering for young people Victoria](/volunteering-for-young-people-victoria): Volunteering opportunities.
+- [Mental health support young people Victoria](/mental-health-support-young-people-victoria): Wellbeing and mental health support.
+
+## About
+
+- [About](/about): What we do and who we're built for.
+- [Contact](/contact): Get in touch.
+- [Privacy](/privacy): Privacy policy.
+- [Search](/search): Search all opportunities.
+
+## Optional
+
+- [Submit a listing](/submit): For organisations to submit opportunities.

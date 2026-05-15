@@ -6,7 +6,7 @@
 // To add a new public page: add it here, then add the matching <Route> in
 // src/App.tsx and the <SEO> tag with title/description/canonical on the page.
 
-export const ORIGIN = 'https://www.whatsonyouth.org.au';
+export const ORIGIN = 'https://whatsonyouth.org.au';
 
 // shouldIndex = false → page is private (auth/utility). Will be added to the
 // SEO check (must be noindex) but EXCLUDED from sitemap.xml.

@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const NotFound = () => (
   <>
+    <SEO
+      title="Page not found — What's On Youth"
+      description="The page you're looking for doesn't exist. Browse free events, jobs, grants and programs for young Victorians."
+      noindex
+    />
     <Navbar />
     <div className="bg-white min-h-[calc(100vh-56px)] flex items-center justify-center px-6 py-[120px]">
       <div className="text-center">

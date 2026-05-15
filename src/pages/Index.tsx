@@ -42,10 +42,10 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="What's On Youth — Free Events, Jobs & Grants for Young Victorians"
+        title="What's On Youth — Free Events, Jobs & Grants for Youth"
         description="Free events, jobs, grants, youth programs and wellbeing support for young Victorians aged 15–25. Melbourne, Geelong, Ballarat, Bendigo & online."
-        ogUrl="https://www.whatsonyouth.org.au"
-        canonical="https://www.whatsonyouth.org.au"
+        ogUrl="https://whatsonyouth.org.au"
+        canonical="https://whatsonyouth.org.au"
       />
       {/* Organization + WebSite JSON-LD live in index.html so they're visible to crawlers without JS */}
       <Navbar />
