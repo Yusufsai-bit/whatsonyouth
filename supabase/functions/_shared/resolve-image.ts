@@ -67,7 +67,8 @@ export async function resolveImage(
   listingUrl: string,
   listingTitle: string,
   category: string,
-  supabase: any
+  supabase: any,
+  options: { skipUnsplash?: boolean } = {}
 ): Promise<{ url: string | null; source: "existing" | "og" | "unsplash" | null }> {
   // Step 1: Check existing image_url
   const { data: listing } = await supabase
