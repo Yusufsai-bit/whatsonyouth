@@ -530,6 +530,36 @@ serve(async (req) => {
       });
     }
 
+    // Load minimum quality score threshold (listings below this go in as inactive)
+    let minQualityScore = 60;
+    try {
+      const { data: minQ } = await supabase
+        .from('platform_settings').select('value').eq('key', 'scanner_min_quality_score').maybeSingle();
+      const parsed = parseInt(minQ?.value || '60', 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) minQualityScore = parsed;
+    } catch { /* default 60 */ }
+
+    // Load platform contact email (used as the public contact_email on every scanner listing)
+    let platformContactEmail = 'info@whatsonyouth.org.au';
+    try {
+      const { data: ce } = await supabase
+        .from('platform_settings').select('value').eq('key', 'contact_email').maybeSingle();
+      if (ce?.value) platformContactEmail = ce.value;
+    } catch { /* default */ }
+
+    // Load per-source trust + daily cap (defaults: trusted, cap 25)
+    const sourceMeta = new Map<string, { trust_level: string; daily_publish_cap: number }>();
+    try {
+      const { data: srcRows } = await supabase
+        .from('scan_sources').select('url, trust_level, daily_publish_cap');
+      for (const r of (srcRows || [])) {
+        sourceMeta.set((r as any).url, {
+          trust_level: (r as any).trust_level || 'trusted',
+          daily_publish_cap: (r as any).daily_publish_cap ?? 25,
+        });
+      }
+    } catch { /* defaults */ }
+
     // Also track links inserted this run
     const insertedLinks = new Set<string>();
 
