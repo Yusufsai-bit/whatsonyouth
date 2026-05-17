@@ -17,7 +17,7 @@ export default function SubmitCallout() {
           </span>
           <h2 className="text-[32px] tracking-[-0.02em] text-white">Have an opportunity to share?</h2>
           <p className="font-body text-base text-white/70 leading-relaxed max-w-[440px] mt-3">
-            Submit your event, job, grant, program, or wellbeing resource for free. Create a free account to get started — your listing goes live immediately.
+            Submit your event, job, grant, program, or wellbeing resource for free. Every listing is reviewed by our team to keep things safe and accurate — most go live within minutes.
           </p>
           <Link
             to="/submit"
