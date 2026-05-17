@@ -4,7 +4,7 @@ import { trackEvent } from '@/lib/analytics';
 const steps = [
   'Create a free account or log in',
   'Fill in your listing details',
-  'Your listing goes live immediately and reaches young Victorians',
+  'Our team reviews your listing (usually within minutes) and it goes live',
 ];
 
 export default function SubmitCallout() {
