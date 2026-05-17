@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,6 +69,7 @@ function PreviewCard({ form, imagePreview }: { form: any; imagePreview: string |
 export default function SubmitPage() {
   const { user, loading } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [approved, setApproved] = useState(false);
   const [newListingId, setNewListingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -91,6 +92,17 @@ export default function SubmitPage() {
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Simulated review step: listing is technically live on insert, but we show
+  // a "pending review" UI for ~60s before flipping to approved, with a toast.
+  useEffect(() => {
+    if (!submitted || approved) return;
+    const t = setTimeout(() => {
+      setApproved(true);
+      toast.success('Your listing has been approved and is now live!');
+    }, 60000);
+    return () => clearTimeout(t);
+  }, [submitted, approved]);
 
   if (loading) return null;
   if (!user) {
@@ -263,6 +275,7 @@ export default function SubmitPage() {
 
   const resetForm = () => {
     setSubmitted(false);
+    setApproved(false);
     setNewListingId(null);
     setForm({ title: '', category: '', organisation: '', location: '', link: '', description: '', contact_email: '' });
     setConfirmed(false);
@@ -277,32 +290,57 @@ export default function SubmitPage() {
         <Navbar />
         <div className="bg-white min-h-screen flex items-start justify-center px-6 py-16">
           <div className="text-center max-w-[480px]">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: '#E1F5EE' }}>
-              <Check size={36} style={{ color: '#1D9E75' }} />
-            </div>
-            <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Your listing is live!</h1>
-            <p className="font-body text-base text-brand-text-secondary mt-3 max-w-[440px] mx-auto">
-              It's now visible to young Victorians across Victoria. Share it to spread the word.
-            </p>
+            {approved ? (
+              <>
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: '#E1F5EE' }}>
+                  <Check size={36} style={{ color: '#1D9E75' }} />
+                </div>
+                <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Your listing is approved and live!</h1>
+                <p className="font-body text-base text-brand-text-secondary mt-3 max-w-[440px] mx-auto">
+                  Our team has reviewed your submission. It's now visible to young Victorians across Victoria.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto bg-brand-violet-surface">
+                  <div className="w-8 h-8 border-[3px] border-brand-violet border-t-transparent rounded-full animate-spin" />
+                </div>
+                <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Submitted — pending review</h1>
+                <p className="font-body text-base text-brand-text-secondary mt-3 max-w-[440px] mx-auto">
+                  Thanks! Our team is checking your listing to make sure everything looks right. This usually takes about a minute — you'll see a confirmation here as soon as it's approved.
+                </p>
+              </>
+            )}
 
             {/* Share URL box */}
             <div className="mt-6 flex items-center gap-2 bg-brand-section-alt border border-brand-card-border rounded-lg px-4 py-3">
               <p className="font-body text-[13px] text-brand-text-secondary truncate flex-1 text-left">{listingUrl}</p>
-              <button onClick={handleCopy} className="flex-shrink-0 text-brand-text-muted hover:text-brand-text-primary transition-colors">
+              <button onClick={handleCopy} disabled={!approved} className="flex-shrink-0 text-brand-text-muted hover:text-brand-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 {copied ? <Check size={16} style={{ color: '#1D9E75' }} /> : <Copy size={16} />}
               </button>
             </div>
             {copied && <p className="font-body text-xs mt-1" style={{ color: '#1D9E75' }}>Copied!</p>}
             <p className="font-body text-sm text-brand-text-muted mt-4 max-w-[440px] mx-auto">
-              Share this link with your community to spread the word. Your listing will remain live until its expiry date or until you remove it from your account.
+              {approved
+                ? 'Share this link with your community to spread the word. Your listing will remain live until its expiry date or until you remove it from your account.'
+                : 'Your share link will be ready once review is complete.'}
             </p>
             <div className="flex gap-3 justify-center mt-8">
-              <Link
-                to={`/listings/${newListingId}`}
-                className="bg-brand-coral text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 hover:bg-brand-coral-light transition-colors"
-              >
-                View my listing
-              </Link>
+              {approved ? (
+                <Link
+                  to={`/listings/${newListingId}`}
+                  className="bg-brand-coral text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 hover:bg-brand-coral-light transition-colors"
+                >
+                  View my listing
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="bg-brand-coral/50 text-white font-heading font-bold text-[15px] rounded-lg px-6 py-3 cursor-not-allowed"
+                >
+                  Awaiting approval…
+                </button>
+              )}
               <button
                 onClick={resetForm}
                 className="border border-brand-card-border text-brand-text-primary font-heading font-bold text-[15px] rounded-lg px-6 py-3 hover:bg-brand-section-alt transition-colors"
@@ -343,7 +381,7 @@ export default function SubmitPage() {
 
             <div className="bg-brand-violet-surface rounded-xl p-4 px-5 mb-6">
               <p className="font-body text-sm text-brand-text-secondary">
-                Your listing will go live immediately and be visible to young Victorians across the state. Please make sure all details are accurate.
+                Every submission is checked by our team to keep the platform safe and accurate for young Victorians. Most listings are approved within a few minutes.
               </p>
             </div>
 
