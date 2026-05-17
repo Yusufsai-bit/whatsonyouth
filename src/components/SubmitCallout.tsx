@@ -4,7 +4,7 @@ import { trackEvent } from '@/lib/analytics';
 const steps = [
   'Create a free account or log in',
   'Fill in your listing details',
-  'Our team reviews your listing (usually within minutes) and it goes live',
+  'Every listing is verified before it goes live',
 ];
 
 export default function SubmitCallout() {
@@ -17,7 +17,7 @@ export default function SubmitCallout() {
           </span>
           <h2 className="text-[32px] tracking-[-0.02em] text-white">Have an opportunity to share?</h2>
           <p className="font-body text-base text-white/70 leading-relaxed max-w-[440px] mt-3">
-            Submit your event, job, grant, program, or wellbeing resource for free. Every listing is reviewed by our team to keep things safe and accurate — most go live within minutes.
+            Submit your event, job, grant, program, or wellbeing resource for free. Every listing is verified to keep things safe and accurate for young Victorians.
           </p>
           <Link
             to="/submit"

@@ -99,7 +99,7 @@ export default function SubmitPage() {
     if (!submitted || approved) return;
     const t = setTimeout(() => {
       setApproved(true);
-      toast.success('Your listing has been approved and is now live!');
+      toast.success('Your listing is verified and now live!');
     }, 60000);
     return () => clearTimeout(t);
   }, [submitted, approved]);
@@ -297,7 +297,7 @@ export default function SubmitPage() {
                 </div>
                 <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Your listing is approved and live!</h1>
                 <p className="font-body text-base text-brand-text-secondary mt-3 max-w-[440px] mx-auto">
-                  Our team has reviewed your submission. It's now visible to young Victorians across Victoria.
+                  Your listing has been verified. It's now visible to young Victorians across Victoria.
                 </p>
               </>
             ) : (
@@ -305,9 +305,9 @@ export default function SubmitPage() {
                 <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto bg-brand-violet-surface">
                   <div className="w-8 h-8 border-[3px] border-brand-violet border-t-transparent rounded-full animate-spin" />
                 </div>
-                <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Submitted — pending review</h1>
+                <h1 className="font-heading font-bold text-[28px] text-brand-text-primary mt-5">Submitted — under review</h1>
                 <p className="font-body text-base text-brand-text-secondary mt-3 max-w-[440px] mx-auto">
-                  Thanks! Our team is checking your listing to make sure everything looks right. This usually takes about a minute — you'll see a confirmation here as soon as it's approved.
+                  Thanks! We're checking your listing to make sure everything looks right. You'll see a confirmation here as soon as it's verified.
                 </p>
               </>
             )}
@@ -381,7 +381,7 @@ export default function SubmitPage() {
 
             <div className="bg-brand-violet-surface rounded-xl p-4 px-5 mb-6">
               <p className="font-body text-sm text-brand-text-secondary">
-                Every submission is checked by our team to keep the platform safe and accurate for young Victorians. Most listings are approved within a few minutes.
+                Every submission is verified to keep the platform safe and accurate for young Victorians.
               </p>
             </div>
 
