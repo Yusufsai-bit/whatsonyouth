@@ -343,7 +343,7 @@ export default function SubmitPage() {
 
             <div className="bg-brand-violet-surface rounded-xl p-4 px-5 mb-6">
               <p className="font-body text-sm text-brand-text-secondary">
-                Your listing will go live immediately and be visible to young Victorians across the state. Please make sure all details are accurate.
+                Every submission is checked by our team to keep the platform safe and accurate for young Victorians. Most listings are approved within a few minutes.
               </p>
             </div>
 
