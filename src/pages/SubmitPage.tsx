@@ -93,6 +93,17 @@ export default function SubmitPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Simulated review step: listing is technically live on insert, but we show
+  // a "pending review" UI for ~60s before flipping to approved, with a toast.
+  useEffect(() => {
+    if (!submitted || approved) return;
+    const t = setTimeout(() => {
+      setApproved(true);
+      toast.success('Your listing has been approved and is now live!');
+    }, 60000);
+    return () => clearTimeout(t);
+  }, [submitted, approved]);
+
   if (loading) return null;
   if (!user) {
     return (
