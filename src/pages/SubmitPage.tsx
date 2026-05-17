@@ -69,6 +69,7 @@ function PreviewCard({ form, imagePreview }: { form: any; imagePreview: string |
 export default function SubmitPage() {
   const { user, loading } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [approved, setApproved] = useState(false);
   const [newListingId, setNewListingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
